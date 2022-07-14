@@ -1,29 +1,28 @@
 import React, {useState} from "react";
-import Alert from 'react-bootstrap/Alert';
+import Collapse from 'react-bootstrap/Collapse';
 import Button from 'react-bootstrap/Button';
 
 
-function CaseInstructions(props){
-    const [show, setShow] = useState(true)
-    if (show){
+function CaseInstructions({instructions}){
+    const [show, setShow] = useState(false)
+    
         return (
             <div className="container mt-3">
-                <Alert show={show} variant="info">
-                    <Alert.Heading>Case Study</Alert.Heading>
-                    <p>
-                       {props.instructions}
-                    </p>
-                    <hr />
-                    <div className="d-flex justify-content-end">
-                    <Button onClick={() => setShow(false)} variant="outline-info">
-                        Close
-                    </Button>
-                    </div>
-                </Alert>
 
-                {!show && <Button onClick={() => setShow(true)}>Show Alert</Button>}
+                  <Button
+        onClick={() => setShow(!show)}
+        aria-controls="example-collapse-text"
+        aria-expanded={show}
+      >
+        Instructions
+      </Button><br />
+      <Collapse in={show}>
+        <div id="example-collapse-text">
+          {instructions}
+        </div>
+      </Collapse><br />
             </div>
           );
-        }
+        
 }
 export default CaseInstructions

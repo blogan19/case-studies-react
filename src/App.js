@@ -12,7 +12,7 @@ const App = () => {
     
     <>
       <NavBar/>
-      <PatientDetails firstname={data.patient.firstname} lastname={data.patient.surname} hospitalNo={data.patient.hospitalNo} dob={data.patient.dob} address={data.patient.address} weight={data.patient.weight} height={data.patient.height} allergies={data.allergies} />
+      <PatientDetails firstname={data.patient.firstname} surname={data.patient.surname} hospitalNo={data.patient.hospitalNo} dob={data.patient.dob} address={data.patient.address} weight={data.patient.weight} height={data.patient.height} allergies={data.allergies} />
       <CaseInstructions instructions={data.case_instructions}/>
       <ObservationsBanner />
       <Prescription prescriptions={data.prescriptionList}/>

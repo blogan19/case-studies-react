@@ -6,7 +6,7 @@ const NavBar = () => {
     return(
         <Navbar bg="light">
         <Container>
-          <Navbar.Brand href="#home">Brand link</Navbar.Brand>
+          <Navbar.Brand href="#home">Electronic Prescription Chart</Navbar.Brand>
         </Container>
       </Navbar>
     )
