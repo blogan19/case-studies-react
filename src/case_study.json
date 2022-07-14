@@ -1,0 +1,83 @@
+{
+    "case_instructions" : "Read the information provided about the patients admission to hospital before attempting the questions below",
+    "patient":{
+        "firstname":"John",
+        "surname": "Smith",
+        "hospitalNo": "1234567",
+        "dob":"01/01/1962",
+        "address": "test address at test address",
+        "weight": "82.5kg",
+        "height": "170cm"
+    },
+    "allergies": ["NKDA"],
+    "prescriptionList" : [
+        {
+          "drug": "amoxicillin",
+          "dose": "500mg",
+          "frequency": "Three times daily",
+          "route": "oral",
+          "form": "tablets",
+          "stat": false,
+          "start_date": "05/07/2022",
+          "end_date": "12/07/2022",
+          "indication": "CAP",
+          "note": "Curb score of 1"
+        },{
+          "drug": "Zopiclone",
+          "dose": "7.5mg",
+          "frequency": "Once at Night",
+          "route": "oral",
+          "form": "tablets",
+          "stat": false,
+          "start_date": "05/07/2022",
+          "end_date": "",
+          "indication": "",
+          "note": "Not for discharge"
+        },{
+            "drug": "apixaban",
+            "dose": "5mg",
+            "frequency": "Twice Daily",
+            "route": "oral",
+            "form": "tablets",
+            "stat": false,
+            "start_date": "05/07/2022",
+            "end_date": "",
+            "indication": "",
+            "note": ""
+        },{
+            "drug": "Bisoprolol",
+            "dose": "7.5mg",
+            "frequency": "Once at Night",
+            "route": "oral",
+            "form": "tablets",
+            "stat": false,
+            "start_date": "05/07/2022",
+            "end_date": "",
+            "indication": "",
+            "note": ""
+        },{
+            "drug": "Clarithromycin",
+            "dose": "500mg",
+            "frequency": "Twice Daily",
+            "route": "oral",
+            "form": "tablets",
+            "stat": false,
+            "start_date": "05/07/2022",
+            "end_date": "",
+            "indication": "CAP",
+            "note": "Atypical Cover"
+        },{
+            "drug": "Movicol",
+            "dose": "1",
+            "frequency": "PRN",
+            "route": "oral",
+            "form": "Sachet",
+            "stat": false,
+            "start_date": "05/07/2022",
+            "end_date": "",
+            "indication": "",
+            "note": ""
+          }
+      ]
+}
+

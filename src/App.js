@@ -1,25 +1,25 @@
-import logo from './logo.svg';
-import './App.css';
+import NavBar from './components/NavBar';
+import PatientDetails from './components/Patient_details';
+import CaseInstructions from './components/CaseInstructions';
+import ObservationsBanner from './components/observations/observationsBanner';
+import Prescription from './components/prescriptions/Prescription';
+//import MCQ from './components/questions/MCQ';
+import Example from './components/observations/biochemistry';
+import data from './case_study.json'
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    
+    <>
+      <NavBar/>
+      <PatientDetails firstname={data.patient.firstname} lastname={data.patient.surname} hospitalNo={data.patient.hospitalNo} dob={data.patient.dob} address={data.patient.address} weight={data.patient.weight} height={data.patient.height} allergies={data.allergies} />
+      <CaseInstructions instructions={data.case_instructions}/>
+      <ObservationsBanner />
+      <Prescription prescriptions={data.prescriptionList}/>
+      <Example />
+    </>
   );
+  
 }
 
 export default App;
