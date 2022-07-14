@@ -20,6 +20,7 @@ function CaseInstructions({instructions}){
         <div id="example-collapse-text">
           {instructions}
         </div>
+        {/* hi */}
       </Collapse><br />
             </div>
           );
