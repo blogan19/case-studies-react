@@ -2,12 +2,11 @@ import React from "react";
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 
-
 const PatientDetails = ({firstname, surname, hospitalNo, dob, weight, height, allergies, address}) => {
     return(
         
         <Container>
-            <Table bordered hover>
+            <Table bordered>
                 <tbody>
                 <tr>
                     <td>
@@ -21,7 +20,7 @@ const PatientDetails = ({firstname, surname, hospitalNo, dob, weight, height, al
                     <td>
                         <i className="text-muted">DoB  </i> 
                         {dob}
-                    </td>
+                    </td>                 
                 </tr>      
                 <tr>
                     <td>
