@@ -2,44 +2,44 @@ import React from "react";
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 
-
-const PatientDetails = (props) => {
+const PatientDetails = ({firstname, surname, hospitalNo, dob, weight, height, allergies, address}) => {
     return(
+        
         <Container>
             <Table bordered>
                 <tbody>
                 <tr>
                     <td>
                         <i className="text-muted">Name  </i> 
-                        {props.patient.firstname} {props.patient.lastname}
+                        {firstname} {surname}
                     </td>
                     <td>
                         <i className="text-muted">Hospital No  </i>
-                        {props.patient.hospitalNo}
+                        {hospitalNo}
                     </td>
                     <td>
                         <i className="text-muted">DoB  </i> 
-                        {props.patient.dob}
-                    </td>
+                        {dob}
+                    </td>                 
                 </tr>      
                 <tr>
                     <td>
                         <i className="text-muted">Weight  </i> 
-                        {props.patient.weight}
+                        {weight}
                     </td>
                     <td>
                         <i className="text-muted">Height  </i> 
-                        {props.patient.height}
+                        {height}
                     </td>
                     <td>
                         <i className="text-muted">Allergies  </i> 
-                        {props.allergies}
+                        {allergies}
                     </td>
                 </tr>       
                 <tr>
                     <td colSpan={3}>
                         <i className="text-muted">Address </i> 
-                        {props.patient.address}
+                        {address}
                     </td>
                 </tr>  
                 </tbody>
@@ -47,15 +47,4 @@ const PatientDetails = (props) => {
         </Container>
     )
 }
-export default PatientDetails
-
-
-/*
-    Name
-    DOB
-    hos no
-    Allergies
-    weight
-    height
-    
-*/
+export default PatientDetails;
