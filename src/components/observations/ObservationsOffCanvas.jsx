@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
-import { ReactComponent as Biochemistry_svg} from '../../svgs/biochemistry_svg.svg'
 import styles from '../prescriptionchart.css'
 
 function ObservationsOffCanvas() {

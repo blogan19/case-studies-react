@@ -1,45 +1,49 @@
 import React from "react";
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
+import Allergies from "./allergies";
 
-const PatientDetails = ({firstname, surname, hospitalNo, dob, weight, height, allergies, address}) => {
+const PatientDetails = ({patient, allergies}) => {
     return(
-        
         <Container>
             <Table bordered>
                 <tbody>
                 <tr>
                     <td>
                         <i className="text-muted">Name  </i> 
-                        {firstname} {surname}
+                        {patient.firstname} {patient.surname}
                     </td>
                     <td>
                         <i className="text-muted">Hospital No  </i>
-                        {hospitalNo}
+                        {patient.hospitalNo}
                     </td>
                     <td>
                         <i className="text-muted">DoB  </i> 
-                        {dob}
+                        {patient.dob}
                     </td>                 
                 </tr>      
                 <tr>
                     <td>
                         <i className="text-muted">Weight  </i> 
-                        {weight}
+                        {patient.weight}
                     </td>
                     <td>
                         <i className="text-muted">Height  </i> 
-                        {height}
+                        {patient.height}
                     </td>
                     <td>
                         <i className="text-muted">Allergies  </i> 
-                        {allergies}
+                        <Allergies allergyList={allergies}/>
                     </td>
                 </tr>       
                 <tr>
-                    <td colSpan={3}>
+                    <td colSpan={1}>
+                        <i className="text-muted">Gender </i>
+                        {patient.gender}
+                    </td>
+                    <td colSpan={2}>
                         <i className="text-muted">Address </i> 
-                        {address}
+                        {patient.address}
                     </td>
                 </tr>  
                 </tbody>

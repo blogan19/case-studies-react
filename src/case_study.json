@@ -7,9 +7,10 @@
         "dob":"01/01/1962",
         "address": "test address at test address",
         "weight": "82.5kg",
-        "height": "170cm"
+        "height": "170cm",
+        "gender": "male"
     },
-    "allergies": ["NKDA"],
+    "allergies": ["amlodipine ankle swelling","amoxicillin rash"],
     "prescriptionList" : [
         {
           "drug": "amoxicillin",
@@ -21,7 +22,11 @@
           "start_date": "05/07/2022",
           "end_date": "12/07/2022",
           "indication": "CAP",
-          "note": "Curb score of 1"
+          "note": "Curb score of 1",
+          "prescriber": "Dr test",
+          "administrations":{
+            "":""
+          }
         },{
           "drug": "Zopiclone",
           "dose": "7.5mg",

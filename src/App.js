@@ -11,7 +11,7 @@ const App = () => {
     
     <>
       <NavBar/>
-      <PatientDetails firstname={data.patient.firstname} surname={data.patient.surname} hospitalNo={data.patient.hospitalNo} dob={data.patient.dob} address={data.patient.address} weight={data.patient.weight} height={data.patient.height} allergies={data.allergies} />
+      <PatientDetails patient={data.patient} allergies={data.allergies}/>
       <CaseInstructions instructions={data.case_instructions}/>
       <ObservationsOffCanvas />
       <Prescription prescriptions={data.prescriptionList}/>
