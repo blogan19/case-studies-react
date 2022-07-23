@@ -6,8 +6,8 @@ import Allergies from './allergies';
 const PatientDetails = ({ patient, allergies }) => {
   return (
     <>
-      <Container className="mt-3">
-        <Table bordered>
+      <Container className="mt-3 ">
+        <Table bordered className='container-shadow '>
           <tbody>
             <tr>
               <td>

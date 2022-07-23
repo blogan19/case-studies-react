@@ -32,6 +32,7 @@ function CaseNotes(props) {
     <>
       <td onClick={handleClick}>
         <Icon logo="bi bi-collection" title_text="Case Notes"/>
+
       </td>
 
       <Offcanvas show={show} onHide={handleClose} style={{ width: '100%' }}>

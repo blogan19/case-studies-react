@@ -22,7 +22,7 @@ const Prescriptions = (props) => {
     <>
       <div className="prescriptions">
         <Container className="prescription-tools">
-          <Row className="border bg-light mt-3 py-3 rounded">
+          <Row className="border blue-back text-white mt-3 py-3 rounded">
             <Col sm={3}>
               <h4>Prescriptions </h4>
             </Col>

@@ -10,7 +10,7 @@ function PatientRecordsContainer(props) {
   return (
     <>
       <Container>
-        <Table bordered className="center text-center">
+        <Table bordered className="text-center container-shadow ">
           <tbody>
             <tr>
               <CaseNotes case_notes={props.case_notes} />

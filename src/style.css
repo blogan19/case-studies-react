@@ -1,23 +1,19 @@
 table td:hover {
   background-color: #f5f5f5;
 }
-.observations-icons-red {
-  color: #dd0000 !important;
-}
-.case-notes-color{
-  color: #F8d775
-}
 .blue-back{
   background-color: #2196f3;
 }
-.prescription-container {
+.container-shadow {
   -webkit-box-shadow: 0 4px 3px -3px grey;
     -moz-box-shadow: 0 4px 3px -3px grey;
       box-shadow: 0 4px 3px -3px grey;
 }
-
 .icon-style{
   font-size: 3rem !important;
   color: #2196f3;
 
+}
+.allergy-text{
+  color: #ff7b7b;
 }

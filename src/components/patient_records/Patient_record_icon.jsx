@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 
 function Icon(props) {
   let classes =  `${props.logo} icon-style`

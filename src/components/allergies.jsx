@@ -15,11 +15,11 @@ function Allergies(props) {
   return (
     <>
       <Container className="mt-3">
-        <Table bordered>
+        <Table bordered className='container-shadow'>
           <tbody>
             <tr>
               <td rowspan={rowList.length}>
-                <i className="text-muted">Allergies</i>
+                <i className="allergy-text">Allergies</i>
               </td>
               <td colspan={2} >{rowList[0]}</td>
             </tr>

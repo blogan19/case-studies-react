@@ -1,6 +1,5 @@
 import React from 'react';
 import Tooltip from 'react-bootstrap/Tooltip';
-import Button from 'react-bootstrap/Button';
 import Badge from 'react-bootstrap/Badge';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Container from 'react-bootstrap/Container';
@@ -25,7 +24,7 @@ const Prescription = ({
   index,
 }) => {
   return (
-    <Container className="bg-white mt-1 rounded prescription-container">
+    <Container className="bg-white mt-1 rounded container-shadow ">
       <Row>
         <Col xs={4} className="py-2">
           <i className="text-muted">Drug</i>
@@ -73,7 +72,7 @@ const Prescription = ({
             placement="bottom"
           >
             <Badge
-              variant="info"
+              className='blue-back'
               style={{ visibility: note != '' ? 'visible' : 'hidden' }}
             >
               Note
