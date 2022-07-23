@@ -4,9 +4,9 @@ import Navbar from 'react-bootstrap/Navbar';
 
 const NavBar = () => {
     return(
-        <Navbar bg="light">
+        <Navbar className="blue-back">
         <Container>
-          <Navbar.Brand href="#home">Electronic Prescription Chart</Navbar.Brand>
+          <Navbar.Brand href="#home" className="text-white">Electronic Prescription Chart</Navbar.Brand>
         </Container>
       </Navbar>
     )

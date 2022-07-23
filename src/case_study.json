@@ -1,88 +1,175 @@
 {
-    "case_instructions" : "Read the information provided about the patients admission to hospital before attempting the questions below",
-    "patient":{
-        "firstname":"John",
-        "surname": "Smith",
-        "hospitalNo": "1234567",
-        "dob":"01/01/1962",
-        "address": "test address at test address",
-        "weight": "82.5kg",
-        "height": "170cm",
-        "gender": "male"
-    },
-    "allergies": ["amlodipine ankle swelling","amoxicillin rash"],
-    "prescriptionList" : [
+  "case_instructions": "Read the information provided about the patients admission to hospital before attempting the questions below",
+  "patient": {
+    "firstname": "John",
+    "surname": "Smith",
+    "hospitalNo": "1234567",
+    "dob": "01/01/1962",
+    "address": "test address at test address",
+    "weight": "82.5kg",
+    "height": "170cm",
+    "gender": "male"
+  },
+  "allergies": ["amlodipine ankle swelling", "amoxicillin rash"],
+  "prescriptionList": [
+    {
+      "drug": "amoxicillin",
+      "dose": "500mg",
+      "frequency": "Three times daily",
+      "route": "oral",
+      "form": "tablets",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "12/07/2022",
+      "indication": "CAP",
+      "note": "Curb score of 1",
+      "prescriber": "Dr test",
+      "administrations": [
         {
-          "drug": "amoxicillin",
-          "dose": "500mg",
-          "frequency": "Three times daily",
-          "route": "oral",
-          "form": "tablets",
-          "stat": false,
-          "start_date": "05/07/2022",
-          "end_date": "12/07/2022",
-          "indication": "CAP",
-          "note": "Curb score of 1",
-          "prescriber": "Dr test",
-          "administrations":{
-            "":""
-          }
-        },{
-          "drug": "Zopiclone",
-          "dose": "7.5mg",
-          "frequency": "Once at Night",
-          "route": "oral",
-          "form": "tablets",
-          "stat": false,
-          "start_date": "05/07/2022",
-          "end_date": "",
-          "indication": "",
-          "note": "Not for discharge"
-        },{
-            "drug": "apixaban",
-            "dose": "5mg",
-            "frequency": "Twice Daily",
-            "route": "oral",
-            "form": "tablets",
-            "stat": false,
-            "start_date": "05/07/2022",
-            "end_date": "",
-            "indication": "",
-            "note": ""
-        },{
-            "drug": "Bisoprolol",
-            "dose": "7.5mg",
-            "frequency": "Once at Night",
-            "route": "oral",
-            "form": "tablets",
-            "stat": false,
-            "start_date": "05/07/2022",
-            "end_date": "",
-            "indication": "",
-            "note": ""
-        },{
-            "drug": "Clarithromycin",
-            "dose": "500mg",
-            "frequency": "Twice Daily",
-            "route": "oral",
-            "form": "tablets",
-            "stat": false,
-            "start_date": "05/07/2022",
-            "end_date": "",
-            "indication": "CAP",
-            "note": "Atypical Cover"
-        },{
-            "drug": "Movicol",
-            "dose": "1",
-            "frequency": "PRN",
-            "route": "oral",
-            "form": "Sachet",
-            "stat": false,
-            "start_date": "05/07/2022",
-            "end_date": "",
-            "indication": "",
-            "note": ""
-          }
+          "adminDateTime": "05/07/2022 08:00",
+          "administeredBy": "Nurse 1",
+          "adminNote": "Administered"
+        },
+        {
+          "adminDateTime": "05/07/2022 13:00",
+          "administeredBy": "Nurse 1",
+          "adminNote": "Administered"
+        },
+        {
+          "adminDateTime": "05/07/2022 20:00",
+          "administeredBy": "Nurse 2",
+          "adminNote": "Drug not available"
+        }
       ]
+    },
+    {
+      "drug": "Zopiclone",
+      "dose": "7.5mg",
+      "frequency": "Once at Night",
+      "route": "oral",
+      "form": "tablets",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "Not for discharge",
+      "prescriber": "Dr test",
+      "administrations": [
+        {
+          "adminDateTime": "05/07/2022 22:00",
+          "administeredBy": "Nurse 1",
+          "adminNote": ""
+        }
+      ]
+    },
+    {
+      "drug": "apixaban",
+      "dose": "5mg",
+      "frequency": "Twice Daily",
+      "route": "oral",
+      "form": "tablets",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr test",
+      "administrations": [
+        {
+          "adminDateTime": "05/07/2022 08:00",
+          "administeredBy": "Nurse 1",
+          "adminNote": ""
+        },
+        {
+          "adminDateTime": "05/07/2022 13:00",
+          "administeredBy": "Nurse 1",
+          "adminNote": "Administered"
+        },
+        {
+          "adminDateTime": "05/07/2022 20:00",
+          "administeredBy": "Nurse 2",
+          "adminNote": "Drug not available"
+        }
+      ]
+    },
+    {
+      "drug": "Bisoprolol",
+      "dose": "7.5mg",
+      "frequency": "Once at Night",
+      "route": "oral",
+      "form": "tablets",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "",
+      "administrations": []
+    },
+    {
+      "drug": "Clarithromycin",
+      "dose": "500mg",
+      "frequency": "Twice Daily",
+      "route": "oral",
+      "form": "tablets",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "CAP",
+      "note": "Atypical Cover",
+      "prescriber": "",
+      "administrations": []
+    },
+    {
+      "drug": "Movicol",
+      "dose": "1",
+      "frequency": "PRN",
+      "route": "oral",
+      "form": "Sachet",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "",
+      "administrations": []
+    }
+  ],
+  "case_notes": {
+    "presenting_complaint": "Breathlessness/CAP",
+    "history_presenting_complaint": "78 YO female BIBA Presented with SOB onset 48 hours ago",
+    "conditions": [
+      "Diabetes",
+      "COPD",
+      "Arthritis",
+      "previous #NOF",
+      "Parkinsons"
+    ],
+    "social_history": {
+      "alcohol": "2 units per week",
+      "smoking": "10 pack years",
+      "recreational_drugs": "",
+      "occupation": "retired",
+      "home_environment": "Lives alone in sheltered accomodation"
+    },
+    "family_history": "Mother MI, Father nil",
+    "notes": [
+      {
+        "note_id": "1",
+        "note_date": "05/07/2022 22:30:0",
+        "note_location": "A/E",
+        "note_author": "FY1",
+        "note_content": "Found of floor BIBA, Sats 92% on RA. Left basal consolidation on cxray Co-amox and clarith started. For any medical ward"
+      },
+      {
+        "note_id": "2",
+        "note_date": "06/07/2022 10:30:0",
+        "note_location": "AMU",
+        "note_author": "Cons",
+        "note_content": "Post take ward round. Step down PO Co-amox, monitor for 24h D/C planning"
+      }
+    ]
+  },
+  "biochemistry": {},
+  "observations": {}
 }
-

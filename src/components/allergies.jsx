@@ -1,34 +1,34 @@
 import React, { useState } from 'react';
-import Tooltip from 'react-bootstrap/Tooltip';
-import Button from 'react-bootstrap/Button';
-import OverlayTrigger from 'react-bootstrap/OverlayTrigger'
+import Container from 'react-bootstrap/Container';
+import Table from 'react-bootstrap/Table';
 
-const Allergies = (props) =>{
-    const [allergyButton, setAllergybtn] = useState('')
+function Allergies(props) {
+  const allergies = props.allergyList;
+  const rowList = allergies.map((allergy) => (
+    <tr>
+      <td key={allergy} colspan={2} >
+        {allergy}
+      </td>
+    </tr>
+  ));
 
-    let allergies = props.allergyList
-    let allergyItems = ''
-
-    if(Array.isArray(allergies) && allergies[0] != 'nkda'){
-        allergyItems = allergies.map((allergy) =>
-            <li key={allergy}>{allergy}</li>
-        )
-//        setAllergybtn('Allergies')
-    }
-    
-    return(
-        <OverlayTrigger        
-                        overlay={(props) => (
-                            <Tooltip {...props}>
-                                <ul>
-                                    {allergyItems}
-                                </ul>
-                            </Tooltip>
-                        )}
-                        placement="bottom">
-                        <Button variant="outline-danger" > allergy</Button>
-        </OverlayTrigger>
-    )
+  return (
+    <>
+      <Container className="mt-3">
+        <Table bordered>
+          <tbody>
+            <tr>
+              <td rowspan={rowList.length}>
+                <i className="text-muted">Allergies</i>
+              </td>
+              <td colspan={2} >{rowList[0]}</td>
+            </tr>
+            {rowList.pop()}
+          </tbody>
+        </Table>
+      </Container>
+    </>
+  );
 }
 
-export default Allergies
+export default Allergies;
