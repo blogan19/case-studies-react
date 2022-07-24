@@ -170,6 +170,114 @@
       }
     ]
   },
-  "biochemistry": {},
-  "observations": {}
+  "biochemistry": {
+    "eGfR":{
+      "name": "eGFR",
+      "category": "UE",
+      "range": ">90",
+      "unit": "ml/min",
+      "results":[{
+        "datetime": "04/07/2022 08:00",
+        "result": 87
+      },{
+        "datetime": "04/07/2022 13:00",
+        "result": 82
+      },{
+        "datetime": "05/07/2022 08:00",
+        "result": 81
+      },{
+        "datetime": "05/07/2022 12:47",
+        "result": 87
+      },{
+        "datetime": "05/07/2022 20:00",
+        "result": 87
+      }]
+    },
+    "potassium":{
+      "name": "Potassium (k+)",
+      "category":"UE",
+      "range": "3.5-5.0",
+      "unit": "mmol/ml",
+      "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 3.7
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 3.7
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 3.7
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 3.7
+        },{
+          "datetime": "05/07/2022 20:00",
+          "result": 3.7
+        }]
+      },
+      "CRP":{
+        "name": "C-Reactive Protein (CRP)",
+        "category":"FBC",
+        "range": ">4",
+        "unit": "x 10^9",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 138
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 82
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 65
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 68
+        }]
+      }
+  },
+  "observations": {
+    "blood_pressure": [{
+      "datetime": "04/07/2022 08:00",
+      "systolic": 110,
+      "diastolic": 80
+    },{
+      "datetime": "04/07/2022 13:00",
+      "systolic": 116,
+      "diastolic": 87
+    },{
+      "datetime": "05/07/2022 07:45",
+      "systolic": 125,
+      "diastolic": 92
+    },{
+      "datetime": "05/07/2022 12:45",
+      "systolic": 118,
+      "diastolic": 78
+    }],
+    "heart_rate": [{
+      "datetime": "04/07/2022 08:00",
+      "rate": 110
+    },{
+      "datetime": "04/07/2022 13:00",
+      "rate": 116      
+    },{
+      "datetime": "05/07/2022 07:45",
+      "rate": 125
+    },{
+      "datetime": "05/07/2022 12:45",
+      "rate": 118
+    }],
+    "temperature": [{
+      "datetime": "04/07/2022 08:00",
+      "temperature": 37.3
+    },{
+      "datetime": "04/07/2022 13:00",
+      "temperature": 37.6     
+    },{
+      "datetime": "05/07/2022 07:45",
+      "temperature": 36.9
+    },{
+      "datetime": "05/07/2022 12:45",
+      "temperature": 37.4
+    }]
+  }
 }

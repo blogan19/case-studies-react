@@ -38,7 +38,7 @@ const PatientDetails = ({ patient, allergies }) => {
               </td>
             </tr>
             <tr>
-              <td colspan={3}>
+              <td colSpan={3}>
                 <i className="text-muted">Address </i>
                 {patient.address}
               </td>

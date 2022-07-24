@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Icon from './Patient_record_icon';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import BloodPressure from './observations_charts/Blood_pressure';
+import TempHR from './observations_charts/Temp_heartrate';
 
-function Observations() {
+function Observations(props) {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleClick = () => setShow(true);
-
+  
   return (
     <>
       <td onClick={handleClick}>
@@ -14,10 +18,13 @@ function Observations() {
       </td>
 
       <Offcanvas show={show} onHide={handleClose} style={{ width: '100%'}}>
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title>Offcanvas</Offcanvas.Title>
+        <Offcanvas.Header closeButton className="blue-back text-white">
+          <Offcanvas.Title>Observations</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body>These are case blooods</Offcanvas.Body>
+        <Offcanvas.Body>
+          <BloodPressure data={props} />           
+          <TempHR data={props} />
+        </Offcanvas.Body>
       </Offcanvas>
     </>
   );

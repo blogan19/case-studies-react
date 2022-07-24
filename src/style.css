@@ -4,10 +4,16 @@ table td:hover {
 .blue-back{
   background-color: #2196f3;
 }
+.blue-back2{
+  background-color: #64B5F6;
+}
+.lightblue-back{
+  background-color: #E3F2FD;
+}
 .container-shadow {
-  -webkit-box-shadow: 0 4px 3px -3px grey;
-    -moz-box-shadow: 0 4px 3px -3px grey;
-      box-shadow: 0 4px 3px -3px grey;
+  -webkit-box-shadow: 0px 1px 3px grey;
+    -moz-box-shadow: 0px 1px 3px grey;
+      box-shadow: 0px 1px 3px grey;
 }
 .icon-style{
   font-size: 3rem !important;
@@ -16,4 +22,8 @@ table td:hover {
 }
 .allergy-text{
   color: #ff7b7b;
+}
+.tbl-notes{
+  border-radius: 5px;
+  overflow: hidden;
 }

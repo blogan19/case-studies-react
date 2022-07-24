@@ -14,7 +14,7 @@ const App = () => {
       <NavBar />
       <CaseInstructions instructions={data.case_instructions} />
       <PatientDetails patient={data.patient} allergies={data.allergies} />
-      <PatientRecordsContainer case_notes={data.case_notes} />
+      <PatientRecordsContainer patient_records={data} />
       <Prescription prescriptions={data.prescriptionList} />
     </>
   );

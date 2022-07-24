@@ -6,7 +6,7 @@ function Allergies(props) {
   const allergies = props.allergyList;
   const rowList = allergies.map((allergy) => (
     <tr>
-      <td key={allergy} colspan={2} >
+      <td key={allergy} colSpan={2} >
         {allergy}
       </td>
     </tr>
@@ -18,10 +18,10 @@ function Allergies(props) {
         <Table bordered className='container-shadow'>
           <tbody>
             <tr>
-              <td rowspan={rowList.length}>
+              <td rowSpan={rowList.length}>
                 <i className="allergy-text">Allergies</i>
               </td>
-              <td colspan={2} >{rowList[0]}</td>
+              <td colSpan={2} >{rowList[0]}</td>
             </tr>
             {rowList.pop()}
           </tbody>

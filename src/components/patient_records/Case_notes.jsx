@@ -15,90 +15,109 @@ function CaseNotes(props) {
   const history_presenting_complaint =
     props.case_notes['history_presenting_complaint'];
   const conditions = props.case_notes['conditions'].map((condition, index) => (
-    <span>{(index ? ', ' : '') + condition}</span>
+    <span key={condition}>{(index ? ', ' : '') + condition}</span>
   ));
   const social_history = props.case_notes['social_history'];
   const family_history = props.case_notes['family_history'];
   const notes = props.case_notes['notes'].map((item) => (
-    <tr>
-      <th>{item['note_date']}</th>
-      <th>{item['note_location']}</th>
-      <th>{item['note_author']}</th>
-      <td>{item['note_content']}</td>
-    </tr>
+    <React.Fragment key={item['note_date']}>
+      <tr  className="lightblue-back">
+        <th>{item['note_date']}</th>
+        <th>{item['note_location']}</th>
+        <th>{item['note_author']}</th>
+      </tr>
+      <tr>
+        <td colSpan={3}>{item['note_content']}</td>
+      </tr>
+    </React.Fragment>
   ));
 
   return (
     <>
       <td onClick={handleClick}>
         <Icon logo="bi bi-collection" title_text="Case Notes"/>
-
       </td>
 
       <Offcanvas show={show} onHide={handleClose} style={{ width: '100%' }}>
-        <Offcanvas.Header closeButton>
+        <Offcanvas.Header closeButton className="blue-back text-white">
           <Offcanvas.Title>Case Notes</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
           <Container>
-            <Table striped>
-              <thead colspan={2}>
-                <tr>
-                  <th>
-                    <h3>History</h3>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <th> Presenting complaint </th>
-                  <td> {presenting_complaint} </td>
-                </tr>
-                <tr>
-                  <th> History of Presenting complaint </th>
-                  <td> {history_presenting_complaint} </td>
-                </tr>
-                <tr>
-                  <th>Past Medical History </th>
-                  <td>{conditions}</td>
-                </tr>
-                <tr>
-                  <th> Social History </th>
-                  <td>
-                    <p>Alcohol: {social_history['alcohol']}</p>
-                    <p>Smoking History: {social_history['smoking']}</p>
-                    <p>
-                      Recreational Drugs: {social_history['recreational_drugs']}
-                    </p>
-                    <p>Occupation: {social_history['occupation']}</p>
-                    <p>
-                      Home environment: {social_history['home_environment']}
-                    </p>
-                  </td>
-                </tr>
-                <tr>
-                  <th> Family History </th>
-                  <td> {family_history} </td>
-                </tr>
-              </tbody>
-            </Table>
+              <Table  className='tbl-notes container-shadow' >
+                <thead >
+                  <tr className="blue-back text-white">
+                    <th colSpan={2}>
+                      <h4>History</h4>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <th> Presenting complaint </th>
+                    <td> {presenting_complaint} </td>
+                  </tr>
+                  <tr>
+                    <th> History of Presenting complaint </th>
+                    <td> {history_presenting_complaint} </td>
+                  </tr>
+                  <tr>
+                    <th>Past Medical History </th>
+                    <td>{conditions}</td>
+                  </tr>
+                  <tr>
+                    <th> Social History </th>
+                    <td>
+                      <Table>
+                        <tbody>
+                          <tr>
+                            <td>Alcohol:</td>
+                            <td>{social_history['alcohol']}</td>
+                          </tr>
+                          <tr>
+                            <td>Smoking History:</td>
+                            <td>{social_history['smoking']}</td>
+                          </tr>
+                          <tr>
+                            <td>Recreational Drugs:</td>
+                            <td>{social_history['recreational_drugs']}</td>
+                          </tr>
+                          <tr>
+                            <td>Occupation:</td>
+                            <td>{social_history['occupation']}</td>
+                          </tr>           
+                          <tr>
+                            <td>Home Environment:</td>
+                            <td>{social_history['home_environment']}</td>
+                          </tr>
+                          </tbody>
+                      </Table>
+                    </td>
+                  </tr>
+                  <tr>
+                    <th> Family History </th>
+                    <td> {family_history} </td>
+                  </tr>
+                </tbody>
+              </Table>
           </Container>
           <Container>
-            <Table striped>
+            <Table  className='tbl-notes container-shadow'>
               <thead>
-                <tr>
-                  <th colspan={4}>
-                    <h3>Case Notes</h3>
+                <tr className="blue-back text-white">
+                  <th colSpan={4}>
+                    <h4>Case Notes</h4>
                   </th>
                 </tr>
                 <tr>
                   <th>Date</th>
                   <th>Location</th>
                   <th>Author</th>
-                  <th>Note</th>
                 </tr>
               </thead>
-              <tbody>{notes}</tbody>
+              <tbody>
+                {notes}
+              </tbody>
             </Table>
           </Container>
         </Offcanvas.Body>
