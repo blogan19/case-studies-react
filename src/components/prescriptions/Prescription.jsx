@@ -17,8 +17,7 @@ const Prescriptions = (props) => {
   }
 
   return (
-    <Container className="prescriptions text-break">
-      <Container className="prescription-tools">
+      <Container className="prescription-tools text-break">
         <Row className="border blue-back text-white mt-3 py-3 container-shadow rounded">
           <Col sm={3}>
             <h4>Prescriptions </h4>
@@ -44,7 +43,6 @@ const Prescriptions = (props) => {
           ))}
         </Row>
       </Container>
-    </Container>
 
   );
 };

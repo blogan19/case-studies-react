@@ -1,28 +1,69 @@
 {
-  "case_instructions": "Read the information provided about the patients admission to hospital before attempting the questions below",
+  "case_instructions": "John Smith has been admitted to the Medical Admissions Unit. Read the information provided about the patients admission to hospital before attempting the questions below",
   "patient": {
     "firstname": "John",
     "surname": "Smith",
     "hospitalNo": "1234567",
-    "dob": "01/01/1962",
-    "address": "test address at test address",
-    "weight": "82.5kg",
-    "height": "170cm",
-    "gender": "male"
+    "dob": "11/02/1944",
+    "address": "14 Castle Street, Liverpool, L11 5AT",
+    "weight": "68kg",
+    "height": "175cm",
+    "gender": "Male"
   },
-  "allergies": ["amlodipine ankle swelling", "amoxicillin rash"],
+  "allergies": ["penicillin unknown reaction"],
+  "case_notes": {
+    "presenting_complaint": "UTI",
+    "history_presenting_complaint": "78 YO female BIBA Presented with SOB onset 48 hours ago",
+    "conditions": [
+      "Rheumatoid Arthritis",
+      "Raised Cholesterol",
+      "Hypertension",
+      "DVT 1 month ago following long haul flight"
+    ],
+    "social_history": {
+      "alcohol": "",
+      "smoking": "",
+      "recreational_drugs": "",
+      "occupation": "",
+      "home_environment": "Lives alone in sheltered accomodation"
+    },
+    "family_history": "",
+    "notes": [
+      {
+        "note_id": "1",
+        "note_date": "05/07/2022 22:30:0",
+        "note_location": "A/E",
+        "note_author": "FY1",
+        "note_content": "Found of floor BIBA, Acute confusion. Left basal consolidation on cxray Co-amox and clarith started. For any medical ward"
+      },
+      {
+        "note_id": "2",
+        "note_date": "06/07/2022 10:30:00",
+        "note_location": "AMU",
+        "note_author": "Cons",
+        "note_content": "+ve MSSU. Diagnosis UTI start appropriate treatment as per local policy/sensitivities"
+      },
+      {
+        "note_id": "3",
+        "note_date": "06/07/2022 12:25:0",
+        "note_location": "AMU",
+        "note_author": "Pharmacy Technician",
+        "note_content": "Medicines reconciliation complete. Patient normally has blister packs at home."
+      }
+    ]
+  },
   "prescriptionList": [
     {
-      "drug": "amoxicillin",
-      "dose": "500mg",
-      "frequency": "Three times daily",
+      "drug": "Nitrofurantoin",
+      "dose": "50mg",
+      "frequency": "Four times daily",
       "route": "oral",
       "form": "tablets",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "12/07/2022",
-      "indication": "CAP",
-      "note": "Curb score of 1",
+      "indication": "UTI",
+      "note": "",
       "prescriber": "Dr test",
       "administrations": [
         {
@@ -43,8 +84,8 @@
       ]
     },
     {
-      "drug": "Zopiclone",
-      "dose": "7.5mg",
+      "drug": "Simvastatin",
+      "dose": "40mg",
       "frequency": "Once at Night",
       "route": "oral",
       "form": "tablets",
@@ -52,7 +93,7 @@
       "start_date": "05/07/2022",
       "end_date": "",
       "indication": "",
-      "note": "Not for discharge",
+      "note": "",
       "prescriber": "Dr test",
       "administrations": [
         {
@@ -63,37 +104,37 @@
       ]
     },
     {
-      "drug": "apixaban",
-      "dose": "5mg",
-      "frequency": "Twice Daily",
-      "route": "oral",
-      "form": "tablets",
+      "drug": "Enoxaparin",
+      "dose": "40mg",
+      "frequency": "Once Daily",
+      "route": "S/C",
+      "form": "Injection",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
       "indication": "",
-      "note": "",
+      "note": "VTE prophylaxis",
       "prescriber": "Dr test",
       "administrations": [
         {
-          "adminDateTime": "05/07/2022 08:00",
+          "adminDateTime": "04/07/2022 18:00",
           "administeredBy": "Nurse 1",
           "adminNote": ""
         },
         {
-          "adminDateTime": "05/07/2022 13:00",
+          "adminDateTime": "05/07/2022 18:00",
           "administeredBy": "Nurse 1",
           "adminNote": "Administered"
         },
         {
-          "adminDateTime": "05/07/2022 20:00",
+          "adminDateTime": "06/07/2022 18:00",
           "administeredBy": "Nurse 2",
           "adminNote": "Drug not available"
         }
       ]
     },
     {
-      "drug": "Bisoprolol",
+      "drug": "Methorexate",
       "dose": "7.5mg",
       "frequency": "Once at Night",
       "route": "oral",
@@ -103,11 +144,25 @@
       "end_date": "",
       "indication": "",
       "note": "",
-      "prescriber": "",
-      "administrations": []
+      "prescriber": "Dr Test",
+      "administrations": [{
+        "adminDateTime": "04/07/2022 18:00",
+        "administeredBy": "Nurse 1",
+        "adminNote": ""
+      },
+      {
+        "adminDateTime": "05/07/2022 18:00",
+        "administeredBy": "Nurse 1",
+        "adminNote": "Administered"
+      },
+      {
+        "adminDateTime": "06/07/2022 18:00",
+        "administeredBy": "Nurse 2",
+        "adminNote": "Drug not available"
+      }]
     },
     {
-      "drug": "Clarithromycin",
+      "drug": "Naproxen",
       "dose": "500mg",
       "frequency": "Twice Daily",
       "route": "oral",
@@ -115,17 +170,17 @@
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
-      "indication": "CAP",
-      "note": "Atypical Cover",
-      "prescriber": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
       "administrations": []
     },
     {
-      "drug": "Movicol",
-      "dose": "1",
-      "frequency": "PRN",
+      "drug": "Perindopril",
+      "dose": "8mg",
+      "frequency": "Once in the morning",
       "route": "oral",
-      "form": "Sachet",
+      "form": "Tablet",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -133,86 +188,160 @@
       "note": "",
       "prescriber": "",
       "administrations": []
+    },{
+      "drug": "Bendroflumethiazide",
+      "dose": "2.5mg",
+      "frequency": "Once in the morning",
+      "route": "oral",
+      "form": "Tablet",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
+      "administrations": []
+    },{
+      "drug": "Coversyl Arginine Plus",
+      "dose": "T",
+      "frequency": "Once in the morning",
+      "route": "oral",
+      "form": "Tablet",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
+      "administrations": []
+    },{
+      "drug": "Folic acid",
+      "dose": "5mg",
+      "frequency": "Once in the morning",
+      "route": "oral",
+      "form": "Tablet",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
+      "administrations": []
+    },{
+      "drug": "Novomix",
+      "dose": "24units",
+      "frequency": "Once at Night",
+      "route": "S/C",
+      "form": "Tablet",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
+      "administrations": []
+    },{
+      "drug": "Novomix",
+      "dose": "28units",
+      "frequency": "Once each morning",
+      "route": "S/C",
+      "form": "Injection",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
+      "administrations": []
+    },{
+      "drug": "Edoxaban",
+      "dose": "60mg",
+      "frequency": "Once at Night",
+      "route": "Oral",
+      "form": "Tablet",
+      "stat": false,
+      "start_date": "05/07/2022",
+      "end_date": "",
+      "indication": "",
+      "note": "",
+      "prescriber": "Dr Test",
+      "administrations": []
     }
   ],
-  "case_notes": {
-    "presenting_complaint": "Breathlessness/CAP",
-    "history_presenting_complaint": "78 YO female BIBA Presented with SOB onset 48 hours ago",
-    "conditions": [
-      "Diabetes",
-      "COPD",
-      "Arthritis",
-      "previous #NOF",
-      "Parkinsons"
-    ],
-    "social_history": {
-      "alcohol": "2 units per week",
-      "smoking": "10 pack years",
-      "recreational_drugs": "",
-      "occupation": "retired",
-      "home_environment": "Lives alone in sheltered accomodation"
-    },
-    "family_history": "Mother MI, Father nil",
-    "notes": [
-      {
-        "note_id": "1",
-        "note_date": "05/07/2022 22:30:0",
-        "note_location": "A/E",
-        "note_author": "FY1",
-        "note_content": "Found of floor BIBA, Sats 92% on RA. Left basal consolidation on cxray Co-amox and clarith started. For any medical ward"
-      },
-      {
-        "note_id": "2",
-        "note_date": "06/07/2022 10:30:0",
-        "note_location": "AMU",
-        "note_author": "Cons",
-        "note_content": "Post take ward round. Step down PO Co-amox, monitor for 24h D/C planning"
-      }
-    ]
-  },
+  "microbiology":
+    [{
+      "datetime":"04/07/2022 08:00",
+      "sample_type": "MSSU",
+      "growth":"E. coli",
+      "sensitivities":[["Amoxicillin","S"],["Cefaclor","R"],["Nitrofurantoin","S"],["Gentamicin","S"],["Trimethoprim","S"]],
+      "notes": "S = Sensitive  R = Resistant"
+    }]
+  ,
   "biochemistry": {
-    "eGfR":{
-      "name": "eGFR",
+    "sodium":{
+      "name": "Na+",
       "category": "UE",
-      "range": ">90",
-      "unit": "ml/min",
+      "range": "135*145",
+      "unit": "mmol/L",
       "results":[{
         "datetime": "04/07/2022 08:00",
-        "result": 87
+        "result": 139
       },{
         "datetime": "04/07/2022 13:00",
-        "result": 82
+        "result": 140
       },{
         "datetime": "05/07/2022 08:00",
-        "result": 81
+        "result": 138
       },{
         "datetime": "05/07/2022 12:47",
-        "result": 87
+        "result": 137
       },{
         "datetime": "05/07/2022 20:00",
-        "result": 87
+        "result": 139
       }]
     },
     "potassium":{
       "name": "Potassium (k+)",
       "category":"UE",
       "range": "3.5-5.0",
-      "unit": "mmol/ml",
+      "unit": "mmol/L",
       "results":[{
           "datetime": "04/07/2022 08:00",
-          "result": 3.7
+          "result": 4.2
         },{
           "datetime": "04/07/2022 13:00",
-          "result": 3.7
+          "result": 5.2
         },{
           "datetime": "05/07/2022 08:00",
-          "result": 3.7
+          "result": 4.8
         },{
           "datetime": "05/07/2022 12:47",
-          "result": 3.7
+          "result": 4.0
         },{
           "datetime": "05/07/2022 20:00",
-          "result": 3.7
+          "result": 3.0
+        }]
+      },
+      "UREA":{
+        "name":"Urea",
+        "category":"UE",
+        "range":"2.5-7.5",
+        "unit":"mmol/L",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 5.3
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 18.5
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 15.2
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 12.1
+        },{
+          "datetime": "05/07/2022 20:00",
+          "result": 8.6
         }]
       },
       "CRP":{
@@ -232,6 +361,111 @@
         },{
           "datetime": "05/07/2022 12:47",
           "result": 68
+        }]
+      },
+      "creatinine":{
+        "name": "Creatinine",
+        "category":"UE",
+        "range": "80-120",
+        "unit": "mmol/L",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 98
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 110
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 215
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 198
+        }]
+      },
+      "haemogoblin":{
+        "name": "Haemogoblin (Hb)",
+        "category":"FBC",
+        "range": "12-15",
+        "unit": "g/dL",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 138
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 82
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 65
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 68
+        }]
+      },
+      "platelets":{
+        "name": "Platelets",
+        "category":"FBC",
+        "range": "150-450",
+        "unit": "x 10^9",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 175
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 170
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 165
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 180
+        }]
+      },
+      "WCC":{
+        "name": "White Cell Count (WCC)",
+        "category":"FBC",
+        "range": "4-11",
+        "unit": "x 10^9",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 5.8
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 12.1
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 14.0
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 13.1
+        }]
+      },
+      "neutrophils":{
+        "name": "Neutrophils (neuts)",
+        "category":"FBC",
+        "range": "2.5-7.5",
+        "unit": "g/dL",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 3.2
+        },{
+          "datetime": "04/07/2022 13:00",
+          "result": 4.8
+        },{
+          "datetime": "05/07/2022 08:00",
+          "result": 8.4
+        },{
+          "datetime": "05/07/2022 12:47",
+          "result": 10.1
+        }]
+      },
+      "blood_glucose":{
+        "name": "Random Blood Glucose",
+        "category":"Diabetes",
+        "range": "4.0-8.0",
+        "unit": "mmol/L",
+        "results":[{
+          "datetime": "04/07/2022 08:00",
+          "result": 5.7
         }]
       }
   },
@@ -279,5 +513,21 @@
       "datetime": "05/07/2022 12:45",
       "temperature": 37.4
     }]
-  }
+  },
+  "questions": [{
+    "questionNumber": 1,
+    "questionType": "MultipleChoice",
+    "questionTitle": "Apixaban",
+    "questionText": "The patients renal creatinine increases to 290 micromoles. What would be the most appropriate action for the apixaban?",
+    "answerOptions": ["Hold the apixaban and bridge with enoxaparin","Switch to warfarin","Reduce the dose to 2.5mg twice daily","Hold all anticoagulation","Leave the dose as 5mg BD"],
+    "answer": "Reduce the dose to 2.5mg twice daily",
+    "answerExplanation":"The Patients crcl is now belo 30ml/min and this is the correct dose as per product literature"
+  },{
+    "questionNumber": 3,
+    "questionType": "CarePlan",
+    "questionTitle": "Care Plan",
+    "questionText": "Outline a pharmaceutical care plan for the patient",
+    "Model Answer":""
+    }]
+
 }

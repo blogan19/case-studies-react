@@ -71,23 +71,23 @@ function CaseNotes(props) {
                       <Table>
                         <tbody>
                           <tr>
-                            <td>Alcohol:</td>
+                            <th>Alcohol:</th>
                             <td>{social_history['alcohol']}</td>
                           </tr>
                           <tr>
-                            <td>Smoking History:</td>
+                            <th>Smoking History:</th>
                             <td>{social_history['smoking']}</td>
                           </tr>
                           <tr>
-                            <td>Recreational Drugs:</td>
+                            <th>Recreational Drugs:</th>
                             <td>{social_history['recreational_drugs']}</td>
                           </tr>
                           <tr>
-                            <td>Occupation:</td>
+                            <th>Occupation:</th>
                             <td>{social_history['occupation']}</td>
                           </tr>           
                           <tr>
-                            <td>Home Environment:</td>
+                            <th>Home Environment:</th>
                             <td>{social_history['home_environment']}</td>
                           </tr>
                           </tbody>

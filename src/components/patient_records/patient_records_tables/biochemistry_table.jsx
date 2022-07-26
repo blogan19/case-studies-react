@@ -12,13 +12,13 @@ function BiochemistryTable(props) {
     const table_rows = props.data.map((item) => (
         <React.Fragment key={item['name']}>
             <tr className='lightblue-back'>
-                <th colSpan={item['results'].length}>
+                <th colSpan={maxWidth}>
                     {item['name']}  ({item['range']}) {item['unit']}
                 </th>
             </tr>
             <tr>
                 {item['results'].map((result)=> 
-                    <td key={`${result.datetime}_${result.name}`}>{result.datetime}</td>
+                    <td key={`${result.datetime}_${result.name}`} >{result.datetime}</td>
                 )}
             </tr>
             <tr>

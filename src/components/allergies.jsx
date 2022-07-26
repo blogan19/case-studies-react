@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
 
@@ -21,9 +21,12 @@ function Allergies(props) {
               <td rowSpan={rowList.length}>
                 <i className="allergy-text">Allergies</i>
               </td>
-              <td colSpan={2} >{rowList[0]}</td>
+              <td colSpan={2}>
+                             
+                  {rowList}                 
+                
+              </td>
             </tr>
-            {rowList.pop()}
           </tbody>
         </Table>
       </Container>
