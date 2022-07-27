@@ -4,6 +4,12 @@ import Container from 'react-bootstrap/Container';
 import Allergies from './allergies';
 
 const PatientDetails = ({ patient, allergies }) => {
+
+  const birthdate = Date.parse(patient.dob);
+  const currentDate = new Date();
+  const diff = currentDate - birthdate;
+  const age = Math.floor(diff/31557600000);
+  
   return (
     <>
       <Container className="mt-3 ">
@@ -20,7 +26,7 @@ const PatientDetails = ({ patient, allergies }) => {
               </td>
               <td>
                 <i className="text-muted">DoB </i>
-                {patient.dob}
+                {patient.dob} ({age})
               </td>
             </tr>
             <tr>

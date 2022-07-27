@@ -13,7 +13,7 @@
   "allergies": ["penicillin unknown reaction"],
   "case_notes": {
     "presenting_complaint": "UTI",
-    "history_presenting_complaint": "78 YO female BIBA Presented with SOB onset 48 hours ago",
+    "history_presenting_complaint": "78 YO Male BIBA Presented with UTI onset 48 hours ago",
     "conditions": [
       "Rheumatoid Arthritis",
       "Raised Cholesterol",
@@ -517,11 +517,19 @@
   "questions": [{
     "questionNumber": 1,
     "questionType": "MultipleChoice",
-    "questionTitle": "Apixaban",
-    "questionText": "The patients renal creatinine increases to 290 micromoles. What would be the most appropriate action for the apixaban?",
-    "answerOptions": ["Hold the apixaban and bridge with enoxaparin","Switch to warfarin","Reduce the dose to 2.5mg twice daily","Hold all anticoagulation","Leave the dose as 5mg BD"],
-    "answer": "Reduce the dose to 2.5mg twice daily",
-    "answerExplanation":"The Patients crcl is now belo 30ml/min and this is the correct dose as per product literature"
+    "questionTitle": "Nitrofurantoin",
+    "questionText": "What would the most appropriate duration for nitrofurantoin be for this patient?",
+    "answerOptions": ["7 days","3 days","14 days"],
+    "answer": "7 days",
+    "answerExplanation":""
+  },{
+    "questionNumber": 2,
+    "questionType": "MultipleChoice",
+    "questionTitle": "Enoxaparin",
+    "questionText": "What class of drug is enoxparin?",
+    "answerOptions": ["Vitamin K antagonist","low-molecular weight heparin","Direct oral anticoagulant","antiplatelet","unfractionated herparin"],
+    "answer": "low-molecular weight heparin",
+    "answerExplanation":""
   },{
     "questionNumber": 3,
     "questionType": "CarePlan",

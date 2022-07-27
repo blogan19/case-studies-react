@@ -61,7 +61,7 @@ const MultipleChoice = (props) => {
                     key={answerOption}
                     label={answerOption}
                     name={question.questionNumber}
-                    id={`radio${index}`}
+                    id={`radioQ${question.questionNumber}${index}`}
                     onChange={() => handleChange(answerOption)}
                     disabled={radioDisabled}
                   />
