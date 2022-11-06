@@ -4,7 +4,7 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
 
-function CaseNotes(props) {
+const CaseNotes = (props) => {
   //handle canvas
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);

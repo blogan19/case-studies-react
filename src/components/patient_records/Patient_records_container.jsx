@@ -5,7 +5,7 @@ import CaseNotes from './Case_notes';
 import Laboratory from './Laboratory';
 import Observations from './Observations';
 
-function PatientRecordsContainer(props) {
+const PatientRecordsContainer = (props) => {
   return (
     <>
       <Container>

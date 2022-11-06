@@ -2,12 +2,12 @@ import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Table from 'react-bootstrap/Table';
 
-function Allergies(props) {
+const Allergies = (props) => {
   const allergies = props.allergyList;
   const rowList = allergies.map((allergy) => (
     <tr>
-      <td key={allergy} colSpan={2} >
-        {allergy}
+      <td key={allergy.drug} colSpan={2} >
+        {allergy.drug} {allergy.reaction}
       </td>
     </tr>
   ));

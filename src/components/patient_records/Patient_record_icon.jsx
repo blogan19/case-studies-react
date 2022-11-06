@@ -1,6 +1,6 @@
 import React from 'react';
 
-function Icon(props) {
+const Icon = (props) => {
   let classes =  `${props.logo} icon-style`
   return (
     <>

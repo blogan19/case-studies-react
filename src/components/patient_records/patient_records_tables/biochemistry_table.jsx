@@ -4,7 +4,7 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 
 
-function BiochemistryTable(props) {  
+const BiochemistryTable = (props) => {  
     //get category name and longest length of a row
     const category = props.data[0].category
     const maxWidth = Math.max(...props.data.map((item) => item['results'].length))

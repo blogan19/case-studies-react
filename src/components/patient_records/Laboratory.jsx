@@ -27,7 +27,7 @@ const group_data = (results) =>{
 }
 
 
-function Laboratory(props) {
+const Laboratory = (props) => {
   
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);

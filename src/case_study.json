@@ -1,4 +1,5 @@
 {
+  "prescribingStatus": true,
   "case_instructions": "John Smith has been admitted to the Medical Admissions Unit. Read the information provided about the patients admission to hospital before attempting the questions below",
   "patient": {
     "firstname": "John",
@@ -10,7 +11,13 @@
     "height": "175cm",
     "gender": "Male"
   },
-  "allergies": ["penicillin unknown reaction"],
+  "allergies": [{
+    "drug":"penicillin", 
+    "reaction": "unknown reaction"
+  },{
+    "drug": "bisoprolol",
+    "reaction": "hypotension"
+  }],
   "case_notes": {
     "presenting_complaint": "UTI",
     "history_presenting_complaint": "78 YO Male BIBA Presented with UTI onset 48 hours ago",
@@ -60,7 +67,7 @@
       "route": "oral",
       "form": "tablets",
       "stat": false,
-      "start_date": "05/07/2022",
+      "start_date": "11/07/2022",
       "end_date": "12/07/2022",
       "indication": "UTI",
       "note": "",
@@ -92,8 +99,8 @@
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
-      "indication": "",
-      "note": "",
+      "indication": "hypercholesterolaemia",
+      "note": "Switch to atrovastatin",
       "prescriber": "Dr test",
       "administrations": [
         {
@@ -110,7 +117,7 @@
       "route": "S/C",
       "form": "Injection",
       "stat": false,
-      "start_date": "05/07/2022",
+      "start_date": "01/07/2022",
       "end_date": "",
       "indication": "",
       "note": "VTE prophylaxis",
@@ -140,13 +147,13 @@
       "route": "oral",
       "form": "tablets",
       "stat": false,
-      "start_date": "05/07/2022",
+      "start_date": "05/08/2022",
       "end_date": "",
       "indication": "",
       "note": "",
       "prescriber": "Dr Test",
       "administrations": [{
-        "adminDateTime": "04/07/2022 18:00",
+        "adminDateTime": "01/08/2022 18:00",
         "administeredBy": "Nurse 1",
         "adminNote": ""
       },
@@ -167,7 +174,7 @@
       "frequency": "Twice Daily",
       "route": "oral",
       "form": "tablets",
-      "stat": false,
+      "stat": true,
       "start_date": "05/07/2022",
       "end_date": "",
       "indication": "",

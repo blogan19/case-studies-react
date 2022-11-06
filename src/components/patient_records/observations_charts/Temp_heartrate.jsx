@@ -22,7 +22,7 @@ ChartJS.register(
   Legend
 );
 
-function TempHR(props) {
+const TempHR = (props) => {
   const temperature = props.data.observations.temperature.map((temp) => temp['temperature'])
   const heartRate = props.data.observations.heart_rate.map((hr) => hr['rate'])
 

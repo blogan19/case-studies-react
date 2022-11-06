@@ -6,7 +6,7 @@ import Row from 'react-bootstrap/Row';
 import BloodPressure from './observations_charts/Blood_pressure';
 import TempHR from './observations_charts/Temp_heartrate';
 
-function Observations(props) {
+const Observations = (props) => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleClick = () => setShow(true);
