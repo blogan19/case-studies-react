@@ -20,6 +20,11 @@ const Prescriptions = (props) => {
   const handleClose = () => setShow(false);
   const handleClick = () => setShow(true);
   const [fullscreen, setFullscreen] = useState(true);
+
+  const handleEdit = (index) => {
+    alert("you want to edit prescription " + prescriptionList[index].drug)
+  }
+  
   //Update state when item deleted
   const handleDelete = (index) => {
       let confirmDelete =  window.confirm(`${prescriptionList[index].drug} will be removed from the inpatient chart`)
@@ -72,11 +77,12 @@ const Prescriptions = (props) => {
               }
             
             </ButtonGroup>
-          </Col>
+            
+          </Col>          
         </Row>
         <Row>
           {prescriptionList.map((prescription, index) => (
-            <Prescription  key={index} index={index} prescribingStatus={prescribingStatus} prescription={prescription} deletePrescription={handleDelete} />
+            <Prescription  key={index} index={index} prescribingStatus={prescribingStatus} prescription={prescription} editPrescription={handleEdit} deletePrescription={handleDelete} />
           ))}
         </Row>
       </Container>
@@ -88,8 +94,11 @@ const Prescriptions = (props) => {
         <Modal.Body>
             <AddPrescription newPrescription={handleNew} closeModal={handleClose}/>
         </Modal.Body>
-        
       </Modal>
+
+      
+
+
 </>
   );
 };

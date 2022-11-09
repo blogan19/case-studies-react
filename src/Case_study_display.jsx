@@ -10,6 +10,7 @@ import './style.css';
 import ContentHeader from './components/Content_header';
 
 
+
 const CaseStudyDisplay = () => {
   const [ caseStudy, setCase ] = useState(data);
 
