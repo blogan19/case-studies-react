@@ -2,8 +2,7 @@
   "prescribingStatus": true,
   "case_instructions": "John Smith has been admitted to the Medical Admissions Unit. Read the information provided about the patients admission to hospital before attempting the questions below",
   "patient": {
-    "firstname": "John",
-    "surname": "Smith",
+    "name": "John Smith",
     "hospitalNo": "1234567",
     "dob": "11/02/1944",
     "address": "14 Castle Street, Liverpool, L11 5AT",

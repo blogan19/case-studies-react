@@ -18,7 +18,7 @@ const PatientDetails = ({ patient, allergies }) => {
             <tr>
               <td>
                 <i className="text-muted">Name </i>
-                {patient.firstname} {patient.surname}
+                {patient.name}
               </td>
               <td>
                 <i className="text-muted">Hospital No </i>

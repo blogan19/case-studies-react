@@ -1,8 +1,6 @@
 import React, { useState } from 'react';
 import Offcanvas from 'react-bootstrap/Offcanvas';
 import Icon from './Patient_record_icon';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
 import BloodPressure from './observations_charts/Blood_pressure';
 import TempHR from './observations_charts/Temp_heartrate';
 

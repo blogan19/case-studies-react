@@ -4,6 +4,7 @@ import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col'
 import drugList from './drugList'
+import { InputGroup } from "react-bootstrap";
 
 
 const AddPrescription = ({newPrescription, closeModal}) => {
@@ -13,8 +14,6 @@ const AddPrescription = ({newPrescription, closeModal}) => {
     const [unit, setUnit] = useState("")
     const [frequency, setFrequency] = useState("")
     const [route, setRoute] = useState("")
-
-
 
     //dates   
     const defaultDate = new Date().toISOString().slice(0, 10)
@@ -41,6 +40,9 @@ const AddPrescription = ({newPrescription, closeModal}) => {
     }
     const handleRoute = (event) => {
         setRoute(event.target.value)
+    }
+    const addAdmin = () =>{
+        
     }
     const handleForm = () =>{
         let start = new Date(startDate)
@@ -84,7 +86,7 @@ const AddPrescription = ({newPrescription, closeModal}) => {
         )
     )
     
- //https://www.educative.io/blog/react-hooks-tutorial-todo-list   
+
     return(
         <>
             <Form class="was-validated" >
@@ -152,6 +154,23 @@ const AddPrescription = ({newPrescription, closeModal}) => {
                     </Form.Group>
                 </Row>
                 <hr/>
+                <p>Administrations</p>
+                <Row>
+                    <Form.Group as={Col} controlId="formStartDate">
+                        <Form.Label>Admin Date</Form.Label>
+                        <Form.Control type="date" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="formStartDate">
+                        <Form.Label>Admin Time</Form.Label>
+                        <Form.Control type="time" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
+                    </Form.Group>
+                    <Col className="my-1">
+                        <br/>
+                        <Button variant="outline-success" onClick= {() => addAdmin()}>Add</Button>
+                    </Col>
+                </Row>
+                
+                <hr/>
                 <Row>
                     <Col xs={6}>
                         <Button variant="outline-success" onClick= {() => handleForm()}>Add Prescription</Button>
@@ -160,6 +179,7 @@ const AddPrescription = ({newPrescription, closeModal}) => {
                         <Button variant="outline-danger" onClick={() => closeModal()}>Cancel</Button>
                     </Col>
                 </Row>
+                
             </Form>
             
             

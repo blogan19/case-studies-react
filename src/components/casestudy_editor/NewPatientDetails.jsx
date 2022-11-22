@@ -11,7 +11,7 @@ import PatientDetails from "../patient_records/Patient_details"
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
 
-const NewCaseForm = () => {
+const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}) => {
     const [name, setName] = useState("")
     const [age, setAge] = useState("")
     const [dob, setDob] = useState("")  
@@ -111,9 +111,11 @@ const NewCaseForm = () => {
         "address": address,
         "weight": weight,
         "height": height,
-        "gender": gender
+        "gender": gender,
     }
-    
+
+    //States for confirming completion 
+    const [continueDisabled, setContinueDisabled] = useState(true)    
     const [nameConfirm, setNameConfirm] = useState("")
     const [hospNoConfirm, setHospnoConfirm] = useState("")
     const [dobConfirm, setDobConfirm] = useState("")
@@ -125,46 +127,43 @@ const NewCaseForm = () => {
     
     //check all details have been completed and changes colours
     const checkComplete = () =>{
-        name.length > 0 ? setNameConfirm("green") : setNameConfirm("")
-        hospNo.length > 0 ? setHospnoConfirm("green") : setHospnoConfirm("")
-        dob.length > 0 ? setDobConfirm("green") : setDobConfirm("")
-        address.length > 0 ? setAddressConfirm("green") : setAddressConfirm("")
-        weight.length > 0 ? setWeightConfirm("green") : setWeightConfirm("")
-        height.length > 0 ? setHeightConfirm("green") : setHeightConfirm("")
-        gender.length > 0 ? setGenderConfirm("green") : setGenderConfirm("")
-        allergies.length > 0 ? setAllergyConfirm("green") : setAllergyConfirm("")
+        let complete = "#77DD77"
+        
+        name.length > 0 ? setNameConfirm(complete) : setNameConfirm("")
+        hospNo.length > 0 ? setHospnoConfirm(complete) : setHospnoConfirm("")
+        dob.length > 0 ? setDobConfirm(complete) : setDobConfirm("")
+        address.length > 0 ? setAddressConfirm(complete) : setAddressConfirm("")
+        weight > 10 ? setWeightConfirm(complete) : setWeightConfirm("")
+        height > 10 ? setHeightConfirm(complete) : setHeightConfirm("")
+        gender.length > 0 ? setGenderConfirm(complete) : setGenderConfirm("")
+        allergies.length > 0 ? setAllergyConfirm(complete) : setAllergyConfirm("")
 
-
+        if(nameConfirm == "#77DD77" && hospNoConfirm == "#77DD77" && dobConfirm == "#77DD77" && addressConfirm == "#77DD77" && weightConfirm == "#77DD77" && heightConfirm == "#77DD77" && genderConfirm == "#77DD77" && allergyConfirm == "#77DD77"){
+            setContinueDisabled(false)
+        }else{
+            setContinueDisabled(true)
+        }
 
     }
+
+    //Send patient to parent element and closes offcanvas
+    const savePatient = () =>{
+        patientDemographics(patient)
+        setPatientAllergies(allergies)
+        closeNewPatient()
+    }
     
+    //Check canvas each time
     useEffect(() => {
-        console.log("useeffect")
         checkComplete()
       });
 
 
     return(
-        <>
+        <> 
+        <h3>Display</h3>
         <Row>
             <PatientDetails patient={patient} allergies={allergies} />
-        </Row>
-        <Row>
-            <Col>
-                <ListGroup horizontal>
-                    <ListGroup.Item style={{backgroundColor : nameConfirm}}>Patient Name</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : hospNoConfirm}}>Hospital No</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : dobConfirm}}>DOB</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : addressConfirm}}>Address</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : weightConfirm}}>Weight</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : heightConfirm}}>Height</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : genderConfirm}}>Gender</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : allergyConfirm}}>Allergy Status</ListGroup.Item>
-                </ListGroup>
-            </Col>
-            <Col>
-                
-            </Col>
         </Row>
         <hr/>
         <Form>
@@ -259,7 +258,27 @@ const NewCaseForm = () => {
             </Row>
             <hr/>
         </Form>
-
+        <h3>Progress</h3> 
+        
+        <Row className="mb-3">
+            <Col>
+                <ListGroup horizontal>
+                    <ListGroup.Item style={{backgroundColor : nameConfirm}}>Patient Name</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : hospNoConfirm}}>Hospital No</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : dobConfirm}}>DOB</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : addressConfirm}}>Address</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : weightConfirm}}>Weight</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : heightConfirm}}>Height</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : genderConfirm}}>Gender</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : allergyConfirm}}>Allergy Status</ListGroup.Item>
+                </ListGroup>
+            </Col>            
+        </Row>
+        <Row>
+            <Col>
+                <Button variant="primary" disabled={continueDisabled} onClick={savePatient}>Save Patient</Button>
+            </Col>
+        </Row>
     
             
 
