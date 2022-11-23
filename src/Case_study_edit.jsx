@@ -39,7 +39,6 @@ const CaseStudyEdit = () => {
 
   return (
     <>
-     <NavBar/>
      <div className="container mt-3">
         <Button variant="outline-primary" onClick={() => {createNew(); setShowLoadPrevious(false)}}>New Case Study</Button>{' '}
         <Button variant="outline-primary" onClick={() => {setShowLoadPrevious(true)}}>Load Previous</Button>

@@ -4,7 +4,7 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
-const NavBar = () => {
+const NavBar = ({setCreate}) => {
     return(
         <Navbar className="blue-back">
         <Container>
@@ -12,7 +12,12 @@ const NavBar = () => {
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">
-            <Nav.Link href="/create" className="text-white">Create Case Study</Nav.Link>           
+            
+              <Nav.Link href="#" onClick={() => setCreate(false)} className="text-white">Create New Case Study</Nav.Link>           
+            
+              <Nav.Link href="#" onClick={() => setCreate(true)} className="text-white">View Case Study</Nav.Link>           
+            
+            
           </Nav>
         </Navbar.Collapse>
         </Container>

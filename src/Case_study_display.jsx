@@ -16,7 +16,6 @@ const CaseStudyDisplay = () => {
 
   return (
     <>
-      <NavBar />
       <CaseInstructions instructions={caseStudy.case_instructions} />
       <PatientDetails patient={caseStudy.patient} allergies={caseStudy.allergies} />
       <PatientRecordsContainer patient_records={caseStudy} />
