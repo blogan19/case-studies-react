@@ -25,6 +25,20 @@ const AddPrescription = ({newPrescription, closeModal}) => {
     const [stat, setStat] = useState("")
     const [note, setNotes] = useState("")
 
+    //Adding Admins
+    const [adminDate, setAdminDate] = useState("")
+    const [adminTime, setAdminTime] = useState("")
+    const [adminReason, setAdminReason] = useState("")
+    const [administrations, setAdministrations] = useState([])
+    
+    const addAdmin = () => {
+        setAdministrations(administrations.concat({
+            "adminDateTime":adminDate + " " + adminTime,
+            "administeredBy": "Nurse 1", 
+            "adminNote": adminReason}))
+    }
+
+    console.log(administrations)
     
     
     const handleDrug = (event) => {
@@ -41,9 +55,10 @@ const AddPrescription = ({newPrescription, closeModal}) => {
     const handleRoute = (event) => {
         setRoute(event.target.value)
     }
-    const addAdmin = () =>{
-        
+    const handleAdminReason = (event) => {
+        setAdminReason(event.target.value)
     }
+
     const handleForm = () =>{
         let start = new Date(startDate)
         let end = new Date(endDate)
@@ -60,9 +75,7 @@ const AddPrescription = ({newPrescription, closeModal}) => {
             "indication": indication,
             "note": note,
             "prescriber": 'Dr Test',
-            "administrations": [
-                {}
-            ]
+            "administrations": administrations
             
         }
 
@@ -85,7 +98,14 @@ const AddPrescription = ({newPrescription, closeModal}) => {
         <option value={x} key={x}>{x}</option>
         )
     )
-    
+    const nonAdminDropDown = drugList["nonAdmins"].map((x,index) => (
+        <option value={x} key={x}>{x}</option>
+        )
+    )
+    const administrationDisplay = administrations.map((x) => (
+        <p>{x["adminDateTime"]} {x["administeredBy"]} {x["adminNote"]}</p>
+
+    ))
 
     return(
         <>
@@ -158,18 +178,29 @@ const AddPrescription = ({newPrescription, closeModal}) => {
                 <Row>
                     <Form.Group as={Col} controlId="formStartDate">
                         <Form.Label>Admin Date</Form.Label>
-                        <Form.Control type="date" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
+                        <Form.Control type="date" placeholder="Start Date" onChange={(e) => setAdminDate(e.target.value)}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="formStartDate">
                         <Form.Label>Admin Time</Form.Label>
-                        <Form.Control type="time" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
+                        <Form.Control type="time" placeholder="Start Date" onChange={(e) => setAdminTime(e.target.value)}/>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="formStartDate">
+                        <Form.Label>Administered?</Form.Label>
+                        <Form.Select aria-label="Default select example" onChange={handleAdminReason}>
+                                {nonAdminDropDown}
+                        </Form.Select>
                     </Form.Group>
                     <Col className="my-1">
                         <br/>
-                        <Button variant="outline-success" onClick= {() => addAdmin()}>Add</Button>
+                        <Button variant="outline-success" onClick= {() => addAdmin()}>Add Administration</Button>
                     </Col>
                 </Row>
-                
+                <Row>
+                    <Col>
+                    {administrationDisplay}
+                    </Col>
+                </Row>
+                   
                 <hr/>
                 <Row>
                     <Col xs={6}>

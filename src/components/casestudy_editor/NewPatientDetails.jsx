@@ -156,18 +156,34 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
     //Check canvas each time
     useEffect(() => {
         checkComplete()
-      });
+    });
 
 
     return(
         <> 
+        <h3>Progress</h3> 
+        
+        <Row className="mb-3">
+            <Col>
+                <ListGroup horizontal>
+                    <ListGroup.Item style={{backgroundColor : nameConfirm}}>Patient Name</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : hospNoConfirm}}>Hospital No</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : dobConfirm}}>DOB</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : addressConfirm}}>Address</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : weightConfirm}}>Weight</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : heightConfirm}}>Height</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : genderConfirm}}>Gender</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : allergyConfirm}}>Allergy Status</ListGroup.Item>
+                </ListGroup>
+            </Col>            
+        </Row>
         <h3>Display</h3>
         <Row>
             <PatientDetails patient={patient} allergies={allergies} />
         </Row>
         <hr/>
         <Form>
-            <h3>Patient Demographics</h3>
+            <h3>Set Patient Demographics</h3>
             <Row className="mb-3">
                 <Col>
                 Patient Name
@@ -251,29 +267,24 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
             </Row>
             <Row>
                 <Col>
-                    <Button variant="outline-primary" onClick={handleAddAllergy}>Add Allergy</Button>{' '}
-                    <Button variant="outline-primary" onClick={deleteAllergyShow}>Delete Allergy</Button>
+                    {
+                        newAllergyInput.length > 0 ? (
+                            <Button variant="outline-primary" onClick={handleAddAllergy}>Add Allergy</Button>
+                        ):""
+                    }
+                    {' '}
+                    {
+                        allergies.length > 0 ? (
+                            <Button variant="outline-primary" onClick={deleteAllergyShow}>Delete Allergy</Button>
+                        ): ""
+                    }
+                    
                 </Col>
                
             </Row>
             <hr/>
         </Form>
-        <h3>Progress</h3> 
         
-        <Row className="mb-3">
-            <Col>
-                <ListGroup horizontal>
-                    <ListGroup.Item style={{backgroundColor : nameConfirm}}>Patient Name</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : hospNoConfirm}}>Hospital No</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : dobConfirm}}>DOB</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : addressConfirm}}>Address</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : weightConfirm}}>Weight</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : heightConfirm}}>Height</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : genderConfirm}}>Gender</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : allergyConfirm}}>Allergy Status</ListGroup.Item>
-                </ListGroup>
-            </Col>            
-        </Row>
         <Row>
             <Col>
                 <Button variant="primary" disabled={continueDisabled} onClick={savePatient}>Save Patient</Button>
@@ -286,7 +297,7 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
 
         <Modal show={showDel} onHide={deleteAllergyClose}>
             <Modal.Header closeButton>
-            <Modal.Title> Delete Allergy</Modal.Title>
+            <Modal.Title> Delete Allergies</Modal.Title>
             </Modal.Header>
             <Modal.Body>
             { 
