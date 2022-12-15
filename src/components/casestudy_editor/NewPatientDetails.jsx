@@ -11,13 +11,41 @@ import PatientDetails from "../patient_records/Patient_details"
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
 
-const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}) => {
+const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies, currentDemographics, currentAllergies}) => {
     const [name, setName] = useState("")
     const [age, setAge] = useState("")
     const [dob, setDob] = useState("")  
     const [weight, setWeight] = useState("")
     const [height, setHeight] = useState("")
     const [gender, setGender] = useState("")
+
+    //load previous patient 
+    const loadExistingDetails = () =>{
+        console.log(currentDemographics)
+
+        setName(currentDemographics['name'])
+        setDob(currentDemographics['dob'])
+        setAddress(currentDemographics['address'])
+
+        let wt = currentDemographics['weight'].replace('kg','')
+        setWeight(wt)
+
+        let ht = currentDemographics['height'].replace('cm','')
+        setHeight(ht)
+
+        setGender(currentDemographics['gender'])
+
+        setAllergies(currentAllergies)
+
+    }
+
+    //Load previous data n first rerender only
+    useEffect(() => {
+        if(currentDemographics.length != ""){
+            loadExistingDetails()
+        }
+    },[]);
+
 
     const randomName = (gender) => {       
         let firstname = data["names"][gender][Math.floor(Math.random() * data["names"][gender].length)]  
@@ -153,42 +181,23 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
         closeNewPatient()
     }
     
-    //Check canvas each time
+    //Check for completion each render each time
     useEffect(() => {
         checkComplete()
     });
+    
+    
 
 
     return(
         <> 
-        <h3>Progress</h3> 
-        
-        <Row className="mb-3">
-            <Col>
-                <ListGroup horizontal>
-                    <ListGroup.Item style={{backgroundColor : nameConfirm}}>Patient Name</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : hospNoConfirm}}>Hospital No</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : dobConfirm}}>DOB</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : addressConfirm}}>Address</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : weightConfirm}}>Weight</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : heightConfirm}}>Height</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : genderConfirm}}>Gender</ListGroup.Item>
-                    <ListGroup.Item style={{backgroundColor : allergyConfirm}}>Allergy Status</ListGroup.Item>
-                </ListGroup>
-            </Col>            
-        </Row>
-        <h3>Display</h3>
-        <Row>
-            <PatientDetails patient={patient} allergies={allergies} />
-        </Row>
-        <hr/>
         <Form>
             <h3>Set Patient Demographics</h3>
             <Row className="mb-3">
                 <Col>
                 Patient Name
                     <InputGroup>
-                        <Form.Control aria-label="Patients name" value={name}  onChange={(e) => setName(e.target.value)}/>
+                        <Form.Control aria-label="Patients name" defaultvalue={name} value={name}  onChange={(e) => setName(e.target.value)}/>
                         <Button variant="outline-secondary" onClick= {() => randomName("male_names")}>Random Male</Button>
                         <Button variant="outline-secondary" onClick= {() => randomName("female_names")}>Random Female</Button>
                     </InputGroup>
@@ -201,18 +210,18 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
                 </Form.Group> 
                 <Form.Group as={Col} controlId="formBirthDate">
                     <Form.Label>Age <span>{age}</span></Form.Label>
-                    <Form.Range value={age} onChange={e => birthdate(e.target.value)}/>
+                    <Form.Range  value={age} onChange={e => birthdate(e.target.value)}/>
                 </Form.Group>
                 <Form.Group as={Col} controlId="formHospitalno">
                     <Form.Label>Date of Birth</Form.Label>
-                    <Form.Control type="text" value={dob}/>
+                    <Form.Control type="text" defaultvalue={dob} value={dob}/>
                 </Form.Group> 
             </Row>
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formAddress">
                     <Form.Label>Address</Form.Label>
                     <InputGroup>
-                        <Form.Control type="text" onChange={(e) => setAddress(e.target.value)} value={address}/>
+                        <Form.Control type="text" onChange={(e) => setAddress(e.target.value)} defaultvalue={address} value={address}/>
                         <Button variant="outline-secondary" onClick= {() => randomAddress()}>Random Address</Button>
                     </InputGroup>
                 </Form.Group>
@@ -221,14 +230,14 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
                 <Form.Group as={Col} controlId="formWeight">
                     <Form.Label>Weight</Form.Label>
                     <InputGroup>
-                        <Form.Control type="text" onChange={(e) => setWeight(e.target.value)} value={weight}/>
+                        <Form.Control type="text" onChange={(e) => setWeight(e.target.value)} defaultvalue={weight} value={weight}/>
                         <Button variant="secondary" disabled>kg</Button>
                     </InputGroup>
                 </Form.Group>
                 <Form.Group as={Col} controlId="formWeight">
                     <Form.Label>Height</Form.Label>
                     <InputGroup>
-                        <Form.Control type="text" onChange={(e) => setHeight(e.target.value)} value={height}/>
+                        <Form.Control type="text" onChange={(e) => setHeight(e.target.value)} defaultvalue={height} value={height}/>
                         <Button variant="secondary" disabled>cm</Button>
                     </InputGroup>
                 </Form.Group>
@@ -236,7 +245,7 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
                 <Form.Group as={Col}>
                     <Form.Label>Gender</Form.Label>
                         <InputGroup>
-                            <ToggleButtonGroup type="radio" name="genderOptions" value={gender} onChange={updateGender}>
+                            <ToggleButtonGroup type="radio" name="genderOptions" value={gender} defaultvalue={gender} onChange={updateGender}>
                                 <ToggleButton id="gender1" value={"Male"} variant="outline-primary">
                                     Male
                                 </ToggleButton>
@@ -284,14 +293,33 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies}
             </Row>
             <hr/>
         </Form>
+        <hr/>
+        <h3>Progress</h3> 
         
+        <Row className="mb-3">
+            <Col>
+                <ListGroup horizontal>
+                    <ListGroup.Item style={{backgroundColor : nameConfirm}}>Patient Name</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : hospNoConfirm}}>Hospital No</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : dobConfirm}}>DOB</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : addressConfirm}}>Address</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : weightConfirm}}>Weight</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : heightConfirm}}>Height</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : genderConfirm}}>Gender</ListGroup.Item>
+                    <ListGroup.Item style={{backgroundColor : allergyConfirm}}>Allergy Status</ListGroup.Item>
+                </ListGroup>
+            </Col>            
+        </Row>
+        <h3>Display</h3>
+        <Row>
+            <PatientDetails patient={patient} allergies={allergies} />
+        </Row>
+        <hr/>
         <Row>
             <Col>
                 <Button variant="primary" disabled={continueDisabled} onClick={savePatient}>Save Patient</Button>
             </Col>
         </Row>
-    
-            
 
 
 

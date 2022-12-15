@@ -1,4 +1,4 @@
-import React, { useState }  from "react";
+import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
@@ -7,13 +7,14 @@ import drugList from './drugList'
 import { InputGroup } from "react-bootstrap";
 
 
-const AddPrescription = ({newPrescription, closeModal}) => {
+const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
     
     const [drug, setDrug] = useState("")
     const [dose, setDose] = useState("")
     const [unit, setUnit] = useState("")
     const [frequency, setFrequency] = useState("")
     const [route, setRoute] = useState("")
+    
 
     //dates   
     const defaultDate = new Date().toISOString().slice(0, 10)
@@ -22,7 +23,7 @@ const AddPrescription = ({newPrescription, closeModal}) => {
 
 
     const [indication, setIndication] = useState("")
-    const [stat, setStat] = useState("")
+    const [stat, setStat] = useState(false)
     const [note, setNotes] = useState("")
 
     //Adding Admins
@@ -30,6 +31,60 @@ const AddPrescription = ({newPrescription, closeModal}) => {
     const [adminTime, setAdminTime] = useState("")
     const [adminReason, setAdminReason] = useState("")
     const [administrations, setAdministrations] = useState([])
+
+    // {
+    //     "drugindex": "0",
+    //     "drug": "apixaban",
+    //     "dose": "20mg",
+    //     "unit": "mg",
+    //     "frequency": "",
+    //     "route": "",
+    //     "form": "tablets",
+    //     "stat": "",
+    //     "start_date": "19/12/2022",
+    //     "end_date": "Invalid Date",
+    //     "indication": "",
+    //     "note": "",
+    //     "prescriber": "Dr Test",
+    //     "administrations": []
+    // }
+    //Load prescription to Edit
+    const loadEditPrescription = () => {
+        setDrug(editPrescription['drugindex'])
+
+        let dose = editPrescription['dose']
+        dose = dose.replace(editPrescription["unit"],"")
+        setDose(dose)
+
+        setUnit(editPrescription["unit"])
+        setFrequency(editPrescription["frequency"])
+        setRoute(editPrescription["route"])
+
+        let start_date = editPrescription["start_date"]
+        let startSplit = start_date.split('/');
+        start_date = `${startSplit[2]}-${startSplit[1]-1}-${startSplit[0]}`
+        setStartDate(start_date)
+
+        let end_date = editPrescription["end_date"]
+        let endSplit = end_date.split('/')
+        end_date = `${endSplit[2]}-${endSplit[1]}-${endSplit[0]}`
+        setEndDate(end_date)
+
+        setIndication(editPrescription['indication'])
+        setNotes(editPrescription['note'])
+        setStat(editPrescription['stat'])
+        console.log(editPrescription)
+        console.log(editPrescription['stat'])
+        console.log(stat)
+    } 
+    //Load previous data on first rerender only
+    useEffect(() => {
+        if(editPrescription != ""){
+            loadEditPrescription()
+        }
+    },[]);
+
+    
     
     const addAdmin = () => {
         setAdministrations(administrations.concat({
@@ -37,9 +92,7 @@ const AddPrescription = ({newPrescription, closeModal}) => {
             "administeredBy": "Nurse 1", 
             "adminNote": adminReason}))
     }
-
-    console.log(administrations)
-    
+   
     
     const handleDrug = (event) => {
          //newPrescription(testScript);
@@ -64,8 +117,10 @@ const AddPrescription = ({newPrescription, closeModal}) => {
         let end = new Date(endDate)
         
         let script = {
+            "drugindex": drug,
             "drug" : drugList["drugs"][drug][0],
             "dose": `${dose}${drugList["drugs"][drug][2]}`,
+            "unit": drugList["drugs"][drug][2],
             "frequency": frequency, 
             "route": route,
             "form": drugList["drugs"][drug][3],
@@ -84,7 +139,7 @@ const AddPrescription = ({newPrescription, closeModal}) => {
     }
 
     
-    const drugDropdown = drugList["drugs"].map((x, index) => (
+    const drugDropdown = drugList["drugs"].map((x, index) => ( 
             <option value={index} key={index}>{x[0]} {x[1]} {x[3]}</option>
         )
     )
@@ -113,8 +168,8 @@ const AddPrescription = ({newPrescription, closeModal}) => {
                 <Row className="mb-3"> 
                     <Form.Group as={Col} controlId="formDrugName">
                         <Form.Label>Drug Name</Form.Label>
-                        <Form.Select  onChange={handleDrug} >
-                            <option selected disabled>Select Drug</option>
+                        <Form.Select  onChange={handleDrug} value={drug}>
+                            <option selected>Select Drug</option>
                             {drugDropdown}
                         </Form.Select>
                         
@@ -133,14 +188,14 @@ const AddPrescription = ({newPrescription, closeModal}) => {
                 <Row className="mb-3">
                 <Form.Group as={Col} controlId="formFrequency">
                         <Form.Label>Frequency</Form.Label>
-                        <Form.Select aria-label="Default select example" onChange={handleFreq}>
+                        <Form.Select aria-label="Default select example" value={frequency} onChange={handleFreq}>
                             <option selected disabled>Select Frequency</option>
                             {frequencyDropDown}
                         </Form.Select>
                     </Form.Group>
                     <Form.Group as={Col} controlId="formRoute">
                         <Form.Label>Route</Form.Label>
-                        <Form.Select aria-label="Default select example" onChange={handleRoute}>
+                        <Form.Select aria-label="Default select example" value={route} onChange={handleRoute}>
                             <option selected disabled>Select Route</option>
                             {routeDropdown}
                         </Form.Select>
@@ -149,28 +204,28 @@ const AddPrescription = ({newPrescription, closeModal}) => {
                 <Row className="mb-3"> 
                     <Form.Group as={Col} controlId="formStartDate">
                         <Form.Label>Start Date</Form.Label>
-                        <Form.Control required defaultValue={defaultDate} type="date" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
+                        <Form.Control required value={startDate} type="date" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="formEndDate">
                         <Form.Label>End Date</Form.Label>
-                        <Form.Control  type="date" placeholder="End Date" onChange={(e) => setEndDate(e.target.value)}/>
+                        <Form.Control  value={endDate} type="date" placeholder="End Date" onChange={(e) => setEndDate(e.target.value)}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formIndication">
                         <Form.Label>Indication</Form.Label>
-                        <Form.Control type="text" placeholder="Indication" onChange={(e) => setIndication(e.target.value)}/>
+                        <Form.Control type="text" value={indication} placeholder="Indication" onChange={(e) => setIndication(e.target.value)}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formNote">
                         <Form.Label>Note</Form.Label>
-                        <Form.Control as="textarea" placeholder="Additional Notes" onChange={(e) => setNotes(e.target.value)} />
+                        <Form.Control as="textarea" value={note} placeholder="Additional Notes" onChange={(e) => setNotes(e.target.value)} />
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="statCheckbox">
-                        <Form.Check type="checkbox" label="Stat" onChange={(e) => setStat(e.target.checked)}/>
+                        <Form.Check type="checkbox" checked={stat} label="Stat" onChange={(e) => setStat(e.target.checked)}/>
                     </Form.Group>
                 </Row>
                 <hr/>

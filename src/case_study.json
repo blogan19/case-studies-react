@@ -1,4 +1,5 @@
 {
+  "case_study_name": "test case study",
   "prescribingStatus": true,
   "case_instructions": "John Smith has been admitted to the Medical Admissions Unit. Read the information provided about the patients admission to hospital before attempting the questions below",
   "patient": {
@@ -195,6 +196,7 @@
       "prescriber": "",
       "administrations": []
     },{
+      "drugindex":1,
       "drug": "Bendroflumethiazide",
       "dose": "2.5mg",
       "frequency": "Once in the morning",
