@@ -11,6 +11,7 @@ import Alert from 'react-bootstrap/Alert';
 import Prescription from './components/prescriptions/Prescriptions';
 import AddPrescription from './components/prescriptions/addPrescription';
 import AddCaseNotes from './components/casestudy_editor/NewCaseNotes';
+import AddMicrobiology from './components/casestudy_editor/NewMicrobiology'
 import AddBiochemistry from './components/casestudy_editor/NewBiochemistry';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
@@ -37,6 +38,7 @@ const CaseStudyEdit = () => {
   //Case Study Name 
   const [showCaseStudyName, setShowCaseStudyName] = useState(false)
   const [caseStudyName, setCaseStudyName] = useState("")
+  const [caseInstructions, setCaseInstructions] = useState("")
 
   //handle patient details
   const createPatientDetails = () => setShow(true)
@@ -76,6 +78,11 @@ const CaseStudyEdit = () => {
   const [caseNotes, setCaseNotes] = useState("")
   console.log(caseNotes.length)
 
+  //Handle Micro
+  const [microbiologyShow, setMicrobiologyShow] = useState(false)
+  const [microbiology, setMicrobiology] = useState("")
+  console.log(microbiology)
+
   //Handle Biochemistry 
   const [biochemistryShow, setBiochemistryShow] = useState(false)
   const [biochemistry, setBiochemistry] = useState("")
@@ -83,16 +90,20 @@ const CaseStudyEdit = () => {
   //Check Progress
   
   const [caseStudyNameComplete, setCaseStudyNameComplete] = useState(0)
+  const [caseaseStudyInstructionsComplete, setCaseStudyInstructionsComplete] = useState(0)
   const [demographicsComplete, setDemographicsComplete] = useState(0)
   const [prescriptionsComplete, setPrescriptionsComplete] = useState(0)
   const [casenotesComplete, setCaseNotesComplete] = useState(0)
+  const [microbiologyComplete, setMicrobiologyComplete] = useState(0)
   const [biochemistryComplete, setBiochemistryComplete] = useState(0)
   const [observationsComplete, setObservationsComplete] = useState(0)
   
   const [caseStudyNameColour, setCaseStudyNameColour] = useState('light')
+  const [caseStudyInstructionsColour, setCaseStudyInstructionsColour] = useState('light')
   const [demographicsColour, setDemographicsColour] = useState('light')
   const [prescriptionsColour, setPrescriptionsColour] = useState('light')
   const [casenotesColour, setCaseNotesColour] = useState('light')
+  const [microbiologyColour, setMicrobiologyColour] = useState('light')
   const [biochemistryColour, setBiochemistryColour] = useState('light')
   const [observationsColour, setObservationsColour] = useState('light')
   const [totalComplete, setTotalComplete] = useState(0)
@@ -102,16 +113,21 @@ const CaseStudyEdit = () => {
   const loadPrevious = () =>{
       let previousCase = data
       setCaseStudyName(data["case_study_name"])
+      setCaseInstructions(data["case_instructions"])
       setPatientDemographics(data["patient"])
       setPatientAllergies(data["allergies"])
       setPrescriptions(data["prescriptionList"])
       setCaseNotes(data["case_notes"])
+      setMicrobiology(data["microbiology"])
 
   }
   const checkProgress = () => {
     console.log('checking progress')
     caseStudyName != "" ? setCaseStudyNameComplete(1): setCaseStudyNameComplete(0)
-    caseStudyNameComplete === 1 ? setCaseStudyNameColour("success") : setCaseStudyNameColour('light')
+    caseStudyNameComplete === 1 ? setCaseStudyNameColour('success') : setCaseStudyNameColour('light')
+
+    caseInstructions != "" ? setCaseStudyInstructionsComplete(1) : setCaseStudyInstructionsComplete(0)
+    caseaseStudyInstructionsComplete === 1 ? setCaseStudyInstructionsColour('success'): setCaseStudyInstructionsColour('light')
 
     patientDemographics != "" ? setDemographicsComplete(1) : setDemographicsComplete(0)
     demographicsComplete === 1 ? setDemographicsColour('success') :  setDemographicsColour('light')
@@ -122,6 +138,9 @@ const CaseStudyEdit = () => {
     caseNotes != "" ? setCaseNotesComplete(1): setCaseNotesComplete(0) 
     casenotesComplete === 1 ? setCaseNotesColour('success') : setCaseNotesColour('light')
 
+    microbiology != "" ? setMicrobiologyComplete(1) : setMicrobiologyComplete(0)
+    microbiologyComplete === 1 ? setMicrobiologyColour('success') : setMicrobiologyColour('light')
+
     biochemistry != "" ? setBiochemistryComplete(1) : setBiochemistryComplete(0)
     biochemistryComplete === 1 ? setBiochemistryColour(1) : setBiochemistryColour(0)
 
@@ -129,7 +148,7 @@ const CaseStudyEdit = () => {
 
     console.log(caseNotes)
 
-    setTotalComplete(Math.round((caseStudyNameComplete + demographicsComplete + prescriptionsComplete + casenotesComplete + biochemistryComplete + observationsComplete)/6*100))
+    setTotalComplete(Math.round((caseStudyNameComplete + demographicsComplete + prescriptionsComplete + casenotesComplete + microbiologyComplete + biochemistryComplete + observationsComplete)/7*100))
 
 
   }
@@ -171,9 +190,11 @@ const CaseStudyEdit = () => {
                   <Col>
                     <ListGroup variant="flush" className="mt-3">
                       <ListGroup.Item action variant={caseStudyNameColour}>Case Study Name</ListGroup.Item>
+                      <ListGroup.Item action variant={caseStudyInstructionsColour}>Case Study Instructions</ListGroup.Item>
                       <ListGroup.Item action variant={demographicsColour}>Patient Demographics</ListGroup.Item>
                       <ListGroup.Item action variant={prescriptionsColour}>Prescriptions</ListGroup.Item>
                       <ListGroup.Item action variant={casenotesColour}>Case Notes</ListGroup.Item>
+                      <ListGroup.Item action variant={microbiologyColour}>Microbiology</ListGroup.Item>
                       <ListGroup.Item action variant={biochemistryColour}>Biochemistry</ListGroup.Item>
                       <ListGroup.Item action variant={observationsColour}>Observations</ListGroup.Item>
                       <ListGroup.Item action variant={observationsColour}>Questions</ListGroup.Item>
@@ -190,7 +211,6 @@ const CaseStudyEdit = () => {
                     <Form>
                       <Form.Check type="switch" id="prescribing-switch" label="Allow User to prescribe?" />
                     </Form>
-                    
                   </Col>      
                 </Card.Body>
               </Card>
@@ -205,8 +225,14 @@ const CaseStudyEdit = () => {
           <ContentHeader title="Case Study Name" />
             <Form className="mt-3"> 
                     <Form.Group as={Col} controlId="formCaseStudyName">
+                        <Form.Label><strong>Case Study Name</strong></Form.Label>
                         <Form.Control placeholder="Enter Case Study Name" value={caseStudyName} type="text" onChange={(e) => setCaseStudyName(e.target.value)} />
                     </Form.Group> 
+                    <Form.Group as={Col} controlId="formCaseInstructions" className="mt-3">
+                        <Form.Label><strong>Case Instructions</strong></Form.Label>
+                        <p>Use this option to detail any specific instructions the user may need to complete the case study</p>
+                        <Form.Control as="textarea" value={caseInstructions} placeholder="Case Instructions" onChange={(e) => setCaseInstructions(e.target.value)} />
+                    </Form.Group>
             </Form>
           </Container>
         </>):""
@@ -214,13 +240,16 @@ const CaseStudyEdit = () => {
       }
       
 
-      { caseStudyName.length > 0 ? 
+      { caseStudyName.length > 0 && caseInstructions.length> 0 ? 
         (
           <>
             
             <Container className="mt-3">
             <ContentHeader title="Patient Demographics" />
-              <PatientDetails patient={patientDemographics} allergies={allergies} />       
+              {patientDemographics != "" ? (
+                  <PatientDetails patient={patientDemographics} allergies={allergies} />  
+              ):("")}
+                   
             </Container>
             <Container className="mt-3">
               
@@ -260,7 +289,8 @@ const CaseStudyEdit = () => {
           <ContentHeader title="Patient Episode Details" />
           <Container className='mb-3'>
             <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setShow(true)}}>Add Case Notes</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true);setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
           </Container>
           </>
           ):""
@@ -277,8 +307,8 @@ const CaseStudyEdit = () => {
                   ):""
                 }
                 {
-                  biochemistryComplete == 1 ? (
-                    <Laboratory biochemistry={""} microbiology={""}/> 
+                  biochemistryComplete == 1 || microbiologyComplete == 1 ? (
+                    <Laboratory biochemistry={""} microbiology={microbiology}/> 
                   ): ""
                 }
                 {
@@ -317,8 +347,8 @@ const CaseStudyEdit = () => {
             ):""
           }
           {
-            biochemistryShow === true ? (
-              <AddBiochemistry closeModal={handleClose}/>
+            microbiologyShow === true ? (
+              <AddMicrobiology setMicrobiology={setMicrobiology} closeModal={handleClose} previousResult={microbiology}/>
             ):""
           }
           

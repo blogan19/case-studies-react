@@ -112,6 +112,12 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
         setAdminReason(event.target.value)
     }
 
+    const deleteAdmin = (index) => {
+        let adminList = administrations
+        adminList.splice(index,1)
+        setAdministrations(adminList)
+    }
+
     const handleForm = () =>{
         let start = new Date(startDate)
         let end = new Date(endDate)
@@ -157,11 +163,12 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
         <option value={x} key={x}>{x}</option>
         )
     )
-    const administrationDisplay = administrations.map((x) => (
-        <p>{x["adminDateTime"]} {x["administeredBy"]} {x["adminNote"]}</p>
+    const administrationDisplay = administrations.map((x, index) => (
+        <p>{x["adminDateTime"]} {x["administeredBy"]} {x["adminNote"]} <a href='#' onClick={() => {deleteAdmin(index)}}> delete</a></p>
 
     ))
 
+  
     return(
         <>
             <Form class="was-validated" >
@@ -204,7 +211,7 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
                 <Row className="mb-3"> 
                     <Form.Group as={Col} controlId="formStartDate">
                         <Form.Label>Start Date</Form.Label>
-                        <Form.Control required value={startDate} type="date" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
+                        <Form.Control required value={startDate} defaultValue={defaultDate} type="date" placeholder="Start Date" onChange={(e) => setStartDate(e.target.value)}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="formEndDate">
                         <Form.Label>End Date</Form.Label>
@@ -250,7 +257,7 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
                         <Button variant="outline-success" onClick= {() => addAdmin()}>Add Administration</Button>
                     </Col>
                 </Row>
-                <Row>
+                <Row className="mt-3">
                     <Col>
                     {administrationDisplay}
                     </Col>

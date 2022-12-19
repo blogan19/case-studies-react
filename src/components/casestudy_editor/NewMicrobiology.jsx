@@ -10,10 +10,10 @@ import data from './randomFields'
 import PatientDetails from "../patient_records/Patient_details"
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
+import MicrobiologyTable from "../patient_records/patient_records_tables/MicrobiologyTable";
 
 
-const AddBiochemistry = ({closeModal}) => {
-    //https://esneftpathology.nhs.uk/wp-content/uploads/2021/06/Clinical-BioChemistry-Pathology-Handbook.pdf
+const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
     
     const [microDate, setMicroDate] = useState("")
     const [microTime, setMicroTime] = useState("")
@@ -27,7 +27,7 @@ const AddBiochemistry = ({closeModal}) => {
     const [drug, setDrug]  = useState("")
     const [sensitivity, setSensitivity] = useState("")
 
-    const [sample, setSample] = useState()
+    const [samples, setSamples] = useState([])
 
     const addSensitivity = () => {
 
@@ -47,34 +47,28 @@ const AddBiochemistry = ({closeModal}) => {
             setSensitivities(sensitivities.filter(s => s !== x))
         }}> Delete</a></ListGroup.Item>
     )) 
-    //onClick={() => {deleteSensitivity(index)}}
-    const saveMicro = () => {
+
+    const saveSample = () => {
         let microResult = {
             "datetime": microDate + " " + microTime,
             "sample_type": sampleType,
             "growth": growth,
-            "sensitivites": sensitivities,
+            "sensitivities": sensitivities,
             "notes":""
         }
-        setSample(microResult)
+        let sampleList = samples 
+        sampleList.push(microResult)
+        setSamples(sampleList)
+       // setMicrobiology(samples)
     }
-    const saveSample = () => {
-        
-    }
-    useEffect(() => {
-        saveMicro()
-    });
+
+    
+   
 
 
-    //https://esneftpathology.nhs.uk/wp-content/uploads/2021/06/Clinical-BioChemistry-Pathology-Handbook.pdf
+    
 
-    // {
-    //     "datetime":"04/07/2022 08:00",
-    //     "sample_type": "MSSU",
-    //     "growth":"E. coli",
-    //     "sensitivities":[["Amoxicillin","S"],["Cefaclor","R"],["Nitrofurantoin","S"],["Gentamicin","S"],["Trimethoprim","S"]],
-    //     "notes": "S = Sensitive  R = Resistant"
-    //   }]
+  
     return(
         <Form> 
             <h1>Microbiology Results</h1> 
@@ -138,17 +132,18 @@ const AddBiochemistry = ({closeModal}) => {
                 </ListGroup>
             </Row>
             <Form.Group as={Col} controlId="sampleType">
-                <Button variant="success"className="mt-4"  onClick={saveSample}>Save</Button>
+                <Button variant="success" className="mt-4"  onClick={saveSample}>Save</Button>
             </Form.Group>      
 
-            {/* <Row >
-                <Col>
-                    <Button variant="primary">Save Case Notes</Button>
-                </Col>
-            </Row> */}
+            {
+                samples.map((x) => (
+                    <MicrobiologyTable results={x}/>
+                ))
+
+            }
 
         </Form>
     
     )
 }
-export default AddBiochemistry
+export default AddMicrobiology

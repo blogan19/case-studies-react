@@ -283,6 +283,12 @@
       "growth":"E. coli",
       "sensitivities":[["Amoxicillin","S"],["Cefaclor","R"],["Nitrofurantoin","S"],["Gentamicin","S"],["Trimethoprim","S"]],
       "notes": "S = Sensitive  R = Resistant"
+    },{
+      "datetime":"04/07/2022 08:00",
+      "sample_type": "MSSU",
+      "growth":"E. coli",
+      "sensitivities":[["Amoxicillin","S"],["Cefaclor","R"],["Nitrofurantoin","S"],["Gentamicin","S"],["Trimethoprim","S"]],
+      "notes": "S = Sensitive  R = Resistant"
     }]
   ,
   "biochemistry": {

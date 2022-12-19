@@ -96,9 +96,7 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
     const [newAllergyInput, setAllergyInput] = useState("")
     const [newReactionInput, setReactionInput] = useState("")
 
-    const [showDel, setDelete] = useState(false);
-    const deleteAllergyClose = () => setDelete(false);
-    const deleteAllergyShow = () => setDelete(true);
+   
   
 
     const handleAddAllergy = () => {
@@ -128,9 +126,8 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
         let allergyList = allergies
         allergyList.splice(allergy,1)
         setAllergies(allergyList)
-
+        checkComplete()
     }
-
 
     let patient = { 
         "name": name,
@@ -260,18 +257,16 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
             <h3>Allergies</h3>
             <Row className="mb-3">
                 <Col>
-                    <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"NKDA","reaction":""}])}>NKDA</Button>{' '}
-                    <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"Unconfirmed Allergy Status","reaction":""}])}>Unconfirmed Allergies</Button>{' '}
+                    <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"NKDA","reaction":""}])}>Set to NKDA</Button>{' '}
+                    <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"Unconfirmed Allergy Status","reaction":""}])}>Set to Unconfirmed Allergies</Button>{' '}
                 </Col>
             </Row>
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formAllergy">
-                        <Form.Label>Allergy</Form.Label>
-                        <Form.Control type="text" value={newAllergyInput} onChange={(e) => setAllergyInput(e.target.value)}/>           
+                        <Form.Control type="text" placeholder="Allergen" value={newAllergyInput} onChange={(e) => setAllergyInput(e.target.value)}/>           
                 </Form.Group>
                 <Form.Group as={Col} controlId="formAllergyReaction">
-                    <Form.Label>Reaction</Form.Label>
-                    <Form.Control type="text" value={newReactionInput} onChange={(e) => setReactionInput(e.target.value)}/>                     
+                    <Form.Control type="text" placeholder="Reaction" value={newReactionInput} onChange={(e) => setReactionInput(e.target.value)}/>                     
                 </Form.Group>
             </Row>
             <Row>
@@ -283,9 +278,12 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
                     }
                     {' '}
                     {
-                        allergies.length > 0 ? (
-                            <Button variant="outline-primary" onClick={deleteAllergyShow}>Delete Allergy</Button>
-                        ): ""
+                     
+                        allergies.map(((allergy, index) => (
+                            <p>
+                                {allergy.drug} {allergy.reaction} <a href='#' onClick={() => {deleteAllergy(index)}}> delete</a>
+                            </p>
+                        )))   
                     }
                     
                 </Col>
@@ -321,28 +319,6 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
             </Col>
         </Row>
 
-
-
-        <Modal show={showDel} onHide={deleteAllergyClose}>
-            <Modal.Header closeButton>
-            <Modal.Title> Delete Allergies</Modal.Title>
-            </Modal.Header>
-            <Modal.Body>
-            { 
-                allergies.map(((allergy, index) => (
-                    <p>
-                        {allergy.drug} {allergy.reaction} <a href='#' onClick={() => {deleteAllergy(index);deleteAllergyClose()}}> delete</a>
-                    </p>
-                )))           
-            }
-
-            </Modal.Body>
-            <Modal.Footer>
-                <Button variant="secondary" onClick={deleteAllergyClose}>
-                    Close
-                </Button>
-            </Modal.Footer>
-        </Modal>
         </>
     
     )
