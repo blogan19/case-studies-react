@@ -4,6 +4,7 @@ import Container from 'react-bootstrap/Container';
 
 const MicrobiologyTable = (props) => {
     const results = props.results
+    console.log(props)
     return(
         <Container>
             <Table className='tbl-notes container-shadow text-break'>

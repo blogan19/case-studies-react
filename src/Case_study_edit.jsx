@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import NavBar from './components/NavBar'
 import Button from 'react-bootstrap/Button';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Offcanvas from 'react-bootstrap/Offcanvas';
@@ -7,7 +6,6 @@ import NewCaseForm from './components/casestudy_editor/NewPatientDetails';
 import './style.css';
 import PatientDetails from './components/patient_records/Patient_details';
 import { ButtonGroup, Container } from 'react-bootstrap';
-import Alert from 'react-bootstrap/Alert';
 import Prescription from './components/prescriptions/Prescriptions';
 import AddPrescription from './components/prescriptions/addPrescription';
 import AddCaseNotes from './components/casestudy_editor/NewCaseNotes';
