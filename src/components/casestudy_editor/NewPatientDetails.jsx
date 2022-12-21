@@ -95,10 +95,7 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
     const [allergies, setAllergies] = useState([])
     const [newAllergyInput, setAllergyInput] = useState("")
     const [newReactionInput, setReactionInput] = useState("")
-
-   
-  
-
+    
     const handleAddAllergy = () => {
         let newAllergy =  {
             "drug":newAllergyInput, 

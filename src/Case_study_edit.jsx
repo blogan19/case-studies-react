@@ -286,9 +286,9 @@ const CaseStudyEdit = () => {
           <hr/>
           <ContentHeader title="Patient Episode Details" />
           <Container className='mb-3'>
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setShow(true)}}>Add Case Notes</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true);setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setMicrobiologyShow(false); setShow(true)}}>Add Case Notes</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true); setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
           </Container>
           </>
           ):""
@@ -330,6 +330,8 @@ const CaseStudyEdit = () => {
         </Offcanvas.Header>
         <Offcanvas.Body>
           {
+            //remove all this for a switch case 
+
             createPatientDemographics === true ? (
               <NewCaseForm closeNewPatient={handleClose} patientDemographics={setPatientDemographics} currentDemographics={patientDemographics}  setPatientAllergies={setPatientAllergies} currentAllergies={allergies} />
             ):""
@@ -347,6 +349,11 @@ const CaseStudyEdit = () => {
           {
             microbiologyShow === true ? (
               <AddMicrobiology setMicrobiology={setMicrobiology} closeModal={handleClose} previousResult={microbiology}/>
+            ):""
+          }
+          {
+            biochemistryShow === true ? (
+              <AddBiochemistry setBiochemistry={setBiochemistry} closeModal={handleClose} previousResult={biochemistry}/>
             ):""
           }
           
