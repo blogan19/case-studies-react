@@ -1,0 +1,90 @@
+{
+    "biochemistryList": {
+        "Potassium":{
+            "name": "Potassium",
+            "category": "UE",
+            "range": "3.5-5.3", 
+            "unit": "mmol/L"
+        },
+        "Sodium":{
+            "name": "Sodium",
+            "category": "UE",
+            "range": "133–146", 
+            "unit": "mmol/L"
+        },
+        "Urea":{
+            "name": "Urea",
+            "category": "UE",
+            "range": "2.5-7.8", 
+            "unit": "mmol/L"
+        },
+        "Bicarbonate":{
+            "name": "Bicarbonate",
+            "category": "UE",
+            "range": "22-99", 
+            "unit": "mmol/L"
+        },
+        "Chloride":{
+            "name": "Chloride",
+            "category": "UE",
+            "range": "95–108", 
+            "unit": "mmol/L"
+        },
+        "Magnesium":{
+            "name": "Magnesium",
+            "category": "UE",
+            "range": "0.7–1.0", 
+            "unit": "mmol/L"
+        },
+        "Phosphate":{
+            "name": "Phosphate",
+            "category": "UE",
+            "range": "0.8-1.5", 
+            "unit": "mmol/L"
+        },
+        "Haemoglobin":{
+            "name": "Haemoglobin",
+            "category": "FBC",
+            "range": "115-165", 
+            "unit": "g/L"
+        },
+        "Neutrophils":{
+            "name": "Neutrophils",
+            "category": "WCC",
+            "range": "1.8-7.5", 
+            "unit": "x 10^9"
+        },
+        "Lymphocytes":{
+            "name": "Lymphocytes",
+            "category": "WCC",
+            "range": "1.0-4.0", 
+            "unit": "x 10^9"
+        },
+        "Monocytes":{
+            "name": "Monocytes",
+            "category": "WCC",
+            "range": "0.2-0.8", 
+            "unit": "x 10^9"
+        },
+        "Eosinophils":{
+            "name": "Eosinophils",
+            "category": "WCC",
+            "range": "0.1-0.4", 
+            "unit": "x 10^9"
+        },
+        "Basophils":{
+            "name": "Basophils",
+            "category": "WCC",
+            "range": "0.02-0.10", 
+            "unit": "x 10^9"
+        },
+        "WCC":{
+            "name": "WCC",
+            "category": "WCC",
+            "range": "3.6-11", 
+            "unit": "x 10^9"
+        }
+        
+    }
+}
+

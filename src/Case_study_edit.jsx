@@ -43,8 +43,6 @@ const CaseStudyEdit = () => {
   const [createPatientDemographics, setCreatePatientDemographics] = useState(true)
   const [patientDemographics, setPatientDemographics] = useState("")
   const [allergies, setPatientAllergies] = useState("")
-  
-  console.log(patientDemographics)
 
   const [ patientComplete, setPatientComplete ] = useState(false)
 
@@ -74,12 +72,10 @@ const CaseStudyEdit = () => {
   //handle case notes: 
   const [caseNotesShow, setCreateCaseNotes] = useState(false)
   const [caseNotes, setCaseNotes] = useState("")
-  console.log(caseNotes.length)
 
   //Handle Micro
   const [microbiologyShow, setMicrobiologyShow] = useState(false)
   const [microbiology, setMicrobiology] = useState("")
-  console.log(microbiology)
 
   //Handle Biochemistry 
   const [biochemistryShow, setBiochemistryShow] = useState(false)
@@ -117,10 +113,10 @@ const CaseStudyEdit = () => {
       setPrescriptions(data["prescriptionList"])
       setCaseNotes(data["case_notes"])
       setMicrobiology(data["microbiology"])
+      setBiochemistry(data["biochemistry"])
 
   }
   const checkProgress = () => {
-    console.log('checking progress')
     caseStudyName != "" ? setCaseStudyNameComplete(1): setCaseStudyNameComplete(0)
     caseStudyNameComplete === 1 ? setCaseStudyNameColour('success') : setCaseStudyNameColour('light')
 
@@ -141,10 +137,6 @@ const CaseStudyEdit = () => {
 
     biochemistry != "" ? setBiochemistryComplete(1) : setBiochemistryComplete(0)
     biochemistryComplete === 1 ? setBiochemistryColour(1) : setBiochemistryColour(0)
-
-
-
-    console.log(caseNotes)
 
     setTotalComplete(Math.round((caseStudyNameComplete + demographicsComplete + prescriptionsComplete + casenotesComplete + microbiologyComplete + biochemistryComplete + observationsComplete)/7*100))
 
@@ -288,7 +280,7 @@ const CaseStudyEdit = () => {
           <Container className='mb-3'>
             <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setMicrobiologyShow(false); setShow(true)}}>Add Case Notes</Button>{' '}
             <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true); setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
           </Container>
           </>
           ):""

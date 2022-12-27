@@ -293,7 +293,7 @@
   ,
   "biochemistry": {
     "sodium":{
-      "name": "Na+",
+      "name": "sodium",
       "category": "UE",
       "range": "135*145",
       "unit": "mmol/L",
@@ -315,7 +315,7 @@
       }]
     },
     "potassium":{
-      "name": "Potassium (k+)",
+      "name": "potassium",
       "category":"UE",
       "range": "3.5-5.0",
       "unit": "mmol/L",
@@ -336,7 +336,7 @@
           "result": 3.0
         }]
       },
-      "UREA":{
+      "Urea":{
         "name":"Urea",
         "category":"UE",
         "range":"2.5-7.5",
@@ -359,7 +359,7 @@
         }]
       },
       "CRP":{
-        "name": "C-Reactive Protein (CRP)",
+        "name": "CRP",
         "category":"FBC",
         "range": ">4",
         "unit": "x 10^9",
@@ -377,7 +377,7 @@
           "result": 68
         }]
       },
-      "creatinine":{
+      "Creatinine":{
         "name": "Creatinine",
         "category":"UE",
         "range": "80-120",
@@ -396,8 +396,8 @@
           "result": 198
         }]
       },
-      "haemogoblin":{
-        "name": "Haemogoblin (Hb)",
+      "Haemogoblin":{
+        "name": "Haemogoblin",
         "category":"FBC",
         "range": "12-15",
         "unit": "g/dL",
@@ -415,7 +415,7 @@
           "result": 68
         }]
       },
-      "platelets":{
+      "Platelets":{
         "name": "Platelets",
         "category":"FBC",
         "range": "150-450",
@@ -435,7 +435,7 @@
         }]
       },
       "WCC":{
-        "name": "White Cell Count (WCC)",
+        "name": "WCC",
         "category":"FBC",
         "range": "4-11",
         "unit": "x 10^9",
@@ -453,8 +453,8 @@
           "result": 13.1
         }]
       },
-      "neutrophils":{
-        "name": "Neutrophils (neuts)",
+      "Neutrophils":{
+        "name": "Neutrophils",
         "category":"FBC",
         "range": "2.5-7.5",
         "unit": "g/dL",
@@ -472,8 +472,8 @@
           "result": 10.1
         }]
       },
-      "blood_glucose":{
-        "name": "Random Blood Glucose",
+      "blood glucose":{
+        "name": "blood glucose",
         "category":"Diabetes",
         "range": "4.0-8.0",
         "unit": "mmol/L",
