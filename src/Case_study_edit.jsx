@@ -21,6 +21,7 @@ import Observations from "./components/patient_records/Observations";
 import ContentHeader from "./components/Content_header";
 import Table from 'react-bootstrap/Table';
 import data from './case_study.json';
+import QuestionContainer from "./components/questions/QuestionContainer";
 
 const CaseStudyEdit = () => {
 
@@ -81,6 +82,9 @@ const CaseStudyEdit = () => {
   const [biochemistryShow, setBiochemistryShow] = useState(false)
   const [biochemistry, setBiochemistry] = useState("")
 
+  //handle questions
+  const [questions, setQuestions] = useState("")
+
   //Check Progress
   
   const [caseStudyNameComplete, setCaseStudyNameComplete] = useState(0)
@@ -114,6 +118,7 @@ const CaseStudyEdit = () => {
       setCaseNotes(data["case_notes"])
       setMicrobiology(data["microbiology"])
       setBiochemistry(data["biochemistry"])
+      setQuestions(data["questions"])
 
   }
   const checkProgress = () => {
@@ -284,8 +289,6 @@ const CaseStudyEdit = () => {
           </Container>
           </>
           ):""
-          
-
         }
         <Container>
           <Table bordered className="text-center container-shadow">
@@ -306,13 +309,12 @@ const CaseStudyEdit = () => {
                     <Observations observations={""} />
                   ): ""
                 }
-                
-                
-                
               </tr>
             </tbody>
           </Table>
         </Container>
+        <hr/>
+        <ContentHeader title="Case Study Questions" />
 
           
 

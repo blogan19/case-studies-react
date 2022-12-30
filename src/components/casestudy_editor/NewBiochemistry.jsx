@@ -16,18 +16,19 @@ import { Alert, Table } from "react-bootstrap";
 import Container from 'react-bootstrap/Container';
 import ContentHeader from "../Content_header";
 
-
 const AddBiochemistry = ({closeModal, previousResult}) => {
     //https://esneftpathology.nhs.uk/wp-content/uploads/2021/06/Clinical-BioChemistry-Pathology-Handbook.pdf
     const [sampleDropdownList, setSampleDropdownList] = useState()
-    const [saveBtnText, setSaveBtn] = useState("Save")
-    // if true disables form controls for editing sample details but not results
-    const [samplePropertiesdisable, setPropertiesdisable] = useState(false)
-    const [highlightedRecord, setHighlightedEdit] = useState("")
+    const [cancelBtn, setCancelBtn] = useState(false)
+    const [editingTableRow, setEditingTableRow] = useState()
 
+    //modal 
+    const [showEditModal, setShowEditModal] = useState(false);
+    const handleCloseEditModal = () => setShowEditModal(false);
+
+    //Ading a record
     const [sampleType, setSampleType] = useState("")
     const [sampleTypeFreeform, setSampleTypeFreeform] = useState(false)
-
     const[category, setCategory] = useState("")
     const[unit, setUnit] = useState("")
     const[range, setRange] = useState("")
@@ -38,8 +39,10 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
     //result list
     const [results, setResults] = useState({})
 
-    //Keep track of result we are currently editing
+    //editing a record
     const [editRecord, setEditRecord] = useState("")
+    const [editingSample, setEditSample] = useState("")//keeps track of sample we're editing
+    const [editType, setEditType] = useState("")//keeps track of whether editing individual sample or sample type
    
     //sorts sampleDrop down then renders
     const sampleDropdown = () => {
@@ -83,12 +86,11 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
       );
 
     const resetForm = () => {
-        setSaveBtn("Save")
+        setCancelBtn(false)
         setResultDate("")
         setResultTime("")
         setResult("")
         setEditRecord("")
-        setPropertiesdisable(false)
     }
     const addSample = () => {
         let sample = {
@@ -120,19 +122,14 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
 
     console.log(results)
 
+    //Edit a result function sets all form to values of record being edited
     const editResult = (sampleIndex, resultIndex) => {
         //set colour of editing record 
-        setHighlightedEdit(sampleIndex+resultIndex)
+        setEditingTableRow(sampleIndex+resultIndex)
 
-        setPropertiesdisable(true)
-        setSaveBtn("Save Edited Sample")
-        console.log(sampleIndex)
-        console.log(results[sampleIndex])
-        console.log(resultIndex)
-
+    
         let editSample = results[sampleIndex]['results'][resultIndex]
-        
-
+      
         setResult(editSample['result'])        
 
         //Keep track of record editing record
@@ -141,63 +138,60 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
         //split datetime
         let resultDateTime = editSample['datetime'].split(" ")
         setResultDate(resultDateTime[0])
-        setResultTime(resultDateTime[2])
-
-        console.log(resultDateTime)
-
-    }
-    
-    const checkHighlightedRecord = () => {
-
+        setResultTime(resultDateTime[2])    
     }
 
     
-    
+    const editSample = (sample) => {
+        let sampleRecord = results[sample]
+        setSampleType(sampleRecord['name'])
+        setCategory(sampleRecord['category'])
+        setRange(sampleRecord['range'])
+        setUnit(sampleRecord['unit'])
+        setEditSample(sample)
+    }
+    const saveEditSample = () => {
+        console.log(editingSample)
+        let resultList = results
+        let sample = {
+            "name": sampleType,
+            "category": category,
+            "range": range,
+            "unit": unit,
+            "results": resultList[editingSample]['results']
+        }
+        resultList[editingSample] = sample
+        setResults(resultList)
+        
+    }
+    const deleteResult = (sampleIndex, resultIndex) => {
+        
+    }
     //https://geekymedics.com/reference-ranges/
     //https://esneftpathology.nhs.uk/wp-content/uploads/2021/06/Clinical-BioChemistry-Pathology-Handbook.pdf
 
-    // functions
-    //     - add
-    //     - edit
-    //     - delete 
-    //     - load previous
-
-    // "sodium":{
-    //     "name": "Na+",
-    //     "category": "UE",
-    //     "range": "135-145",
-    //     "unit": "mmol/L",
-    //     "results":[{
-    //       "datetime": "04/07/2022 08:00",
-    //       "result": 139
-    //     },{
-    //       "datetime": "04/07/2022 13:00",
-    //       "result": 140
-    //     },{
-    //       "datetime": "05/07/2022 08:00",
-    //       "result": 138
-    //     },{
-    //       "datetime": "05/07/2022 12:47",
-    //       "result": 137
-    //     },{
-    //       "datetime": "05/07/2022 20:00",
-    //       "result": 139
-    //     }]
-    //   },
     return(
         <>
         <ContentHeader title="Biochemistry" className="mb-3"/> 
         <Container className="container-shadow mt-3">
-            <Form> 
+            <Form className="mb-3"> 
                 <br/>
-                <h3>Edit Sample Details</h3>
-                <Alert variant="info">Edit Sample Type Details Using the options below</Alert>
+                
+                {
+                    cancelBtn === true ? (
+                        <>
+                            <h4>Edit Sample</h4>
+                        </>
+                        
+                    ):(
+                        <h4>Add a New Sample</h4>
+                    )
+                }
                 {
                     sampleTypeFreeform === false ? (
                         <Row className="mb-3"> 
                             <Form.Group as={Col} controlId="formSampleTypeDropdown">
-                                <Form.Label>Sample Type</Form.Label>
-                                <Form.Select onChange={handleSampleType} value={sampleType} disabled={samplePropertiesdisable}>
+                                <Form.Select onChange={handleSampleType} value={sampleType} >
                                         <option selected>Select Sample Type</option>
                                         {sampleDropdownList}
                                 </Form.Select>        
@@ -206,8 +200,7 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                     ):(
                         <Row className="mb-3"> 
                             <Form.Group as={Col} controlId="formSampleType">
-                                <Form.Label>Free Form Sample Type</Form.Label>
-                                <Form.Control required type="text" placeholder="sample type" value={sampleType} onChange={(e) => setSampleType(e.target.value)} disabled={samplePropertiesdisable}/>
+                                <Form.Control required type="text" placeholder="sample type" value={sampleType} onChange={(e) => setSampleType(e.target.value)} />
                             </Form.Group>
                         </Row>
                     )
@@ -222,7 +215,7 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                     <Form.Group as={Col} controlId="formSampleType">
                         <Form.Label>Category</Form.Label>
                         <InputGroup>
-                        <Form.Control required type="text" placeholder="sample category" value={category} onChange={(e) => setSampleType(e.target.value)} disabled={samplePropertiesdisable}/>
+                        <Form.Control required type="text" placeholder="sample category" value={category} onChange={(e) => setCategory(e.target.value)} />
                         
                         <OverlayTrigger trigger="click" placement="top" overlay={categoryPopover}>
                             <InputGroup.Text>
@@ -234,46 +227,33 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                     </Form.Group>
                     <Form.Group as={Col} controlId="formRefrange">
                         <Form.Label>Reference Range</Form.Label>
-                        <Form.Control type="text" value={range} onChange={(e) => setRange(e.target.value)} disabled={samplePropertiesdisable}/>
+                        <Form.Control type="text" value={range} onChange={(e) => setRange(e.target.value)} />
                     </Form.Group>  
-                </Row>
-                <Row className="mb-3"> 
                     <Form.Group as={Col} controlId="formUnit">
                         <Form.Label>Unit</Form.Label>
-                        <Form.Control required type="text" placeholder="unit" value={unit} onChange={(e) => setUnit(e.target.value)} disabled={samplePropertiesdisable}/>
+                        <Form.Control required type="text" placeholder="unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
                     </Form.Group>
-                    <Form.Group as={Col}></Form.Group>
                 </Row>
-                <hr/>
-            </Form>
-            </Container>
-            
-            <Container className="container-shadow">
-                <Form>
-                    <br/>
-                    <h3>Result Details</h3>
-                    <Row className="mb-3"> 
-                        <Form.Group as={Col} controlId="microDate">
-                            <Form.Label>Result Date</Form.Label>
-                            <Form.Control type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)}/>
-                        </Form.Group>
-                        <Form.Group as={Col} controlId="microDate">
-                            <Form.Label>Result Time</Form.Label>
-                            <Form.Control type="time" value={resultTime} onChange={(e) => setResultTime(e.target.value)}/>
-                        </Form.Group>
-                    </Row>
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="microDate">
-                            <Form.Label>Result</Form.Label>
-                            <Form.Control type="text" value={result} onChange={(e) => setResult(e.target.value)}/>
-                        </Form.Group>
-                    </Row>        
-                    <Row className="mb-3">
-                        <Form.Group as={Col} controlId="formSave">
-                            <Button variant="success"className="mt-4"  onClick={addSample}>{saveBtnText}</Button>
-                        </Form.Group> 
-                    </Row>  
-                    <br/>     
+                <Row className="mb-3"> 
+                    <Form.Group as={Col} controlId="microDate">
+                        <Form.Label>Result Date</Form.Label>
+                        <Form.Control type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)}/>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="microDate">
+                        <Form.Label>Result Time</Form.Label>
+                        <Form.Control type="time" value={resultTime} onChange={(e) => setResultTime(e.target.value)}/>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="microDate">
+                        <Form.Label>Result</Form.Label>
+                        <Form.Control type="text" value={result} onChange={(e) => setResult(e.target.value)}/>
+                    </Form.Group>
+                </Row>    
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="formSave">
+                        <Button variant="success" className="mt-4"  onClick={addSample}>Save</Button>                       
+                    </Form.Group> 
+                </Row>  
+                <br/>     
                 </Form>
             </Container>
             <Container>
@@ -291,16 +271,17 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                             <th>Category: {results[item]['category']}</th>
                             <th>Range: {results[item]['range']} {results[item]['unit']}</th>
                             <th>
-                                <Button variant="outline-info" className="float-end">Edit</Button>
+                                <Button variant="outline-info" className="float-end" onClick={() => {setShowEditModal(true);setEditType("sample_details");editSample(results[item]['name'])}}>Edit</Button>
                             </th>
                             
                         </tr>
                         {
                             results[item]['results'].map((itemResults,resultIndex) => (
-                                <tr key={results[item]['name'] + resultIndex}>
+                                <tr key={results[item]['name'] + resultIndex} className={results[item]['name']+resultIndex == editingTableRow ? "highlighted-row":""}>
                                     <td>{itemResults['datetime']}</td>
                                     <td>{itemResults['result']}</td>
-                                    <td><a href="#"  onClick={() => {editResult(results[item]['name'],resultIndex)}}>edit</a></td>
+                                    <td></td>
+                                    <td><a href="#"  onClick={() => {setShowEditModal(true);editResult(results[item]['name'],resultIndex);setEditType("sample_result")}}>edit</a> <a href="#"  onClick={() => {deleteResult(results[item]['name'],resultIndex)}}>delete</a></td>
                                 </tr>
                             ))
                         }
@@ -312,6 +293,73 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                 </Table>
             </Container>
             
+
+        <Modal show={showEditModal} onHide={handleCloseEditModal} >
+            <Modal.Header closeButton>
+            <Modal.Title>Edit Biochemistry</Modal.Title>
+            </Modal.Header>
+            <Modal.Body>
+                {
+                    editType === 'sample_result' ? (
+                        <>
+                        <Row className="mb-3"> 
+                            <Form.Group as={Col} controlId="microDate">
+                                <Form.Label>Result Date</Form.Label>
+                                <Form.Control type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)}/>
+                            </Form.Group>
+                        </Row>
+                        <Row className="mb-3">
+                            <Form.Group as={Col} controlId="microDate">
+                                <Form.Label>Result Time</Form.Label>
+                                <Form.Control type="time" value={resultTime} onChange={(e) => setResultTime(e.target.value)}/>
+                            </Form.Group>
+                        </Row>
+                        <Row className="mb-3">
+                            <Form.Group as={Col} controlId="microDate">
+                                <Form.Label>Result</Form.Label>
+                                <Form.Control type="text" value={result} onChange={(e) => setResult(e.target.value)}/>
+                            </Form.Group>
+                        </Row>    
+                        <Button variant="success" className="mt-4" onClick={() => {addSample(); handleCloseEditModal()}}>Save</Button>
+                        </>
+                    ):(
+                        <>
+                             <Row className="mb-3"> 
+                            <Form.Group as={Col} controlId="formSampleType">
+                                <Form.Control required type="text" placeholder="Sample type" value={sampleType} onChange={(e) => setSampleType(e.target.value)} />
+                            </Form.Group>
+                        </Row>                     
+                        <Row className="mb-3"> 
+                            <Form.Group as={Col} controlId="formSampleType">
+                                <Form.Label>Category</Form.Label>
+                                <Form.Control required type="text" placeholder="Sample category" value={category} onChange={(e) => setCategory(e.target.value)} />
+                            </Form.Group>
+                        </Row>
+                        <Row className="mb-3">
+                            <Form.Group as={Col} controlId="formRefrange">
+                                <Form.Label>Reference Range</Form.Label>
+                                <Form.Control placeholder="Reference Range" type="text" value={range} onChange={(e) => setRange(e.target.value)} />
+                            </Form.Group>  
+                        </Row>
+                        <Row className="mb-3">
+                            <Form.Group as={Col} controlId="formUnit">
+                                <Form.Label>Unit</Form.Label>
+                                <Form.Control required type="text" placeholder="Unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
+                            </Form.Group>
+                        </Row>
+                        <Button variant="success" className="mt-4" onClick={() => {saveEditSample(); handleCloseEditModal()}}>Save</Button>
+
+
+
+                        
+                        </>
+                    )
+                }
+               
+            </Modal.Body>
+        </Modal>
+
+        
 
         
        
