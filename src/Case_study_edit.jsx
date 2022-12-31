@@ -11,6 +11,8 @@ import AddPrescription from './components/prescriptions/addPrescription';
 import AddCaseNotes from './components/casestudy_editor/NewCaseNotes';
 import AddMicrobiology from './components/casestudy_editor/NewMicrobiology'
 import AddBiochemistry from './components/casestudy_editor/NewBiochemistry';
+import AddObservations from "./components/casestudy_editor/NewObservations";
+import AddQuestions from "./components/casestudy_editor/NewQuestions";
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -82,7 +84,12 @@ const CaseStudyEdit = () => {
   const [biochemistryShow, setBiochemistryShow] = useState(false)
   const [biochemistry, setBiochemistry] = useState("")
 
+  //Handle Observations
+  const [observationsShow, setObservationsShow] = useState(false)
+  const [observations, setObservations] = useState("")
+
   //handle questions
+  const [questionsShow, setQuestionShow] = useState(false)
   const [questions, setQuestions] = useState("")
 
   //Check Progress
@@ -118,6 +125,7 @@ const CaseStudyEdit = () => {
       setCaseNotes(data["case_notes"])
       setMicrobiology(data["microbiology"])
       setBiochemistry(data["biochemistry"])
+      setObservations(data["observations"])
       setQuestions(data["questions"])
 
   }
@@ -142,6 +150,9 @@ const CaseStudyEdit = () => {
 
     biochemistry != "" ? setBiochemistryComplete(1) : setBiochemistryComplete(0)
     biochemistryComplete === 1 ? setBiochemistryColour(1) : setBiochemistryColour(0)
+
+    observations != "" ? setObservationsComplete(1) : setObservationsComplete(0)
+    observationsComplete === 1 ? setObservationsColour(1) : setObservationsColour(0)
 
     setTotalComplete(Math.round((caseStudyNameComplete + demographicsComplete + prescriptionsComplete + casenotesComplete + microbiologyComplete + biochemistryComplete + observationsComplete)/7*100))
 
@@ -219,15 +230,15 @@ const CaseStudyEdit = () => {
           <Container>
           <ContentHeader title="Case Study Name" />
             <Form className="mt-3"> 
-                    <Form.Group as={Col} controlId="formCaseStudyName">
-                        <Form.Label><strong>Case Study Name</strong></Form.Label>
-                        <Form.Control placeholder="Enter Case Study Name" value={caseStudyName} type="text" onChange={(e) => setCaseStudyName(e.target.value)} />
-                    </Form.Group> 
-                    <Form.Group as={Col} controlId="formCaseInstructions" className="mt-3">
-                        <Form.Label><strong>Case Instructions</strong></Form.Label>
-                        <p>Use this option to detail any specific instructions the user may need to complete the case study</p>
-                        <Form.Control as="textarea" value={caseInstructions} placeholder="Case Instructions" onChange={(e) => setCaseInstructions(e.target.value)} />
-                    </Form.Group>
+              <Form.Group as={Col} controlId="formCaseStudyName">
+                  <Form.Label><strong>Case Study Name</strong></Form.Label>
+                  <Form.Control placeholder="Enter Case Study Name" value={caseStudyName} type="text" onChange={(e) => setCaseStudyName(e.target.value)} />
+              </Form.Group> 
+              <Form.Group as={Col} controlId="formCaseInstructions" className="mt-3">
+                  <Form.Label><strong>Case Instructions</strong></Form.Label>
+                  <p>Use this option to detail any specific instructions the user may need to complete the case study</p>
+                  <Form.Control as="textarea" value={caseInstructions} placeholder="Case Instructions" onChange={(e) => setCaseInstructions(e.target.value)} />
+              </Form.Group>
             </Form>
           </Container>
         </>):""
@@ -286,6 +297,7 @@ const CaseStudyEdit = () => {
             <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setMicrobiologyShow(false); setShow(true)}}>Add Case Notes</Button>{' '}
             <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true); setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}
             <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setObservationsShow(true);setBiochemistryShow(false);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false);  setShow(true)}}>Add Observations</Button>{' '}
           </Container>
           </>
           ):""
@@ -301,12 +313,12 @@ const CaseStudyEdit = () => {
                 }
                 {
                   biochemistryComplete == 1 || microbiologyComplete == 1 ? (
-                    <Laboratory biochemistry={""} microbiology={microbiology}/> 
+                    <Laboratory biochemistry={biochemistry} microbiology={microbiology}/> 
                   ): ""
                 }
                 {
                   observationsComplete == 1 ? (
-                    <Observations observations={""} />
+                    <Observations observations={observations} />
                   ): ""
                 }
               </tr>
@@ -315,6 +327,9 @@ const CaseStudyEdit = () => {
         </Container>
         <hr/>
         <ContentHeader title="Case Study Questions" />
+        <Container className="mt-3">
+          <Button variant="outline-primary" onClick={() => {setObservationsShow(false);setBiochemistryShow(false);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setQuestionShow(true); setShow(true)}}>Add Questions</Button>
+        </Container>
 
           
 
@@ -350,8 +365,16 @@ const CaseStudyEdit = () => {
               <AddBiochemistry setBiochemistry={setBiochemistry} closeModal={handleClose} previousResult={biochemistry}/>
             ):""
           }
-          
-          
+          {
+            observationsShow === true ? (
+              <AddObservations setObservations={setObservations} closeModal={handleClose} previousResult={observations} />
+            ):""
+          }
+          {
+            questionsShow === true ? (
+              <AddQuestions setQuestions={setQuestions} closeModal={handleClose} previousResult={questions}/>
+            ):""
+          }
         </Offcanvas.Body>
       </Offcanvas>
       

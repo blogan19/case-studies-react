@@ -8,7 +8,7 @@ import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 import { useAccordionButton } from "react-bootstrap";
 
-const NewQuestions = ({newCaseNotes, closeModal}) => {
+const AddQuestions = ({newCaseNotes, closeModal}) => {
     // "questions": [{
     //     "questionNumber": 1,
     //     "questionType": "MultipleChoice",
@@ -32,7 +32,7 @@ const NewQuestions = ({newCaseNotes, closeModal}) => {
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Presenting Complaint</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setPresentingComplaint(e.target.value)} />
+                    <Form.Control type="text" onChange={(e) => setQuestionTitle(e.target.value)} />
                 </Form.Group> 
             </Row>
             
@@ -41,4 +41,4 @@ const NewQuestions = ({newCaseNotes, closeModal}) => {
     
     )
 }
-export default NewQuestions
+export default AddQuestions

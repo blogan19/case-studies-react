@@ -16,7 +16,7 @@ import { Alert, Table } from "react-bootstrap";
 import Container from 'react-bootstrap/Container';
 import ContentHeader from "../Content_header";
 
-const AddBiochemistry = ({closeModal, previousResult}) => {
+const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
     //https://esneftpathology.nhs.uk/wp-content/uploads/2021/06/Clinical-BioChemistry-Pathology-Handbook.pdf
     const [sampleDropdownList, setSampleDropdownList] = useState()
     const [cancelBtn, setCancelBtn] = useState(false)
@@ -43,6 +43,9 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
     const [editRecord, setEditRecord] = useState("")
     const [editingSample, setEditSample] = useState("")//keeps track of sample we're editing
     const [editType, setEditType] = useState("")//keeps track of whether editing individual sample or sample type
+
+    //Deleting a record
+    const [deletedCount, setDeletedCount] = useState(0)
    
     //sorts sampleDrop down then renders
     const sampleDropdown = () => {
@@ -67,15 +70,7 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
         setRange(data['biochemistryList'][sampleName]['range'])
     }
 
-    //Functions called on first render
-    useEffect(() => {
-        sampleDropdown()
-        console.log(previousResult)
-        if(previousResult != ""){
-            setResults(previousResult)
-        }
-    },[]);
-
+    
     const categoryPopover = (
         <Popover id="popover-basic">
           <Popover.Header as="h3">Sample Category</Popover.Header>
@@ -113,14 +108,11 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                 resultList[sampleType] = sample
             }
         }else{
-            console.log(editRecord)
             resultList[editRecord[0]]['results'][editRecord[1]] = resultDetails
         }
         resetForm("")
         setResults(resultList)
     }    
-
-    console.log(results)
 
     //Edit a result function sets all form to values of record being edited
     const editResult = (sampleIndex, resultIndex) => {
@@ -165,8 +157,29 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
         
     }
     const deleteResult = (sampleIndex, resultIndex) => {
-        
+        let sampleList = results
+        let resultList = sampleList[sampleIndex]['results']
+        resultList.splice(resultIndex,1)
+        sampleList[sampleIndex]['results'] = resultList
+        setResults(sampleList)
+        setDeletedCount(deletedCount + 1)
     }
+
+    const saveResultList = () => {
+        setBiochemistry(results)
+        closeModal()
+    }
+
+    //Functions called on first render
+    useEffect(() => {
+        sampleDropdown()
+        console.log(previousResult)
+        if(previousResult != ""){
+            setResults(previousResult)
+        }
+    },[]);
+
+    
     //https://geekymedics.com/reference-ranges/
     //https://esneftpathology.nhs.uk/wp-content/uploads/2021/06/Clinical-BioChemistry-Pathology-Handbook.pdf
 
@@ -255,6 +268,11 @@ const AddBiochemistry = ({closeModal, previousResult}) => {
                 </Row>  
                 <br/>     
                 </Form>
+            </Container>
+            <Container>
+                <Row>
+                    <Button variant="success" onClick={saveResultList}>Save Biochemistry</Button>
+                </Row>
             </Container>
             <Container>
                 <Table className="mt-3 container-shadow">
