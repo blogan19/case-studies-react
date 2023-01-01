@@ -8,7 +8,11 @@ const NavBar = ({setCreate}) => {
     return(
         <Navbar className="blue-back">
         <Container>
-          <Navbar.Brand href="#home" className="text-white">Electronic Prescription Chart</Navbar.Brand>
+          <Navbar.Brand href="#home" className="text-white">
+          
+            Electronic Prescription Chart
+            
+          </Navbar.Brand>
           <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav">
           <Nav className="me-auto">

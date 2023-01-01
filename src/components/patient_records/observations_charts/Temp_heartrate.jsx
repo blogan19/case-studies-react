@@ -63,11 +63,19 @@ const TempHR = (props) => {
     },
     scales: {
         y: {
+            title:{
+              display:true,
+              text: "Temperature (Degrees Celcius)"
+            },
             type: 'linear',
             display: true,
             position: 'left',
           },
           y1: {
+            title:{
+              display:true,
+              text: "HeartRate (Beats Per Minute)"
+            },
             type: 'linear',
             display: true,
             position: 'right',

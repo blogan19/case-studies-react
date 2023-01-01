@@ -16,9 +16,9 @@ const Administrations = (props) => {
   ));
   return (
     <>
-      <a href="#" onClick={handleShow}>
+      <Button variant="outline-info" size="sm"  href="#" onClick={handleShow}>
         Administrations
-      </a>
+      </Button>
       <Modal show={show} onHide={handleClose}>
         <Modal.Header closeButton>
           <Modal.Title> {props.drug.charAt(0).toUpperCase() + props.drug.slice(1)} Administrations</Modal.Title>

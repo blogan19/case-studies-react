@@ -22,26 +22,19 @@ ChartJS.register(
   Legend
 );
 
-const BloodPressure = (props) => {
-  const bloodPressure = props.data.observations.blood_pressure
-  const labels = bloodPressure.map((bp) => bp['datetime'])
-  const systolic = bloodPressure.map((bp) => bp['systolic'])
-  const diastolic = bloodPressure.map((bp) => bp['diastolic'])
+const RespRate = (props) => {
+  const respRate = props.data.observations.resp_rate
+  const labels = respRate.map((rr) => rr['datetime'])
+  const rate = respRate.map((rr) => rr['bpm'])
 
   const data = {
     labels,
     datasets : [
       {
-        label: 'Systolic',
-        data: systolic,
+        label: 'Respiratory Rate BPM',
+        data: rate,
         borderColor: 'rgb(255, 99, 132)',
         backgroundColor: 'rgba(255, 99, 132, 0.5)',
-      },
-      {
-        label: 'Diastolic',
-        data: diastolic,
-        borderColor: 'rgba(53, 162, 235, 0.5)',
-        backgroundColor: 'rgba(53, 162, 235, 0.5)',
       }
     ]
   } 
@@ -62,7 +55,7 @@ const BloodPressure = (props) => {
       yAxes: {
         title: {
             display: true,
-            text: 'Blood Pressure (mmHg)',
+            text: 'Respiratory Rate',
             font: {
                 size: 15
             }
@@ -88,10 +81,10 @@ const BloodPressure = (props) => {
   };
   return (
    <Container className="container-shadow mt-3">
-    <h4>Blood Pressure</h4>
+    <h4>Respiratory Rate</h4>
      <Line options={options} data={data}></Line>
    </Container>
   );
 }
 
-export default BloodPressure;
+export default RespRate;

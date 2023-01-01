@@ -3,6 +3,9 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Icon from './Patient_record_icon';
 import BloodPressure from './observations_charts/Blood_pressure';
 import TempHR from './observations_charts/Temp_heartrate';
+import RespRate from './observations_charts/resp_rate';
+import Container from 'react-bootstrap/Container';
+import ObsTable from './observations_charts/Obs_Table';
 
 const Observations = (props) => {
   const [show, setShow] = useState(false);
@@ -20,8 +23,12 @@ const Observations = (props) => {
           <Offcanvas.Title>Observations</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
+          <Container>
+          <ObsTable data={props} />
+          </Container>
           <BloodPressure data={props} />           
           <TempHR data={props} />
+          <RespRate data={props} />
         </Offcanvas.Body>
       </Offcanvas>
     </>

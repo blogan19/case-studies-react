@@ -113,11 +113,6 @@ const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
         }
     },[microDate,microTime,sampleType,growth,notes,sensitivities,drug,sensitivity]);
 
-    
-
-
-
-
     //displays the sensitivities added by the user
     const displaySensitivities = sensitivities.map((x, index) =>(
         <ListGroup.Item key={index}>{x[0]}: {x[1]}  <a href="#"  onClick={()=>{

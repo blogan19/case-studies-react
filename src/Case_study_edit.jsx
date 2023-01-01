@@ -217,6 +217,10 @@ const CaseStudyEdit = () => {
                     <Form>
                       <Form.Check type="switch" id="prescribing-switch" label="Allow User to prescribe?" />
                     </Form>
+                    <Form>
+                      <Form.Check type="switch" id="prescribing-switch" label="User gets instant feedback?" />
+                    </Form>
+                    get titles to change colour when part complete
                   </Col>      
                 </Card.Body>
               </Card>
@@ -292,7 +296,12 @@ const CaseStudyEdit = () => {
             ))}
           </Container>
           <hr/>
-          <ContentHeader title="Patient Episode Details" />
+          <ContentHeader title="Patient Episode Details" className="mb-3" />
+          <Container className="mt-3">
+            <p>
+              Use the options below to add details of the patients medical history, results and presenting complaint
+            </p>
+          </Container>
           <Container className='mb-3'>
             <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setMicrobiologyShow(false); setShow(true)}}>Add Case Notes</Button>{' '}
             <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true); setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}

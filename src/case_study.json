@@ -65,7 +65,7 @@
       "dose": "50mg",
       "frequency": "Four times daily",
       "route": "oral",
-      "form": "tablets",
+      "form": "Tablets",
       "stat": false,
       "start_date": "11/07/2022",
       "end_date": "12/07/2022",
@@ -95,7 +95,7 @@
       "dose": "40mg",
       "frequency": "Once at Night",
       "route": "oral",
-      "form": "tablets",
+      "form": "Tabletss",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -145,7 +145,7 @@
       "dose": "7.5mg",
       "frequency": "Once at Night",
       "route": "oral",
-      "form": "tablets",
+      "form": "Tabletss",
       "stat": false,
       "start_date": "05/08/2022",
       "end_date": "",
@@ -173,7 +173,8 @@
       "dose": "500mg",
       "frequency": "Twice Daily",
       "route": "oral",
-      "form": "tablets",
+      "strength": "5mg",
+      "form": "Tablets",
       "stat": true,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -187,7 +188,8 @@
       "dose": "8mg",
       "frequency": "Once in the morning",
       "route": "oral",
-      "form": "Tablet",
+      "strength": "5mg",
+      "form": "Tablets",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -201,7 +203,8 @@
       "dose": "2.5mg",
       "frequency": "Once in the morning",
       "route": "oral",
-      "form": "Tablet",
+      "strength": "5mg",
+      "form": "Tablets",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -214,7 +217,8 @@
       "dose": "T",
       "frequency": "Once in the morning",
       "route": "oral",
-      "form": "Tablet",
+      "strength": "5mg",
+      "form": "Tablets",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -227,7 +231,8 @@
       "dose": "5mg",
       "frequency": "Once in the morning",
       "route": "oral",
-      "form": "Tablet",
+      "strength": "5mg",
+      "form": "Tablets",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -240,7 +245,8 @@
       "dose": "24units",
       "frequency": "Once at Night",
       "route": "S/C",
-      "form": "Tablet",
+      "strength": "5mg",
+      "form": "Tablets",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -253,6 +259,7 @@
       "dose": "28units",
       "frequency": "Once each morning",
       "route": "S/C",
+      "strength": "5mg",
       "form": "Injection",
       "stat": false,
       "start_date": "05/07/2022",
@@ -266,7 +273,8 @@
       "dose": "60mg",
       "frequency": "Once at Night",
       "route": "Oral",
-      "form": "Tablet",
+      "strength": "5mg",
+      "form": "Tabletss",
       "stat": false,
       "start_date": "05/07/2022",
       "end_date": "",
@@ -526,6 +534,31 @@
     },{
       "datetime": "05/07/2022 12:45",
       "temperature": 37.4
+    }],
+    "resp_rate": [{
+      "datetime": "04/07/2022 08:00",
+      "bpm": 15
+    },{
+      "datetime": "04/07/2022 13:00",
+      "bpm": 16
+    },{
+      "datetime": "05/07/2022 07:45",
+      "bpm": 18
+    },{
+      "datetime": "05/07/2022 12:45",
+      "bpm": 15
+    }],"oxygen": [{
+      "datetime": "04/07/2022 08:00",
+      "percentage": 15
+    },{
+      "datetime": "04/07/2022 13:00",
+      "percentage": 16
+    },{
+      "datetime": "05/07/2022 07:45",
+      "percentage": 18
+    },{
+      "datetime": "05/07/2022 12:45",
+      "percentage": 15
     }]
   },
   "questions": [{

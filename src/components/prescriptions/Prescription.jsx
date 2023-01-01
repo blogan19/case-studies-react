@@ -52,9 +52,10 @@ const Prescriptions = (props) => {
   return (
     <>
       <Container className="prescription-tools text-break">
+        <Container>
         <Row className="border blue-back text-white mt-3 py-3 container-shadow rounded">
           <Col sm={3}>
-            <h4>Prescriptions </h4>
+            <h4> Prescriptions </h4>
           </Col>
           <Col sm={3}>
             <ButtonGroup aria-label="Basic example">
@@ -77,14 +78,15 @@ const Prescriptions = (props) => {
               }
             
             </ButtonGroup>
-            
           </Col>          
         </Row>
-        <Row>
-          {prescriptionList.map((prescription, index) => (
-            <Prescription  key={index} index={index} prescribingStatus={prescribingStatus} prescription={prescription} editPrescription={handleEdit} deletePrescription={handleDelete} />
-          ))}
-        </Row>
+        </Container>
+  
+      </Container>
+      <Container>
+        {prescriptionList.map((prescription, index) => (
+              <Prescription  key={index} index={index} prescribingStatus={prescribingStatus} prescription={prescription} editPrescription={handleEdit} deletePrescription={handleDelete} />
+            ))}
       </Container>
 
       <Modal show={show} onHide={handleClose} >
@@ -92,7 +94,7 @@ const Prescriptions = (props) => {
           <Modal.Title> Add Prescription</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-            <AddPrescription newPrescription={handleNew} closeModal={handleClose}/>
+            <AddPrescription newPrescription={handleNew} closeModal={handleClose} editPrescription={''}/>
         </Modal.Body>
       </Modal>
 

@@ -128,6 +128,7 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
             "unit": drugList["drugs"][drug][2],
             "frequency": frequency, 
             "route": route,
+            "strength": drugList["drugs"][drug][1],
             "form": drugList["drugs"][drug][3],
             "stat": stat,
             "start_date": start.toLocaleDateString('en-GB'),
