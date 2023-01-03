@@ -30,7 +30,11 @@ const CaseStudyEdit = () => {
   const [showLoadPrevious, setShowLoadPrevious] = useState(true)
   const [show ,setShow] = useState(false)
   const handleClose = () => setShow(false);
+  const [modalContents,setModalContents] = useState("")
 
+  
+    
+  
   const createNew = () => setShow(true);
 
   //case study settings 
@@ -54,66 +58,47 @@ const CaseStudyEdit = () => {
   const [prescriptionList, setPrescriptions] = useState([]);
   const [noPrescriptions, setNoPrescriptions] = useState(false)
   const [editPrescription, setEditPrescription] = useState("")
+  const [editPrescriptionIndex, setEditPrescriptionIndex] = useState("")
 
+  //handle a new prescription
   const handleNew = (script) => {
     let prescriptions = [...prescriptionList];
     prescriptions = [...prescriptions, script]
     setPrescriptions(prescriptions)
   }
+  //Delete a prescription
+  const handleDelete = (index) => {
+    let confirmDelete =  window.confirm(`${prescriptionList[index].drug} will be removed from the inpatient chart`)
+      setPrescriptions([
+        ...prescriptionList.slice(0, index),
+        ...prescriptionList.slice(index + 1)
+      ]);
 
-  const handleEdit = (index) => {
+    console.log(`${index} Deleted`)
+} 
+
+  //Set up prescription to edit
+  const setupEdit = (index) => {
     setShow(true)
-    setCreatePrescriptions(true)
-    setCreatePatientDemographics(false)
-    setBiochemistryShow(false); 
-    setCreateCaseNotes(false)
+    setModalContents("prescriptions")
     setEditPrescription(prescriptionList[index])
-
-
+    setEditPrescriptionIndex(index)
+  }
+  //save edited prescription
+  const handleEdit = (script, index) => {
+    //takes edited script and its index and saves script list
+    let prescriptions = prescriptionList
+    prescriptions[index] = script
+    setPrescriptions(prescriptions)
   }
 
-  //handle case notes: 
-  const [caseNotesShow, setCreateCaseNotes] = useState(false)
   const [caseNotes, setCaseNotes] = useState("")
-
-  //Handle Micro
-  const [microbiologyShow, setMicrobiologyShow] = useState(false)
   const [microbiology, setMicrobiology] = useState("")
-
-  //Handle Biochemistry 
-  const [biochemistryShow, setBiochemistryShow] = useState(false)
   const [biochemistry, setBiochemistry] = useState("")
-
-  //Handle Observations
-  const [observationsShow, setObservationsShow] = useState(false)
   const [observations, setObservations] = useState("")
 
-  //handle questions
-  const [questionsShow, setQuestionShow] = useState(false)
   const [questions, setQuestions] = useState("")
 
-  //Check Progress
-  
-  const [caseStudyNameComplete, setCaseStudyNameComplete] = useState(0)
-  const [caseaseStudyInstructionsComplete, setCaseStudyInstructionsComplete] = useState(0)
-  const [demographicsComplete, setDemographicsComplete] = useState(0)
-  const [prescriptionsComplete, setPrescriptionsComplete] = useState(0)
-  const [casenotesComplete, setCaseNotesComplete] = useState(0)
-  const [microbiologyComplete, setMicrobiologyComplete] = useState(0)
-  const [biochemistryComplete, setBiochemistryComplete] = useState(0)
-  const [observationsComplete, setObservationsComplete] = useState(0)
-  
-  const [caseStudyNameColour, setCaseStudyNameColour] = useState('light')
-  const [caseStudyInstructionsColour, setCaseStudyInstructionsColour] = useState('light')
-  const [demographicsColour, setDemographicsColour] = useState('light')
-  const [prescriptionsColour, setPrescriptionsColour] = useState('light')
-  const [casenotesColour, setCaseNotesColour] = useState('light')
-  const [microbiologyColour, setMicrobiologyColour] = useState('light')
-  const [biochemistryColour, setBiochemistryColour] = useState('light')
-  const [observationsColour, setObservationsColour] = useState('light')
-  const [totalComplete, setTotalComplete] = useState(0)
-  
-  const [questionsComplete, setQuestionsComplete] = useState("light")
 
   const loadPrevious = () =>{
       let previousCase = data
@@ -128,40 +113,8 @@ const CaseStudyEdit = () => {
       setObservations(data["observations"])
       setQuestions(data["questions"])
 
-  }
-  const checkProgress = () => {
-    caseStudyName != "" ? setCaseStudyNameComplete(1): setCaseStudyNameComplete(0)
-    caseStudyNameComplete === 1 ? setCaseStudyNameColour('success') : setCaseStudyNameColour('light')
-
-    caseInstructions != "" ? setCaseStudyInstructionsComplete(1) : setCaseStudyInstructionsComplete(0)
-    caseaseStudyInstructionsComplete === 1 ? setCaseStudyInstructionsColour('success'): setCaseStudyInstructionsColour('light')
-
-    patientDemographics != "" ? setDemographicsComplete(1) : setDemographicsComplete(0)
-    demographicsComplete === 1 ? setDemographicsColour('success') :  setDemographicsColour('light')
-
-    prescriptionList.length > 0 ? setPrescriptionsComplete(1) : setPrescriptionsComplete(0)
-    prescriptionsComplete === 1 ? setPrescriptionsColour('success') : setPrescriptionsColour('light')
-    
-    caseNotes != "" ? setCaseNotesComplete(1): setCaseNotesComplete(0) 
-    casenotesComplete === 1 ? setCaseNotesColour('success') : setCaseNotesColour('light')
-
-    microbiology != "" ? setMicrobiologyComplete(1) : setMicrobiologyComplete(0)
-    microbiologyComplete === 1 ? setMicrobiologyColour('success') : setMicrobiologyColour('light')
-
-    biochemistry != "" ? setBiochemistryComplete(1) : setBiochemistryComplete(0)
-    biochemistryComplete === 1 ? setBiochemistryColour(1) : setBiochemistryColour(0)
-
-    observations != "" ? setObservationsComplete(1) : setObservationsComplete(0)
-    observationsComplete === 1 ? setObservationsColour(1) : setObservationsColour(0)
-
-    setTotalComplete(Math.round((caseStudyNameComplete + demographicsComplete + prescriptionsComplete + casenotesComplete + microbiologyComplete + biochemistryComplete + observationsComplete)/7*100))
-
-
-  }
-  
-  useEffect(() => {
-    checkProgress()
-  });
+  }  
+ 
   return (
     <>
       <Container className="container mt-3 mb-3">  
@@ -189,156 +142,143 @@ const CaseStudyEdit = () => {
         showLoadPrevious === false ? (<>
           <Container>
             <Row className="mt-3 mb-3">
-            <Col xs={4}>
-              <Card>
-                <Card.Body>
-                <h4>Progress {totalComplete}%</h4> 
-                  <Col>
-                    <ListGroup variant="flush" className="mt-3">
-                      <ListGroup.Item action variant={caseStudyNameColour}>Case Study Name</ListGroup.Item>
-                      <ListGroup.Item action variant={caseStudyInstructionsColour}>Case Study Instructions</ListGroup.Item>
-                      <ListGroup.Item action variant={demographicsColour}>Patient Demographics</ListGroup.Item>
-                      <ListGroup.Item action variant={prescriptionsColour}>Prescriptions</ListGroup.Item>
-                      <ListGroup.Item action variant={casenotesColour}>Case Notes</ListGroup.Item>
-                      <ListGroup.Item action variant={microbiologyColour}>Microbiology</ListGroup.Item>
-                      <ListGroup.Item action variant={biochemistryColour}>Biochemistry</ListGroup.Item>
-                      <ListGroup.Item action variant={observationsColour}>Observations</ListGroup.Item>
-                      <ListGroup.Item action variant={observationsColour}>Questions</ListGroup.Item>
-                    </ListGroup> 
-                  </Col>      
-                </Card.Body>
-              </Card>
-            </Col>    
-            <Col xs={8}>
-              <Card>
-                <Card.Body>
-                  <h4>Case Study Settings</h4> 
-                  <Col>
-                    <Form>
-                      <Form.Check type="switch" id="prescribing-switch" label="Allow User to prescribe?" />
-                    </Form>
-                    <Form>
-                      <Form.Check type="switch" id="prescribing-switch" label="User gets instant feedback?" />
-                    </Form>
-                    get titles to change colour when part complete
-                  </Col>      
-                </Card.Body>
-              </Card>
-            </Col>                  
+              <Col>
+                <Card>
+                  <Card.Body>
+                    <h4>Case Study Settings</h4> 
+                    <Col>
+                      <Form>
+                        <Form.Check type="switch" id="prescribing-switch" label="Allow User to prescribe?" />
+                      </Form>
+                      <Form>
+                        <Form.Check type="switch" id="prescribing-switch" label="User gets instant feedback?" />
+                      </Form>
+                      get titles to change colour when part complete
+                    </Col>      
+                  </Card.Body>
+                </Card>
+              </Col>                  
             </Row>
             <hr/>
-          
-              
-      
           </Container>
           <Container>
-          <ContentHeader title="Case Study Name" />
+           <ContentHeader title="Case Study Name" complete={caseInstructions != "" ? "true":""}/>
             <Form className="mt-3"> 
               <Form.Group as={Col} controlId="formCaseStudyName">
                   <Form.Label><strong>Case Study Name</strong></Form.Label>
                   <Form.Control placeholder="Enter Case Study Name" value={caseStudyName} type="text" onChange={(e) => setCaseStudyName(e.target.value)} />
               </Form.Group> 
-              <Form.Group as={Col} controlId="formCaseInstructions" className="mt-3">
-                  <Form.Label><strong>Case Instructions</strong></Form.Label>
-                  <p>Use this option to detail any specific instructions the user may need to complete the case study</p>
-                  <Form.Control as="textarea" value={caseInstructions} placeholder="Case Instructions" onChange={(e) => setCaseInstructions(e.target.value)} />
-              </Form.Group>
+              {
+                caseStudyName != "" ? (
+                  <Form.Group as={Col} controlId="formCaseInstructions" className="mt-3">
+                    <Form.Label><strong>Case Instructions</strong></Form.Label>
+                    <p>Use this option to detail any specific instructions the user may need to complete the case study</p>
+                    <Form.Control as="textarea" value={caseInstructions} placeholder="Case Instructions" onChange={(e) => setCaseInstructions(e.target.value)} />
+                  </Form.Group>
+                ):""
+              }
+              
             </Form>
           </Container>
         </>):""
 
       }
-      
-
-      { caseStudyName.length > 0 && caseInstructions.length> 0 ? 
+      {caseInstructions.length> 0 ? 
         (
           <>
             
             <Container className="mt-3">
-            <ContentHeader title="Patient Demographics" />
+              <ContentHeader title="Patient Demographics" complete={patientDemographics != "" ? "true":""}/>
               {patientDemographics != "" ? (
                   <PatientDetails patient={patientDemographics} allergies={allergies} />  
               ):("")}
-                   
             </Container>
             <Container className="mt-3">
-              
-              
-              {
-                patientDemographics != '' ? (
-                  <Button variant="outline-primary" onClick={() => {setShow(true); setCreatePatientDemographics(true);setCreatePrescriptions(false)}}>Edit Patient Details</Button>
-                ):(
-                  <Button variant="outline-primary" onClick={() => {setShow(true); setShowLoadPrevious(false)}}>Add Patient Details</Button>
-                )
-              }
-              
+                  <Button variant="outline-primary" onClick={() => {setShow(true); setModalContents('demographics');}}>
+                    {patientDemographics != '' ? 'Edit Patient Details': 'Add Patient Details'}</Button>
             </Container>
-
           </>
         ):
         ""
       }
-
-        { patientDemographics != "" ? (
+      { //Display rest of fields once patient demographics complete
+        patientDemographics != "" ? (
           <>
-
           <Container className="mb-3">
-            <ContentHeader title="Prescriptions" />
+            <ContentHeader title="Prescriptions" complete={prescriptionList != "" ? "true":""}/>
             <br/>
             <p>Click add prescription to add prescriptions to your case study</p>
             <p>Adding prescriptions to your case study is not mandatory</p>
-            <Button variant="outline-primary" onClick={() => {setCreatePrescriptions(true); setCreatePatientDemographics(false); setShow(true); setEditPrescription("")}}>Add Prescription</Button>{' '} 
+            <Button variant="outline-primary" onClick={() => {setShow(true); setModalContents('prescriptions'); setEditPrescription("")}}>Add Prescription</Button>{' '} 
           </Container>
 
           <Container className='mb-3'>
             {prescriptionList.map((prescription, index) => (
-              <Prescription  key={index} index={index} prescribingStatus={true} prescription={prescription} editPrescription={handleEdit} deletePrescription={''} />
+              <Prescription  key={index} index={index} prescribingStatus={true} prescription={prescription} editPrescription={setupEdit}  deletePrescription={handleDelete} />
             ))}
           </Container>
-          <hr/>
-          <ContentHeader title="Patient Episode Details" className="mb-3" />
+
+          <ContentHeader title="Case Notes" className="mb-3" complete={caseNotes != "" ? "true":""}/>
           <Container className="mt-3">
             <p>
               Use the options below to add details of the patients medical history, results and presenting complaint
             </p>
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('case_notes');}}>Add Case Notes</Button>
           </Container>
-          <Container className='mb-3'>
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setCreateCaseNotes(true); setCreatePrescriptions(false);setCreatePatientDemographics(false); setMicrobiologyShow(false); setShow(true)}}>Add Case Notes</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyShow(true); setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Microbiology</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryShow(true);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setShow(true)}}>Add Biochemistry</Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setObservationsShow(true);setBiochemistryShow(false);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false);  setShow(true)}}>Add Observations</Button>{' '}
+
+          <ContentHeader title="Microbiology" className="mb-3" complete={microbiology != "" ? "true":""}/>
+          <Container className="mt-3">
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('microbiology')}}>Add Microbiology</Button>
           </Container>
-          </>
-          ):""
-        }
-        <Container>
-          <Table bordered className="text-center container-shadow">
-            <tbody>
-              <tr>
-                {
-                  casenotesComplete == 1 ? (
-                    <CaseNotes case_notes={caseNotes} />
-                  ):""
-                }
-                {
-                  biochemistryComplete == 1 || microbiologyComplete == 1 ? (
-                    <Laboratory biochemistry={biochemistry} microbiology={microbiology}/> 
-                  ): ""
-                }
-                {
-                  observationsComplete == 1 ? (
-                    <Observations observations={observations} />
-                  ): ""
-                }
-              </tr>
-            </tbody>
-          </Table>
+
+          <ContentHeader title="Biochemistry" className="mb-3" complete={biochemistry != "" ? "true":""}/>
+          <Container className="mt-3">
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('biochemistry')}}>Add Biochemistry</Button>
+          </Container>
+
+          <ContentHeader title="Observations" className="mb-3" complete={observations != "" ? "true":""}/>
+          <Container className="mt-3">
+          <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('observations')}}>Add Observations</Button>{' '}
+          </Container>
+
+          <Container>
+            <Table bordered className="text-center container-shadow">
+              <tbody>
+                <tr>
+                  {
+                    caseNotes != '' ? (
+                      <CaseNotes case_notes={caseNotes} />
+                    ):""
+                  }
+                  {
+                    biochemistry != '' || microbiology != 1 ? (
+                      <Laboratory biochemistry={biochemistry} microbiology={microbiology}/> 
+                    ): ""
+                  }
+                  {
+                    observations != 1 ? (
+                      <Observations observations={observations} />
+                    ): ""
+                  }
+                </tr>
+              </tbody>
+            </Table>
         </Container>
         <hr/>
-        <ContentHeader title="Case Study Questions" />
+        <ContentHeader title="Case Study Questions" className="mb-3" complete={questions != "" ? "true":""}/>
         <Container className="mt-3">
-          <Button variant="outline-primary" onClick={() => {setObservationsShow(false);setBiochemistryShow(false);setMicrobiologyShow(false);setCreatePrescriptions(false); setCreatePatientDemographics(false); setCreateCaseNotes(false); setQuestionShow(true); setShow(true)}}>Add Questions</Button>
+          <Button variant="outline-primary" onClick={() => {setShow(true);setModalContents('questions')}}>Add Questions</Button>
+          {
+            questions != "" ? (
+              <QuestionContainer questions={questions}/>
+            ):""
+          }
         </Container>
+       
+        </>
+        ):""
+      }
+        
 
           
 
@@ -348,41 +288,18 @@ const CaseStudyEdit = () => {
         </Offcanvas.Header>
         <Offcanvas.Body>
           {
-            //remove all this for a switch case 
-
-            createPatientDemographics === true ? (
-              <NewCaseForm closeNewPatient={handleClose} patientDemographics={setPatientDemographics} currentDemographics={patientDemographics}  setPatientAllergies={setPatientAllergies} currentAllergies={allergies} />
-            ):""
-          }
-          {
-            createPrescriptions === true ? (
-              <AddPrescription newPrescription={handleNew} closeModal={handleClose} editPrescription={editPrescription}/>
-            ): ""
-          }
-          {
-            caseNotesShow === true ? (
-              <AddCaseNotes newCaseNotes={setCaseNotes} closeModal={handleClose} />
-            ):""
-          }
-          {
-            microbiologyShow === true ? (
-              <AddMicrobiology setMicrobiology={setMicrobiology} closeModal={handleClose} previousResult={microbiology}/>
-            ):""
-          }
-          {
-            biochemistryShow === true ? (
-              <AddBiochemistry setBiochemistry={setBiochemistry} closeModal={handleClose} previousResult={biochemistry}/>
-            ):""
-          }
-          {
-            observationsShow === true ? (
-              <AddObservations setObservations={setObservations} closeModal={handleClose} previousResult={observations} />
-            ):""
-          }
-          {
-            questionsShow === true ? (
-              <AddQuestions setQuestions={setQuestions} closeModal={handleClose} previousResult={questions}/>
-            ):""
+             (() => {
+              console.log(modalContents)
+              switch(modalContents){
+                case "demographics" : return <NewCaseForm closeNewPatient={handleClose} patientDemographics={setPatientDemographics} currentDemographics={patientDemographics}  setPatientAllergies={setPatientAllergies} currentAllergies={allergies} />;
+                case "prescriptions" : return <AddPrescription newPrescription={handleNew} closeModal={handleClose} editPrescription={editPrescription} editPrescriptionIndex={editPrescriptionIndex} saveEdit={handleEdit}/>
+                case "case_notes": return <AddCaseNotes newCaseNotes={setCaseNotes} closeModal={handleClose} previousNotes={caseNotes}/>
+                case "microbiology": return <AddMicrobiology setMicrobiology={setMicrobiology} closeModal={handleClose} previousResult={microbiology}/>
+                case "biochemistry": return <AddBiochemistry setBiochemistry={setBiochemistry} closeModal={handleClose} previousResult={biochemistry}/>
+                case "observations": return <AddObservations setObservations={setObservations} closeModal={handleClose} previousResult={observations} />
+                case "questions": return <AddQuestions setQuestions={setQuestions} closeModal={handleClose} previousResult={questions}/>
+              }
+            })()
           }
         </Offcanvas.Body>
       </Offcanvas>

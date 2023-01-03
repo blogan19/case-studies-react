@@ -6,7 +6,7 @@ import Col from 'react-bootstrap/Col'
 import drugList from './drugList'
 
 
-const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
+const AddPrescription = ({newPrescription, editPrescription,editPrescriptionIndex, saveEdit, closeModal}) => {
     
     const [drug, setDrug] = useState("")
     const [dose, setDose] = useState("")
@@ -31,22 +31,6 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
     const [adminReason, setAdminReason] = useState("")
     const [administrations, setAdministrations] = useState([])
 
-    // {
-    //     "drugindex": "0",
-    //     "drug": "apixaban",
-    //     "dose": "20mg",
-    //     "unit": "mg",
-    //     "frequency": "",
-    //     "route": "",
-    //     "form": "tablets",
-    //     "stat": "",
-    //     "start_date": "19/12/2022",
-    //     "end_date": "Invalid Date",
-    //     "indication": "",
-    //     "note": "",
-    //     "prescriber": "Dr Test",
-    //     "administrations": []
-    // }
     //Load prescription to Edit
     const loadEditPrescription = () => {
         setDrug(editPrescription['drugindex'])
@@ -61,7 +45,8 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
 
         let start_date = editPrescription["start_date"]
         let startSplit = start_date.split('/');
-        start_date = `${startSplit[2]}-${startSplit[1]-1}-${startSplit[0]}`
+        start_date = `${startSplit[2]}-${startSplit[1]}-${startSplit[0]}`
+        console.log(start_date)
         setStartDate(start_date)
 
         let end_date = editPrescription["end_date"]
@@ -73,8 +58,7 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
         setNotes(editPrescription['note'])
         setStat(editPrescription['stat'])
         console.log(editPrescription)
-        console.log(editPrescription['stat'])
-        console.log(stat)
+        console.log(editPrescriptionIndex)
     } 
     //Load previous data on first rerender only
     useEffect(() => {
@@ -91,8 +75,7 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
             "administeredBy": "Nurse 1", 
             "adminNote": adminReason}))
     }
-   
-    
+       
     const handleDrug = (event) => {
          //newPrescription(testScript);
          //closeModal()
@@ -120,8 +103,8 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
     const handleForm = () =>{
         let start = new Date(startDate)
         let end = new Date(endDate)
-        
-        let script = {
+
+         let script = {
             "drugindex": drug,
             "drug" : drugList["drugs"][drug][0],
             "dose": `${dose}${drugList["drugs"][drug][2]}`,
@@ -139,8 +122,13 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
             "administrations": administrations
             
         }
+        
+        if(editPrescription != ""){
+            saveEdit(script,editPrescriptionIndex)
 
-        newPrescription(script)
+        }else{
+            newPrescription(script)
+        }
         closeModal()
     }
 
@@ -266,7 +254,7 @@ const AddPrescription = ({newPrescription, editPrescription, closeModal}) => {
                 <hr/>
                 <Row>
                     <Col xs={6}>
-                        <Button variant="outline-success" onClick= {() => handleForm()}>Add Prescription</Button>
+                        <Button variant="outline-success" onClick= {() => handleForm()}>Save Prescription</Button>
                     </Col>
                     <Col>
                         <Button variant="outline-danger" onClick={() => closeModal()}>Cancel</Button>

@@ -1,6 +1,16 @@
 # react case study application
 Next: 
-- to make sure obs import into edit form 
+= not displaying created field
+- import case notes to edit
+- case notes not editable add a modal for the case note
+- delete on case note doens't render
+
+- delete prescription doe snothing
+
+Micro: 
+- warning that not added any sensitivies
+- not loading previous data
+- add another micro sample doesn't reset drug and add save all button rather than relying on closing modal
 
 To do
 - how to do stage roll outs of information

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 
@@ -7,7 +7,7 @@ import Col from 'react-bootstrap/Col';
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 
-const AddCaseNotes = ({newCaseNotes, closeModal}) => {
+const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
     const [presentingComplaint, setPresentingComplaint] = useState("")
     const [historyPresentingComplaint, setHistoryPresentingComplaint] = useState("")
     const [pastMedicalHistory, setPastMedicalHistory] = useState("")
@@ -27,6 +27,27 @@ const AddCaseNotes = ({newCaseNotes, closeModal}) => {
 
     const [caseNotes, setCaseNotes] = useState([])
 
+    const loadPreviousNotes = () => {
+        setPresentingComplaint(previousNotes['presenting_complaint'])
+        setHistoryPresentingComplaint(previousNotes['history_presenting_complaint'])
+        setPastMedicalHistory(previousNotes['conditions'])
+        setAlcohol(previousNotes['social_history']['alcohol'])
+        setSmoking(previousNotes['social_history']['smoking'])
+        setRecreationalDrugs(previousNotes['social_history']['recreational_drugs'])
+        setOccupation(previousNotes['social_history']['occupation'])
+        setHomeEnvironment(previousNotes['social_history']['home_environment'])
+        setFamilyHistory(previousNotes['family_history'])
+
+        setCaseNotes(previousNotes['notes'])
+
+    }
+
+    useEffect(() => {
+        if(previousNotes != ""){
+            loadPreviousNotes()
+        }
+    },[]);
+
     const addCaseNote = () => {
         setCaseNotes(caseNotes.concat({
             "note_date": noteDate,
@@ -35,6 +56,9 @@ const AddCaseNotes = ({newCaseNotes, closeModal}) => {
             "note_content": note
         }))}
 
+    const editNote = (index) => {
+        
+    }
     const deleteNote = (index) => {
         console.log(index)
         let notesList = caseNotes
@@ -48,7 +72,10 @@ const AddCaseNotes = ({newCaseNotes, closeModal}) => {
                 <th>{x["note_date"]}</th>
                 <th>{x["note_location"]} </th>
                 <th>{x["note_author"]}</th>
-                <th> <a href='#' onClick={() => {deleteNote(index)}}> delete</a></th>
+                <th> 
+                    <a href='#' onClick={() => {editNote(index)}}><i class="bi bi-pencil" style={{color: 'white'}}></i></a>
+                    <a href='#' onClick={() => {deleteNote(index)}}><i class="bi bi-trash3" style={{color: 'red'}}></i></a>
+                </th>
             </tr>
             <tr>
                 <td>{x["note_content"]} </td>
@@ -88,51 +115,51 @@ const AddCaseNotes = ({newCaseNotes, closeModal}) => {
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Presenting Complaint</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setPresentingComplaint(e.target.value)} />
+                    <Form.Control type="text" value={presentingComplaint} onChange={(e) => setPresentingComplaint(e.target.value)} />
                 </Form.Group> 
             </Row>
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formHistoryPresentingComplaint">
                     <Form.Label>History of Presenting Complaint</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setHistoryPresentingComplaint(e.target.value)} />
+                    <Form.Control type="text" value={historyPresentingComplaint} onChange={(e) => setHistoryPresentingComplaint(e.target.value)} />
                 </Form.Group> 
             </Row>
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPatientHistory">
                     <Form.Label>Past Medical History</Form.Label>
-                    <Form.Control as="textarea" placeholder="Past Medical History" onChange={(e) => setPastMedicalHistory(e.target.value)} />
+                    <Form.Control as="textarea" value={pastMedicalHistory} placeholder="Past Medical History" onChange={(e) => setPastMedicalHistory(e.target.value)} />
                 </Form.Group>
             </Row>
 
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Alcohol</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setAlcohol(e.target.value)} />
+                    <Form.Control type="text" value={alcohol} onChange={(e) => setAlcohol(e.target.value)} />
                 </Form.Group> 
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Smoking History</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setSmoking(e.target.value)} />
+                    <Form.Control type="text" value={smoking} onChange={(e) => setSmoking(e.target.value)} />
                 </Form.Group>
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Recreational Drugs</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setRecreationalDrugs(e.target.value)} />
+                    <Form.Control type="text" value={recreationalDrugs} onChange={(e) => setRecreationalDrugs(e.target.value)} />
                 </Form.Group>
             </Row>
 
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Occupation</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setOccupation(e.target.value)} />
+                    <Form.Control type="text" value={occupation} onChange={(e) => setOccupation(e.target.value)} />
                 </Form.Group> 
                 <Form.Group as={Col} controlId="formPresentingComplaint">
                     <Form.Label>Home Environment</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setHomeEnvironment(e.target.value)} />
+                    <Form.Control type="text" value={homeEnvironment} onChange={(e) => setHomeEnvironment(e.target.value)} />
                 </Form.Group>
             </Row>
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPatientHistory">
                     <Form.Label>Family History</Form.Label>
-                    <Form.Control as="textarea" placeholder="Past Medical History" onChange={(e) => setFamilyHistory(e.target.value)} />
+                    <Form.Control as="textarea" value={familyhistory} placeholder="Past Medical History" onChange={(e) => setFamilyHistory(e.target.value)} />
                 </Form.Group>
             </Row>
             <hr/>

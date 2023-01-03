@@ -28,13 +28,13 @@
       "DVT 1 month ago following long haul flight"
     ],
     "social_history": {
-      "alcohol": "",
-      "smoking": "",
-      "recreational_drugs": "",
-      "occupation": "",
+      "alcohol": "10 units a week",
+      "smoking": "10 a day",
+      "recreational_drugs": "nil",
+      "occupation": "nil",
       "home_environment": "Lives alone in sheltered accomodation"
     },
-    "family_history": "",
+    "family_history": "Mother previous MI",
     "notes": [
       {
        
@@ -493,19 +493,19 @@
   },
   "observations": {
     "blood_pressure": [{
-      "datetime": "04/07/2022 08:00",
+      "datetime": "2022-07-04 08:00",
       "systolic": 110,
       "diastolic": 80
     },{
-      "datetime": "04/07/2022 13:00",
+      "datetime": "2022-07-04 13:00",
       "systolic": 116,
       "diastolic": 87
     },{
-      "datetime": "05/07/2022 07:45",
+      "datetime": "2022-07-05 07:45",
       "systolic": 125,
       "diastolic": 92
     },{
-      "datetime": "05/07/2022 12:45",
+      "datetime": "2022-07-05 12:45",
       "systolic": 118,
       "diastolic": 78
     }],

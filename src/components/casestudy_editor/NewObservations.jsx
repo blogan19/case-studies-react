@@ -1,15 +1,55 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Form from 'react-bootstrap/Form';
 import Table from 'react-bootstrap/Table';
 
 
-const AddObservations = ({closeModal,setObservations}) => {
+const AddObservations = ({closeModal,setObservations, previousResult}) => {
     const newRecord = {datetime: '',time:'', systolic: '', diastolic: '',heart_rate: '',temperature: '',resp_rate:'', oxygen:''}
     const [recordState, setRecordState] = useState([
         { ...newRecord },
     ]);
+
+    // [
+    //     {
+    //         "datetime": "2022-12-26 15:29",
+    //         "time": "15:29",
+    //         "systolic": "123",
+    //         "diastolic": "",
+    //         "heart_rate": "81",
+    //         "temperature": "37.5",
+    //         "resp_rate": "65",
+    //         "oxygen": "92"
+    //     }
+    // ]
+    const loadPrevious = () => {
+        console.log(previousResult)
+        let results = []
+      
+        previousResult["blood_pressure"].map((x,index) => {
+            let dateSplit = x.datetime.split(" ")
+            let resultObject = {
+                "datetime": dateSplit[0],
+                "time": dateSplit[1],
+                "systolic": x.systolic,
+                "diastolic": x.diastolic,
+                "heart_rate": previousResult["heart_rate"][index]["rate"],
+                "temperature": previousResult["temperature"][index]["temperature"],
+                "resp_rate": previousResult["resp_rate"][index]["bpm"],
+                "oxygen": previousResult["oxygen"][index]["percentage"]
+            }
+            results.push(resultObject)
+        })
+        setRecordState(results)
+
+    }
+    //Functions called on first render
+    useEffect(() => {
+        if(previousResult != ""){
+            loadPrevious()
+        }
+    },[]);
   
     const addRecord = () => { 
         setRecordState([...recordState, {...newRecord}])
