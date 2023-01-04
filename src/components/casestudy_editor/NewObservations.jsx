@@ -166,45 +166,10 @@ const AddObservations = ({closeModal,setObservations, previousResult}) => {
         </Table>
         <Button onClick={saveRecord} variant="success">Save</Button>
         </Form>
+
+
+
     )
 }
-/* <Form> 
-<Row className="mb-3">
-    <Form.Group as={Col} controlId="sampleDate">
-        <th>Result Date</th>
-        <Form.Control type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)}/>
-    </Form.Group>
-</Row> 
-<Row className="mb-3">
-    <Form.Group as={Col} controlId="formSystolic">
-        <th>Systolic</Form.Label>
-        <Form.Range  value={systolic} min="60" max="250" onChange={e => setSystolic(e.target.value)}/>
-    </Form.Group>
-    <Form.Group as={Col} controlId="formDiastolic">
-        <th>Diastolic</Form.Label>
-        <Form.Range  value={diastolic} min="60" max="250" onChange={e => setDiastolic(e.target.value)}/>
-    </Form.Group>   
-    <Form.Group as={Col} controlId="formDiastolic">
-        {diastolic != "" ? (<Button variant="outline-success">{systolic}/{diastolic} mmHg</Button>):""}
-    </Form.Group>              
-</Row>
-<Row className="mb-3">
-    <Form.Group as={Col} controlId="formHR">
-        <th>Heart Rate</Form.Label>
-        <Form.Range  value={heart_rate} min="60" max="250" onChange={e => setHeartRate(e.target.value)}/>
-    </Form.Group>   
-    <Form.Group as={Col} controlId="formHRDisp">
-        {heart_rate != "" ? (<Button variant="outline-success">{heart_rate} Beats Per Minute</Button>):""}
-    </Form.Group>
-</Row>
-<Row className="mb-3">
-    <Form.Group as={Col} controlId="formHR">
-        <th>Temperature</Form.Label>
-        <Form.Range  value={temperature} min="60" max="250" onChange={e => setTemp(e.target.value)}/>
-    </Form.Group>   
-    <Form.Group as={Col} controlId="formHRDisp">
-        {temperature != "" ? (<Button variant="outline-success">{temperature} Degrees Celcius</Button>):""}
-    </Form.Group>
-</Row>
-</Form> */
+
 export default AddObservations

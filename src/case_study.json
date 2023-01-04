@@ -1,6 +1,6 @@
 {
   "case_study_name": "test case study",
-  "prescribingStatus": true,
+  "prescribingStatus": false,
   "case_instructions": "John Smith has been admitted to the Medical Admissions Unit. Read the information provided about the patients admission to hospital before attempting the questions below",
   "patient": {
     "name": "John Smith",
@@ -38,21 +38,21 @@
     "notes": [
       {
        
-        "note_date": "05/07/2022 22:30:0",
+        "note_date": "05/07/2022 22:30",
         "note_location": "A/E",
         "note_author": "FY1",
         "note_content": "Found of floor BIBA, Acute confusion. Left basal consolidation on cxray Co-amox and clarith started. For any medical ward"
       },
       {
         "note_id": "2",
-        "note_date": "06/07/2022 10:30:00",
+        "note_date": "06/07/2022 10:30",
         "note_location": "AMU",
         "note_author": "Cons",
         "note_content": "+ve MSSU. Diagnosis UTI start appropriate treatment as per local policy/sensitivities"
       },
       {
         "note_id": "3",
-        "note_date": "06/07/2022 12:25:0",
+        "note_date": "06/07/2022 12:25",
         "note_location": "AMU",
         "note_author": "Pharmacy Technician",
         "note_content": "Medicines reconciliation complete. Patient normally has blister packs at home."

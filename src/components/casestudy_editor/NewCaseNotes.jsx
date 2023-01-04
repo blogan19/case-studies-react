@@ -6,6 +6,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
+import Modal from 'react-bootstrap/Modal';
 
 const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
     const [presentingComplaint, setPresentingComplaint] = useState("")
@@ -21,11 +22,18 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
     
 
     const [noteDate, setNoteDate] = useState("")
+    const [noteTime, setNoteTime] = useState("")
     const [location, setLocation] = useState("")
     const [author, setAuthor] = useState("")
     const [note, setNote] = useState("")
 
     const [caseNotes, setCaseNotes] = useState([])
+
+    //edit delete modal
+    const [showEditModal, setShowEditModal] = useState(false);
+    const handleCloseEditModal = () => setShowEditModal(false);
+    const [editItem,setEditItem] = useState('')
+    const [deleteIndex, setDelete] = useState('')
 
     const loadPreviousNotes = () => {
         setPresentingComplaint(previousNotes['presenting_complaint'])
@@ -49,14 +57,45 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
     },[]);
 
     const addCaseNote = () => {
-        setCaseNotes(caseNotes.concat({
-            "note_date": noteDate,
+        let noteDateTime = new Date(noteDate)
+        noteDateTime = noteDateTime.toLocaleDateString('en-GB')
+        
+        let noteContent = {
+            "note_date": noteDateTime +" " + noteTime,
             "note_location": location,
             "note_author": author,
             "note_content": note
-        }))}
+        }
+        if(editItem === ''){
+            setCaseNotes(caseNotes.concat(noteContent))
+        }else{
+            let caseNoteList = caseNotes
+            caseNoteList[editItem] = noteContent
+            setCaseNotes(caseNoteList)
+        }
+        handleCloseEditModal()
+    }    
 
     const editNote = (index) => {
+        let result = caseNotes[index]
+        try{
+            //format datetime
+            let noteDateTime = result['note_date']
+            noteDateTime = noteDateTime.split(" ")
+            let editDate = noteDateTime[0].split("/")
+            editDate = `${editDate[2]}-${editDate[1]}-${editDate[0]}`
+            setNoteDate(editDate)
+            setNoteTime(noteDateTime[1])
+        }
+        catch{
+            setNoteTime('')
+            setNoteTime('')
+        }
+
+        setLocation(result['note_location'])
+        setAuthor(result['note_author'])
+        setNote(result['note_content'])
+        setEditItem(index)
         
     }
     const deleteNote = (index) => {
@@ -64,8 +103,10 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
         let notesList = caseNotes
         notesList.splice(index,1)
         setCaseNotes(notesList)
+        setDelete('')
+        handleCloseEditModal()
     }
-    
+
     const caseNoteDisplay = caseNotes.map((x, index) => (
         <>
             <tr className="blue-back text-white"> 
@@ -73,8 +114,8 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
                 <th>{x["note_location"]} </th>
                 <th>{x["note_author"]}</th>
                 <th> 
-                    <a href='#' onClick={() => {editNote(index)}}><i class="bi bi-pencil" style={{color: 'white'}}></i></a>
-                    <a href='#' onClick={() => {deleteNote(index)}}><i class="bi bi-trash3" style={{color: 'red'}}></i></a>
+                    <a href='#' onClick={() => {editNote(index);setShowEditModal(true)}}><i class="bi bi-pencil" style={{color: 'white'}}></i></a>
+                    <a href='#' onClick={() => {setShowEditModal(true);setDelete(index)}}><i class="bi bi-trash3" style={{color: 'red'}}></i></a>
                 </th>
             </tr>
             <tr>
@@ -108,6 +149,7 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
 
 
     return(
+        <>
         <Form> 
             <h3>Social History</h3>
             <p>use the options below to document your patients social history. None of these fields are mandatory.</p>
@@ -163,37 +205,9 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
                 </Form.Group>
             </Row>
             <hr/>
-            <Row>
-                <h4>Add Case Note</h4>
-                <p>Add patient case notes below. An unlimited number of notes can be added</p>
-            </Row>
-            <Row className="mb-3">
-                <Form.Group as={Col} controlId="formNoteDate">
-                    <Form.Label>Note Date</Form.Label>
-                    <Form.Control type="date" placeholder="Start Date" onChange={(e) => setNoteDate(e.target.value)}/>
-                </Form.Group>
-                <Form.Group as={Col} controlId="formPatientHistory">
-                    <Form.Label>Case Note Location</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setLocation(e.target.value)} />
-                </Form.Group>
-                <Form.Group as={Col} controlId="formPatientHistory">
-                    <Form.Label>Case Note Author</Form.Label>
-                    <Form.Control type="text" onChange={(e) => setAuthor(e.target.value)} />
-                </Form.Group>
-            </Row>
-            <Row className="mb-3">
-                <Form.Group as={Col} controlId="formPatientHistory">
-                    <Form.Label>Case Note Contents</Form.Label>
-                    <Form.Control as="textarea" placeholder="Case Note Contents" onChange={(e) => setNote(e.target.value)} />
-                </Form.Group>
-            </Row>
-            <Row className="mb-3">
-                <Col xs={3}>
-                    <Button variant="outline-success" onClick= {() => addCaseNote()}>Add Case Note</Button>
-                </Col>
-            </Row>
-
-            <Row>
+            <Button variant="outline-success" onClick= {() => setShowEditModal(true)}>Add New Case Note</Button>
+           
+            <Row className="mt-3">
                 <Container>
                     <Table className='tbl-notes container-shadow'>
                         {caseNoteDisplay}
@@ -201,13 +215,72 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
                 </Container>
             </Row>
             <Row>
+            <hr/>
             <Col>
-                <Button variant="primary" onClick={saveCaseNotes}>Save Case Notes</Button>
+                <Button variant="success" onClick={saveCaseNotes}>Save Case Notes</Button>{' '}
+                <Button variant="outline-info" onClick= {closeModal}>Cancel</Button>
             </Col>
         </Row>
 
         </Form>
+
+        <Modal show={showEditModal} onHide={handleCloseEditModal} >
+        <Modal.Header closeButton>
+        <Modal.Title>Case Note Entry</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+            {
+                deleteIndex === '' ? (
+                    <>
+                    <Row className="mb-3">
+                    <Form.Group as={Col} controlId="formNoteDate">
+                        <Form.Label>Note Date</Form.Label>
+                        <Form.Control type="date" placeholder="Start Date" value={noteDate} onChange={(e) => setNoteDate(e.target.value)}/>
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="formNoteDate">
+                        <Form.Label>Note Time</Form.Label>
+                        <Form.Control type="time" placeholder="Start Date" value={noteTime} onChange={(e) => setNoteTime(e.target.value)}/>
+                    </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="formCaseLocation">
+                        <Form.Label>Case Note Location</Form.Label>
+                        <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} />
+                    </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="formPatientHistory">
+                        <Form.Label>Case Note Author</Form.Label>
+                        <Form.Control type="text" value={author} onChange={(e) => setAuthor(e.target.value)} />
+                    </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="formPatientHistory">
+                        <Form.Label>Case Note Contents</Form.Label>
+                        <Form.Control as="textarea" value={note} onChange={(e) => setNote(e.target.value)} />
+                    </Form.Group>
+                </Row>
+                <Row className="mb-3">
+                    <Col xs={6}>
+                        <Button variant="outline-success" onClick= {() => addCaseNote()}>Save Case Note</Button>{' '}
+                        <Button variant="outline-info" onClick= {handleCloseEditModal}>Cancel</Button>
+                        
+                    </Col>
+                </Row>
+                </>
+                ):(
+                    <>
+                        <Button variant="danger" onClick= {() => deleteNote(deleteIndex)}>Are you sure you want to Delete this note?</Button>{' '}
+                        <Button variant="outline-info" onClick= {handleCloseEditModal}>Cancel</Button>
+                    </>
+                )
+            }
+           
+       
+        </Modal.Body>
+        </Modal>
     
+</>
     )
 }
 export default AddCaseNotes

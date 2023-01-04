@@ -206,9 +206,6 @@ const CaseStudyEdit = () => {
           <>
           <Container className="mb-3">
             <ContentHeader title="Prescriptions" complete={prescriptionList != "" ? "true":""}/>
-            <br/>
-            <p>Click add prescription to add prescriptions to your case study</p>
-            <p>Adding prescriptions to your case study is not mandatory</p>
             <Button variant="outline-primary" onClick={() => {setShow(true); setModalContents('prescriptions'); setEditPrescription("")}}>Add Prescription</Button>{' '} 
           </Container>
 
@@ -240,8 +237,9 @@ const CaseStudyEdit = () => {
           <Container className="mt-3">
           <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('observations')}}>Add Observations</Button>{' '}
           </Container>
-
-          <Container>
+          
+          <ContentHeader title="Case Notes and Results Display" className="mb-3" />
+          <Container className="mt-3">
             <Table bordered className="text-center container-shadow">
               <tbody>
                 <tr>

@@ -1,11 +1,9 @@
 # react case study application
 Next: 
 = not displaying created field
-- import case notes to edit
-- case notes not editable add a modal for the case note
-- delete on case note doens't render
+- patient details create clean up and random all!
 
-- delete prescription doe snothing
+- delete prescription doe snothing only for end users though
 
 Micro: 
 - warning that not added any sensitivies
