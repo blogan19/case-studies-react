@@ -1,7 +1,7 @@
 {
     "drugs": [["apixaban","5mg","mg","tablets","oral"],["Bendroflumethiazide","2.5mg","mg","tablets","oral"],["bisoprolol","5mg","mg","tablets","oral",""],["Ceftriaxone","1g","g","injection","IV"]],
     "routes": ["oral","IV","both eyes","left eye","right eye","transdermal","IM"],
-    "frequencies": ["when required","four times daily", "three times daily", "each morning","6 hourly", "twice daily", "each night", "four hourly",  "eight hourly", "once daily", "five times daily", "three hourly",  "twelve hourly", "six times daily"],
+    "frequencies": ["once daily","when required","four times daily", "three times daily", "each morning","6 hourly", "twice daily", "each night", "four hourly",  "eight hourly", "five times daily", "three hourly",  "twelve hourly", "six times daily"],
     "nonAdmins": ["Administered","Drug not availabe","patient refused","inappropriate","clinical decision made","low BP","AKI","high BP","low heart rate","high heart rate"]
 
 }

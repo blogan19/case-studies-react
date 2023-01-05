@@ -140,7 +140,7 @@ const CaseStudyEdit = () => {
         
       {
         showLoadPrevious === false ? (<>
-          <Container>
+          {/* <Container>
             <Row className="mt-3 mb-3">
               <Col>
                 <Card>
@@ -160,7 +160,7 @@ const CaseStudyEdit = () => {
               </Col>                  
             </Row>
             <hr/>
-          </Container>
+          </Container> */}
           <Container>
            <ContentHeader title="Case Study Name" complete={caseInstructions != "" ? "true":""}/>
             <Form className="mt-3"> 
@@ -206,7 +206,7 @@ const CaseStudyEdit = () => {
           <>
           <Container className="mb-3">
             <ContentHeader title="Prescriptions" complete={prescriptionList != "" ? "true":""}/>
-            <Button variant="outline-primary" onClick={() => {setShow(true); setModalContents('prescriptions'); setEditPrescription("")}}>Add Prescription</Button>{' '} 
+            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true); setModalContents('prescriptions'); setEditPrescription("")}}>Add Prescription</Button>{' '} 
           </Container>
 
           <Container className='mb-3'>

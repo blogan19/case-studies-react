@@ -7,12 +7,16 @@ import drugList from './drugList'
 
 
 const AddPrescription = ({newPrescription, editPrescription,editPrescriptionIndex, saveEdit, closeModal}) => {
-    
+    const [saveDisabled, setSaveDisabled] = useState(true)
     const [drug, setDrug] = useState("")
+    const [freeFormDrug, setFreeFormDrug] = useState(false)
+    const [freeFormFrequency, setFreeFormFrequency] = useState(false)
     const [dose, setDose] = useState("")
     const [unit, setUnit] = useState("")
     const [frequency, setFrequency] = useState("")
     const [route, setRoute] = useState("")
+    const [form, setForm] = useState("")
+    const [strength, setStrength] = useState("")
     
 
     //dates   
@@ -33,7 +37,14 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
 
     //Load prescription to Edit
     const loadEditPrescription = () => {
-        setDrug(editPrescription['drugindex'])
+        if(editPrescription['drugindex'] === 'freeform'){
+            //If the drug was set via freeform we wont find it in the list
+            setDrug(editPrescription['drug'])
+            setFreeFormDrug(true)
+        }else{
+            setDrug(editPrescription['drugindex'])
+        }
+        
 
         let dose = editPrescription['dose']
         dose = dose.replace(editPrescription["unit"],"")
@@ -81,7 +92,10 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
          //closeModal()
          const drugValue = event.target.value
          setDrug(drugValue)
+         setStrength(drugList["drugs"][drugValue][1])
          setUnit(drugList["drugs"][drugValue][2])
+         setForm(drugList["drugs"][drugValue][3])
+         
 
     }
     const handleFreq = (event) => {
@@ -102,20 +116,44 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
 
     const handleForm = () =>{
         let start = new Date(startDate)
-        let end = new Date(endDate)
+        let end = ""
+        if(endDate != ""){
+            end = new Date(endDate)
+            end = end.toLocaleDateString('en-GB')
+        }
+        //If not freeform then get drug from our list
+        let drugName = null
+        let drugUnit = null
+        let drugStrength = null
+        let drugIndex = null
+        if(freeFormDrug === false){
+            drugName = drugList["drugs"][drug][0]
+            drugStrength = drugList["drugs"][drug][1]
+            drugUnit = drugList["drugs"][drug][2]
+            drugIndex = drug
+        }else{
+            drugName = drug
+            drugUnit = unit
+            drugStrength = strength
+            drugIndex = 'freeform'
+        }
+
+        
+
+
 
          let script = {
-            "drugindex": drug,
-            "drug" : drugList["drugs"][drug][0],
-            "dose": `${dose}${drugList["drugs"][drug][2]}`,
-            "unit": drugList["drugs"][drug][2],
+            "drugindex": drugIndex,
+            "drug" : drugName,
+            "dose": `${dose}${unit}`,
+            "unit": drugUnit,
             "frequency": frequency, 
             "route": route,
-            "strength": drugList["drugs"][drug][1],
-            "form": drugList["drugs"][drug][3],
+            "strength": strength,
+            "form": form,
             "stat": stat,
             "start_date": start.toLocaleDateString('en-GB'),
-            "end_date": end.toLocaleDateString('en-GB'),
+            "end_date": end,
             "indication": indication,
             "note": note,
             "prescriber": 'Dr Test',
@@ -156,24 +194,60 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
 
     ))
 
-  
+    const checkComplete = () => {
+        if(drug != ""  && dose != "" && unit !=""  && frequency != "" && route != ""){
+            setSaveDisabled(false)
+        }else{
+            setSaveDisabled(true)
+        }
+    }
+    useEffect(() => {
+        checkComplete()
+    });
+    
     return(
         <>
             <Form class="was-validated" >
                 <Row className="mb-3"> 
-                    <Form.Group as={Col} controlId="formDrugName">
-                        <Form.Label>Drug Name</Form.Label>
-                        <Form.Select  onChange={handleDrug} value={drug}>
-                            <option selected>Select Drug</option>
-                            {drugDropdown}
-                        </Form.Select>
-                        
+                    {freeFormDrug ===  false ? (
+                        <Form.Group as={Col} controlId="formDrugName">
+                            <Form.Label>Drug Name</Form.Label>
+                            <Form.Select  onChange={handleDrug} value={drug} style={drug === "" ? {border: "solid 1px red"}: {border: ""}}>
+                                <option selected>Select Drug</option>
+                                {drugDropdown}
+                            </Form.Select>
+                        </Form.Group>
+                    ):(
+                        <>
+                            <Form.Group as={Col} controlId="formDrugName">
+                                <Form.Label>Drug Name</Form.Label>
+                                <Form.Control placeholder="Drug Name"  value={drug} onChange={(e) => setDrug(e.target.value)} />
+                            </Form.Group>
+                            <Form.Group as={Col} controlId="formStrength">
+                                <Form.Label>Strength</Form.Label>
+                                <Form.Control placeholder="5mg"  value={strength} onChange={(e) => setStrength(e.target.value)} />
+                            </Form.Group>
+                            <Form.Group as={Col} controlId="formUnit">
+                                <Form.Label>Unit</Form.Label>
+                                <Form.Control placeholder="mg" value={unit} onChange={(e) => setUnit(e.target.value)} />
+                            </Form.Group>
+                            <Form.Group as={Col} controlId="formForm">
+                                <Form.Label>Drug Name</Form.Label>
+                                <Form.Control placeholder="Tablets" value={form} onChange={(e) => setForm(e.target.value)} />
+                            </Form.Group>
+                        </>
+                    )}
+                   
+                </Row>
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="statDrugNotInList">
+                        <Form.Check type="checkbox" checked={freeFormDrug} label="Drug not in list?" onChange={(e) => setFreeFormDrug(e.target.checked)}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formDose">
                         <Form.Label>Dose</Form.Label>
-                        <Form.Control required type="number" placeholder="Dose" value={dose} onChange={(e) => setDose(e.target.value)}/>
+                        <Form.Control required type="number" placeholder="Dose" value={dose} onChange={(e) => setDose(e.target.value)} style={dose === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="formDose">
                         <Form.Label>Unit</Form.Label>
@@ -181,17 +255,25 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
-                <Form.Group as={Col} controlId="formFrequency">
+                    <Form.Group as={Col} controlId="formFrequency">
                         <Form.Label>Frequency</Form.Label>
-                        <Form.Select aria-label="Default select example" value={frequency} onChange={handleFreq}>
-                            <option selected disabled>Select Frequency</option>
-                            {frequencyDropDown}
-                        </Form.Select>
+                        {freeFormFrequency === false ? (
+                            <Form.Select aria-label="Default select example" value={frequency} onChange={handleFreq} style={frequency === "" ? {border: "solid 1px red"}: {border: ""}}>
+                                <option selected disabled value="">Select Frequency</option>
+                                {frequencyDropDown}
+                            </Form.Select>
+                        ):(
+                            <Form.Control required type="text" placeholder="Frequency" value={frequency} onChange={(e) => setFrequency(e.target.value)} style={frequency === "" ? {border: "solid 1px red"}: {border: ""}}/>
+                        )}
+                        
+                        
+                        <Form.Check type="checkbox" checked={freeFormFrequency} label="Frequency not in list?" onChange={(e) => setFreeFormFrequency(e.target.checked)}/>
+    
                     </Form.Group>
                     <Form.Group as={Col} controlId="formRoute">
                         <Form.Label>Route</Form.Label>
-                        <Form.Select aria-label="Default select example" value={route} onChange={handleRoute}>
-                            <option selected disabled>Select Route</option>
+                        <Form.Select aria-label="Default select example" value={route} onChange={handleRoute} style={route === "" ? {border: "solid 1px red"}: {border: ""}}>
+                            <option selected disabled value="">Select Route</option>
                             {routeDropdown}
                         </Form.Select>
                     </Form.Group>
@@ -254,7 +336,7 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
                 <hr/>
                 <Row>
                     <Col xs={6}>
-                        <Button variant="outline-success" onClick= {() => handleForm()}>Save Prescription</Button>
+                        <Button variant="outline-success" onClick= {() => handleForm()} disabled={saveDisabled}>Save Prescription</Button>                        
                     </Col>
                     <Col>
                         <Button variant="outline-danger" onClick={() => closeModal()}>Cancel</Button>

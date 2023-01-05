@@ -1,7 +1,9 @@
 # react case study application
 Next: 
 = not displaying created field
-- patient details create clean up and random all!
+-labe results and case note box showing on create new
+- option to add no prescriptions
+- change buttons to say edit 
 
 - delete prescription doe snothing only for end users though
 
