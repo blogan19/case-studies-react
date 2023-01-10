@@ -31,8 +31,13 @@ const Laboratory = (props) => {
   
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const handleClick = () => setShow(true);
-
+  const handleClick = () => {
+    if(biochemistry_results.length > 0 || microbiology_results.length >0 ){
+      console.log(biochemistry_results)
+      console.log(microbiology_results)
+      setShow(true);
+    }
+  }
   //Microbiology
   const microbiology_results = props.microbiology
 
@@ -43,7 +48,7 @@ const Laboratory = (props) => {
   
   return (
     <>
-      <td onClick={handleClick}>
+      <td onClick={handleClick} style={biochemistry_results.length >0 || microbiology_results.length >0 ? {"opacity": 1}:{"opacity":0.3}}>
         <Icon logo="bi bi-droplet-fill" title_text="Lab Results"/>
       </td>
       <Offcanvas show={show} onHide={handleClose} style={{ width: '100%' }}>
@@ -51,7 +56,10 @@ const Laboratory = (props) => {
           <Offcanvas.Title>Laboratory Results</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-           <MicrobiologyTable results={microbiology_results}></MicrobiologyTable>
+          {microbiology_results != "" ? (
+            <MicrobiologyTable results={microbiology_results}></MicrobiologyTable>
+          ):""}
+           
            {groupKeys.map((group) =>(
               <BiochemistryTable key={group} data={groupedResults.get(group)}/>
            ))}              
