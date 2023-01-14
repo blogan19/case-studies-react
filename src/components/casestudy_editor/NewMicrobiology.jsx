@@ -28,7 +28,7 @@ const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
     
 
     const [samples, setSamples] = useState(previousResult)
-
+    const [saveSampleDisabled, setSaveSampleDisabled] = useState(true)
 
     const addSensitivity = () => {
         if(drug != "" && sensitivity != ""){
@@ -105,12 +105,19 @@ const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
         ))
         setEditList(list)
     }
-   
+    const checkSaveDisabled = () =>{
+        if(microDate != "" && microTime != "" && sampleType != "" && growth != "" && notes !="" && sensitivities.length > 0){
+            setSaveSampleDisabled(false)
+        }else{
+            setSaveSampleDisabled(true)
+        }
+    }
     //refresh existing sample
     useEffect(() => {
         if(samples != ""){
             loadExistingDetails()
         }
+        checkSaveDisabled()
     },[microDate,microTime,sampleType,growth,notes,sensitivities,drug,sensitivity]);
 
     //displays the sensitivities added by the user
@@ -147,21 +154,33 @@ const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
         setSamples(sampleList)
     }
 
+    const saveSamples = () => {
+        setMicrobiology(samples)
+        closeModal()
+    }
 
 
     return(
         
             <>  
                 <h3>Results</h3>
+                <p>Add details of microbiology results for the patient</p>
                 <Table>
                     <tbody>
                         {editList} 
                     </tbody>
-                    
                 </Table>
                 {
                     showForm != 'new' ? (
-                        <Button variant="success" className="mt-4"  onClick={() => {setShowForm("new")}}> Add New Sample </Button>
+                        <>
+                            <Button variant="success" className="mt-4"  onClick={() => {setShowForm("new")}}> Add New Sample </Button>{' '}
+                            <Button variant="outline-info" className="mt-4"  onClick={closeModal}> Cancel</Button>{' '}
+                            {samples != '' ? (
+                                <Button variant="success" className="mt-4"  onClick={saveSamples}> Save Samples </Button>
+                            ):""
+                            }
+                        </>
+                         
                     ):""
                 }
                 
@@ -179,32 +198,37 @@ const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
                             <Row className="mb-3"> 
                                 <Form.Group as={Col} controlId="microDate">
                                     <Form.Label>Result Date</Form.Label>
-                                    <Form.Control type="date" value={microDate} placeholder="Start Date" onChange={(e) => setMicroDate(e.target.value)}/>
+                                    <Form.Control type="date" value={microDate} placeholder="Start Date" onChange={(e) => setMicroDate(e.target.value)} style={microDate === "" ? {border: "solid 1px red"}: {border: ""}}/>
                                 </Form.Group>
                                 <Form.Group as={Col} controlId="microDate">
                                     <Form.Label>Result Time</Form.Label>
-                                    <Form.Control type="time" value={microTime} placeholder="Start Date" onChange={(e) => setMicroTime(e.target.value)}/>
+                                    <Form.Control type="time" value={microTime} placeholder="Start Date" onChange={(e) => setMicroTime(e.target.value)} style={microTime === "" ? {border: "solid 1px red"}: {border: ""}}/>
                                 </Form.Group>
                             </Row>
                             <Row className="mb-3">
                                 <Form.Group as={Col} controlId="sampleType">
                                     <Form.Label>Sample Type</Form.Label>
-                                    <Form.Control type="text" value={sampleType} placeholder="E.g. MSSU" onChange={(e) => setSampleType(e.target.value)}/>
+                                    <Form.Control type="text" value={sampleType} placeholder="E.g. MSSU" onChange={(e) => setSampleType(e.target.value)} style={sampleType === "" ? {border: "solid 1px red"}: {border: ""}}/>
                                 </Form.Group>
                                 <Form.Group as={Col} controlId="sampleType">
                                     <Form.Label>Growth/Organism(s)</Form.Label>
-                                    <Form.Control type="text" value={growth} placeholder="E.g. E.Coli" onChange={(e) => setGrowth(e.target.value)}/>
+                                    <Form.Control type="text" value={growth} placeholder="E.g. E.Coli" onChange={(e) => setGrowth(e.target.value)} style={growth === "" ? {border: "solid 1px red"}: {border: ""}}/>
                                 </Form.Group>
                             </Row>
                             <Row className="mb-3">
                                 <Form.Group as={Col} controlId="notes">
                                     <Form.Label>Notes</Form.Label>
-                                    <Form.Control as="textarea" value={notes} placeholder="Notes" onChange={(e) => setNotes(e.target.value)} />
+                                    <Form.Control as="textarea" value={notes} placeholder="Notes" onChange={(e) => setNotes(e.target.value)}  style={notes === "" ? {border: "solid 1px red"}: {border: ""}}/>
                                 </Form.Group>
                             </Row>
                             <hr/>
                             <Row className="mb-3">
                                 <h4>Add sensitivity details</h4>
+                                {
+                                    sensitivities.length === 0 ? (
+                                        <p style={{"color":"red"}}>You have not added any sensitivity details</p>
+                                    ):""
+                                }
                                 <Form.Group as={Col} controlId="Type">
                                     <Form.Label>Add Sensitivity</Form.Label>
                                     <Form.Control type="text" value={drug} placeholder="Drug" onChange={(e) => setDrug(e.target.value)}/>
@@ -231,12 +255,13 @@ const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
                             </Row>
                         
                             <Row>
+                                <strong>Sensitivities</strong>
                                 <ListGroup>
                                     {displaySensitivities}
                                 </ListGroup>
                             </Row>
                             <Form.Group as={Col} controlId="sampleType">
-                                <Button variant="success" className="mt-4"  onClick={() => {saveSample();cancelEdit()}} >Save Sample </Button>{' '}
+                                <Button variant="success" className="mt-4" disabled={saveSampleDisabled} onClick={() => {saveSample();cancelEdit()}} >Save Sample </Button>{' '}
                                 <Button variant="success" className="mt-4"  onClick={cancelEdit}> Cancel </Button>
                             </Form.Group>      
                         </Form>

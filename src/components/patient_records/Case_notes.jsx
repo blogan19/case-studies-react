@@ -11,6 +11,7 @@ const CaseNotes = (props) => {
   const handleClick = () => setShow(true);
 
   // define data
+  console.log(props.case_notes)
   const presenting_complaint = props.case_notes['presenting_complaint'];
   const history_presenting_complaint =
     props.case_notes['history_presenting_complaint'];

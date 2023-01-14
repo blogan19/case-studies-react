@@ -28,6 +28,8 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
     const [note, setNote] = useState("")
 
     const [caseNotes, setCaseNotes] = useState([])
+    const [saveCaseNoteDisabled,setSaveCaseNoteDisabled] = useState(true)
+
 
     //edit delete modal
     const [showEditModal, setShowEditModal] = useState(false);
@@ -55,6 +57,17 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
             loadPreviousNotes()
         }
     },[]);
+
+    const checkCaseNoteForm = () => {
+        if(noteDate != "" && noteTime != "" && location != "" && author != "" && note != ""){
+            setSaveCaseNoteDisabled(false)
+        }else{
+            setSaveCaseNoteDisabled(true)
+        }
+    }
+    useEffect(() => {
+        checkCaseNoteForm()
+    });
 
     const addCaseNote = () => {
         let noteDateTime = new Date(noteDate)
@@ -201,7 +214,7 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
             <Row className="mb-3">
                 <Form.Group as={Col} controlId="formPatientHistory">
                     <Form.Label>Family History</Form.Label>
-                    <Form.Control as="textarea" value={familyhistory} placeholder="Past Medical History" onChange={(e) => setFamilyHistory(e.target.value)} />
+                    <Form.Control as="textarea" value={familyhistory} onChange={(e) => setFamilyHistory(e.target.value)} />
                 </Form.Group>
             </Row>
             <hr/>
@@ -235,34 +248,34 @@ const AddCaseNotes = ({newCaseNotes, closeModal, previousNotes}) => {
                     <Row className="mb-3">
                     <Form.Group as={Col} controlId="formNoteDate">
                         <Form.Label>Note Date</Form.Label>
-                        <Form.Control type="date" placeholder="Start Date" value={noteDate} onChange={(e) => setNoteDate(e.target.value)}/>
+                        <Form.Control type="date" placeholder="Start Date" value={noteDate} onChange={(e) => setNoteDate(e.target.value)} style={noteDate === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="formNoteDate">
                         <Form.Label>Note Time</Form.Label>
-                        <Form.Control type="time" placeholder="Start Date" value={noteTime} onChange={(e) => setNoteTime(e.target.value)}/>
+                        <Form.Control type="time" placeholder="Start Date" value={noteTime} onChange={(e) => setNoteTime(e.target.value)} style={noteTime === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formCaseLocation">
                         <Form.Label>Case Note Location</Form.Label>
-                        <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)} />
+                        <Form.Control type="text" value={location} onChange={(e) => setLocation(e.target.value)}  style={location === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formPatientHistory">
                         <Form.Label>Case Note Author</Form.Label>
-                        <Form.Control type="text" value={author} onChange={(e) => setAuthor(e.target.value)} />
+                        <Form.Control type="text" value={author} onChange={(e) => setAuthor(e.target.value)}  style={author === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formPatientHistory">
                         <Form.Label>Case Note Contents</Form.Label>
-                        <Form.Control as="textarea" value={note} onChange={(e) => setNote(e.target.value)} />
+                        <Form.Control as="textarea" value={note} onChange={(e) => setNote(e.target.value)}  style={note === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3">
                     <Col xs={6}>
-                        <Button variant="outline-success" onClick= {() => addCaseNote()}>Save Case Note</Button>{' '}
+                        <Button variant="success" disabled={saveCaseNoteDisabled} onClick= {() => addCaseNote()}>Save Case Note</Button>{' '}
                         <Button variant="outline-info" onClick= {handleCloseEditModal}>Cancel</Button>
                         
                     </Col>

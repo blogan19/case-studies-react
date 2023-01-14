@@ -118,28 +118,28 @@ const AddObservations = ({closeModal,setObservations, previousResult}) => {
                 <>
                    <tr className="mb-3">
                         <td>
-                            <Form.Control type="date" name="datetime" data-idx={idx}  value={recordState[idx].datetime} onChange={handleChange}/>
+                            <Form.Control type="date" name="datetime" data-idx={idx}  value={recordState[idx].datetime} onChange={handleChange} style={recordState[idx].datetime === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="time" name="time" data-idx={idx}  value={recordState[idx].time} onChange={handleChange}/>
+                            <Form.Control type="time" name="time" data-idx={idx}  value={recordState[idx].time} onChange={handleChange}  style={recordState[idx].time === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="text" name="systolic" placeholder="mmHg" data-idx={idx}  value={recordState[idx].systolic} onChange={handleChange}/>
+                            <Form.Control type="text" name="systolic" placeholder="mmHg" data-idx={idx}  value={recordState[idx].systolic} onChange={handleChange}  style={recordState[idx].systolic === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="text" name="diastolic" placeholder="mmHg" data-idx={idx}  value={recordState[idx].diastolic} onChange={handleChange}/>
+                            <Form.Control type="text" name="diastolic" placeholder="mmHg" data-idx={idx}  value={recordState[idx].diastolic} onChange={handleChange}  style={recordState[idx].diastolic=== "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="text" name="heart_rate" placeholder="BPM" data-idx={idx}  value={recordState[idx].heart_rate} onChange={handleChange}/>
+                            <Form.Control type="text" name="heart_rate" placeholder="BPM" data-idx={idx}  value={recordState[idx].heart_rate} onChange={handleChange}  style={recordState[idx].heart_rate === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="text" name="temperature" placeholder="&#8451;" data-idx={idx}  value={recordState[idx].temperature} onChange={handleChange}/>
+                            <Form.Control type="text" name="temperature" placeholder="&#8451;" data-idx={idx}  value={recordState[idx].temperature} onChange={handleChange}  style={recordState[idx].temperature === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="text" name="resp_rate" placeholder="BPM" data-idx={idx}  value={recordState[idx].resp_rate} onChange={handleChange}/>
+                            <Form.Control type="text" name="resp_rate" placeholder="BPM" data-idx={idx}  value={recordState[idx].resp_rate} onChange={handleChange}  style={recordState[idx].resp_rate === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <td>
-                            <Form.Control type="text" name="oxygen" placeholder="%" data-idx={idx}  value={recordState[idx].oxygen} onChange={handleChange}/>
+                            <Form.Control type="text" name="oxygen" placeholder="%" data-idx={idx}  value={recordState[idx].oxygen} onChange={handleChange}  style={recordState[idx].oxygen === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         </td>
                         <tr>
                             <td>

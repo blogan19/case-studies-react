@@ -1,6 +1,9 @@
 table td:hover {
   background-color: #f5f5f5;
 }
+table {
+  table-layout: fixed;
+}
 .blue-back{
   background-color: #2196f3;
 }

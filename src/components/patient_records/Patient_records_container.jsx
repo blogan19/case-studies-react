@@ -4,6 +4,7 @@ import Container from 'react-bootstrap/Container';
 import CaseNotes from './Case_notes';
 import Laboratory from './Laboratory';
 import Observations from './Observations';
+import Imaging from './Imaging';
 
 const PatientRecordsContainer = (props) => {
   return (
@@ -15,6 +16,7 @@ const PatientRecordsContainer = (props) => {
               <CaseNotes case_notes={props.patient_records.case_notes} />
               <Laboratory biochemistry={props.patient_records.biochemistry} microbiology={props.patient_records.microbiology}/>
               <Observations observations={props.patient_records.observations} />
+              <Imaging images={props.patient_records.imaging}/>
             </tr>
           </tbody>
         </Table>

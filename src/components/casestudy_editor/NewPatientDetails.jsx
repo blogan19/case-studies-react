@@ -38,8 +38,8 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
         "hospitalNo": hospNo,
         "dob": dob,
         "address": address,
-        "weight": weight,
-        "height": height,
+        "weight": weight + "kg",
+        "height": height + "cm",
         "gender": gender,
     }
 
@@ -209,16 +209,12 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
                     </Col>            
                 </Row> */}
                 <Row className="mb-3">
-                <Alert variant="info" className="mt-3">
-                    <p>Patient demographics can be set manually using the fields below or a random patient can be generated using the randomise buttons</p>
-                    <Button variant="outline-primary" onClick={() => randomPatient('male_names')}>Random Male Patient</Button>{' '}
-                    <Button variant="outline-primary" onClick={() => randomPatient('female_names')}>Random Female Patient</Button>   
-                </Alert>                 
-                    
-
+                    <Alert variant="info" className="mt-3">
+                        <p>Patient demographics can be set manually using the fields below or a random patient can be generated using the randomise buttons</p>
+                        <Button variant="outline-primary" onClick={() => randomPatient('male_names')}>Random Male Patient</Button>{' '}
+                        <Button variant="outline-primary" onClick={() => randomPatient('female_names')}>Random Female Patient</Button>   
+                    </Alert>                
                 </Row>
-
-
                 <Row className="mb-3">
                     <Col>
                     Patient Name
@@ -234,6 +230,8 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
                         <Form.Label>Hospital Number</Form.Label>
                         <Form.Control type="text" onChange={(e) => setHospNo(e.target.value)} value={hospNo}/>
                     </Form.Group> 
+                </Row>
+                <Row className="mb-3">
                     <Form.Group as={Col} controlId="formBirthDate">
                         <Form.Label>Age <span>{age}</span></Form.Label>
                         <Form.Range  value={age} onChange={e => birthdate(e.target.value)}/>
@@ -287,25 +285,27 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
             <Container>
             <ContentHeader title="Allergies" className="mt-5" complete={allergies != "" ? "true":""}/>
             <Form className="mt-3 mb-3">
-            <Row className="mb-3">
-                <Alert variant="info" className="mt-3">
-                    <p>Use the text boxes below to enter an unlimited number of allergies. Alternatively set the allergies to unconfirmed or NKDA</p>
-                </Alert>
-            </Row>
-            <Row className="mb-3">
-                <Col>
-                    <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"NKDA","reaction":""}])}>Set to NKDA</Button>{' '}
-                    <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"Unconfirmed Allergy Status","reaction":""}])}>Set to Unconfirmed Allergies</Button>{' '}
-                </Col>
-            </Row>
-            <Row className="mb-3">
-                <Form.Group as={Col} controlId="formAllergy">
-                        <Form.Control type="text" placeholder="Allergen" value={newAllergyInput} onChange={(e) => setAllergyInput(e.target.value)}/>           
-                </Form.Group>
-                <Form.Group as={Col} controlId="formAllergyReaction">
-                    <Form.Control type="text" placeholder="Reaction" value={newReactionInput} onChange={(e) => setReactionInput(e.target.value)}/>                     
-                </Form.Group>
-            </Row>
+            <Container>
+                <Row className="mb-3">
+                    <Alert variant="info" className="mt-3">
+                        <p>Use the text boxes below to enter an unlimited number of allergies. Alternatively set the allergies to unconfirmed or NKDA</p>
+                    </Alert>
+                </Row>
+                <Row className="mb-3">
+                    <Col>
+                        <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"NKDA","reaction":""}])}>Set to NKDA</Button>{' '}
+                        <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"Unconfirmed Allergy Status","reaction":""}])}>Set to Unconfirmed Allergies</Button>{' '}
+                    </Col>
+                </Row>
+                <Row className="mb-3">
+                    <Form.Group as={Col} controlId="formAllergy">
+                            <Form.Control type="text" placeholder="Allergen" value={newAllergyInput} onChange={(e) => setAllergyInput(e.target.value)}/>           
+                    </Form.Group>
+                    <Form.Group as={Col} controlId="formAllergyReaction">
+                        <Form.Control type="text" placeholder="Reaction" value={newReactionInput} onChange={(e) => setReactionInput(e.target.value)}/>                     
+                    </Form.Group>
+                </Row>
+            </Container>
             <Row>
                 <Col>
                     {
@@ -331,7 +331,7 @@ const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies,
         </Container>
         
         <Container className="mt-3">
-            <ContentHeader title="Patient" className="mb-5"/>
+            <ContentHeader title="Patient Preview" className="mb-5"/>
             <Row>
                 <PatientDetails patient={patient} allergies={allergies} />
             </Row>

@@ -75,7 +75,7 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
         <Popover id="popover-basic">
           <Popover.Header as="h3">Sample Category</Popover.Header>
           <Popover.Body>
-            Samples with the same category are grouped together into the same table
+            Samples with the same category are grouped together into the same table when they are displayed
           </Popover.Body>
         </Popover>
       );
@@ -185,7 +185,6 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
 
     return(
         <>
-        <ContentHeader title="Biochemistry" className="mb-3"/> 
         <Container className="container-shadow mt-3">
             <Form className="mb-3"> 
                 <br/>
@@ -204,7 +203,7 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
                     sampleTypeFreeform === false ? (
                         <Row className="mb-3"> 
                             <Form.Group as={Col} controlId="formSampleTypeDropdown">
-                                <Form.Select onChange={handleSampleType} value={sampleType} >
+                                <Form.Select onChange={handleSampleType} value={sampleType} style={sampleType === "" ? {border: "solid 1px red"}: {border: ""}}>
                                         <option selected>Select Sample Type</option>
                                         {sampleDropdownList}
                                 </Form.Select>        
@@ -213,7 +212,7 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
                     ):(
                         <Row className="mb-3"> 
                             <Form.Group as={Col} controlId="formSampleType">
-                                <Form.Control required type="text" placeholder="sample type" value={sampleType} onChange={(e) => setSampleType(e.target.value)} />
+                                <Form.Control required type="text" placeholder="sample type" value={sampleType} onChange={(e) => setSampleType(e.target.value)} style={sampleType === "" ? {border: "solid 1px red"}: {border: ""}}/>
                             </Form.Group>
                         </Row>
                     )
@@ -228,7 +227,7 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
                     <Form.Group as={Col} controlId="formSampleType">
                         <Form.Label>Category</Form.Label>
                         <InputGroup>
-                        <Form.Control required type="text" placeholder="sample category" value={category} onChange={(e) => setCategory(e.target.value)} />
+                        <Form.Control required type="text" placeholder="sample category" value={category} onChange={(e) => setCategory(e.target.value)} style={category === "" ? {border: "solid 1px red"}: {border: ""}}/>
                         
                         <OverlayTrigger trigger="click" placement="top" overlay={categoryPopover}>
                             <InputGroup.Text>
@@ -240,45 +239,40 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
                     </Form.Group>
                     <Form.Group as={Col} controlId="formRefrange">
                         <Form.Label>Reference Range</Form.Label>
-                        <Form.Control type="text" value={range} onChange={(e) => setRange(e.target.value)} />
+                        <Form.Control type="text" value={range} onChange={(e) => setRange(e.target.value)} style={range === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>  
                     <Form.Group as={Col} controlId="formUnit">
                         <Form.Label>Unit</Form.Label>
-                        <Form.Control required type="text" placeholder="unit" value={unit} onChange={(e) => setUnit(e.target.value)} />
+                        <Form.Control required type="text" placeholder="unit" value={unit} onChange={(e) => setUnit(e.target.value)} style={unit === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3"> 
                     <Form.Group as={Col} controlId="microDate">
                         <Form.Label>Result Date</Form.Label>
-                        <Form.Control type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)}/>
+                        <Form.Control type="date" value={resultDate} onChange={(e) => setResultDate(e.target.value)} style={resultDate === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="microDate">
                         <Form.Label>Result Time</Form.Label>
-                        <Form.Control type="time" value={resultTime} onChange={(e) => setResultTime(e.target.value)}/>
+                        <Form.Control type="time" value={resultTime} onChange={(e) => setResultTime(e.target.value)} style={resultTime === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                     <Form.Group as={Col} controlId="microDate">
                         <Form.Label>Result</Form.Label>
-                        <Form.Control type="text" value={result} onChange={(e) => setResult(e.target.value)}/>
+                        <Form.Control type="text" value={result} onChange={(e) => setResult(e.target.value)} style={result === "" ? {border: "solid 1px red"}: {border: ""}}/>
                     </Form.Group>
                 </Row>    
                 <Row className="mb-3">
                     <Form.Group as={Col} controlId="formSave">
-                        <Button variant="success" className="mt-4"  onClick={addSample}>Save</Button>                       
+                        <Button variant="success" className="mt-4"  onClick={addSample}>Add Result</Button>                       
                     </Form.Group> 
                 </Row>  
                 <br/>     
                 </Form>
             </Container>
             <Container>
-                <Row>
-                    <Button variant="success" onClick={saveResultList}>Save Biochemistry</Button>
-                </Row>
-            </Container>
-            <Container>
                 <Table className="mt-3 container-shadow">
                 <tbody>
                 <tr className="blue-back text-white">
-                    <th colspan="4"><h3>Results</h3></th>
+                    <th colSpan="4"><h3>Results</h3></th>
                 </tr>
                 {
                     Object.keys(results).map((item, index) => (
@@ -309,6 +303,13 @@ const AddBiochemistry = ({closeModal, previousResult, setBiochemistry}) => {
                 }
                 </tbody>
                 </Table>
+            </Container>
+            <Container>
+                <Row>
+                    <Col>
+                        <Button variant="success" onClick={saveResultList}>Save Results</Button>
+                    </Col>                    
+                </Row>
             </Container>
             
 

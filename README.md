@@ -1,16 +1,19 @@
 # react case study application
 Next: 
-= not displaying created field
--labe results and case note box showing on create new
+
+
+- Check if works if complete and then start deleting things
+- delteing microbiology and not biochemistry greys out icon
+ - add rugs lit ans biochem list 
+
+- stages if case study
+
+
+
 - option to add no prescriptions
 - change buttons to say edit 
 
-- delete prescription doe snothing only for end users though
-
-Micro: 
-- warning that not added any sensitivies
-- not loading previous data
-- add another micro sample doesn't reset drug and add save all button rather than relying on closing modal
+- delete prescription doe snothing only for end users thoughS
 
 To do
 - how to do stage roll outs of information

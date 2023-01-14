@@ -57,7 +57,6 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
         let start_date = editPrescription["start_date"]
         let startSplit = start_date.split('/');
         start_date = `${startSplit[2]}-${startSplit[1]}-${startSplit[0]}`
-        console.log(start_date)
         setStartDate(start_date)
 
         let end_date = editPrescription["end_date"]
@@ -68,8 +67,6 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
         setIndication(editPrescription['indication'])
         setNotes(editPrescription['note'])
         setStat(editPrescription['stat'])
-        console.log(editPrescription)
-        console.log(editPrescriptionIndex)
     } 
     //Load previous data on first rerender only
     useEffect(() => {
@@ -264,11 +261,7 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
                             </Form.Select>
                         ):(
                             <Form.Control required type="text" placeholder="Frequency" value={frequency} onChange={(e) => setFrequency(e.target.value)} style={frequency === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                        )}
-                        
-                        
-                        <Form.Check type="checkbox" checked={freeFormFrequency} label="Frequency not in list?" onChange={(e) => setFreeFormFrequency(e.target.checked)}/>
-    
+                        )}   
                     </Form.Group>
                     <Form.Group as={Col} controlId="formRoute">
                         <Form.Label>Route</Form.Label>
@@ -276,6 +269,11 @@ const AddPrescription = ({newPrescription, editPrescription,editPrescriptionInde
                             <option selected disabled value="">Select Route</option>
                             {routeDropdown}
                         </Form.Select>
+                    </Form.Group>
+                </Row>
+                <Row>
+                    <Form.Group as={Col} controlId="freeformFrequency">
+                        <Form.Check type="checkbox" checked={freeFormFrequency} label="Frequency not in list?" onChange={(e) => setFreeFormFrequency(e.target.checked)}/>
                     </Form.Group>
                 </Row>
                 <Row className="mb-3"> 
