@@ -1,277 +1,211 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from 'react';
 import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
+import ListGroup from 'react-bootstrap/ListGroup';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import Table from 'react-bootstrap/Table';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
-import ListGroup from 'react-bootstrap/ListGroup';
-import { Container, ListGroupItem } from "react-bootstrap";
-import Table from 'react-bootstrap/Table';
 
+const emptyForm = {
+  microDate: '',
+  microTime: '',
+  sampleType: '',
+  growth: '',
+  notes: 'S = Sensitive I = Intermediate R = Resistant',
+  sensitivities: [],
+  drug: '',
+  sensitivity: '',
+};
 
-const AddMicrobiology = ({previousResult, setMicrobiology,closeModal}) => {
-    
+const AddMicrobiology = ({ previousResult, setMicrobiology, closeModal }) => {
+  const [samples, setSamples] = useState([]);
+  const [showForm, setShowForm] = useState(false);
+  const [sampleId, setSampleId] = useState(null);
+  const [formState, setFormState] = useState(emptyForm);
 
-    //Define variables
-    const [showForm, setShowForm] = useState(false)
-    const [microDate, setMicroDate] = useState("")
-    const [microTime, setMicroTime] = useState("")
-    const [sampleType, setSampleType] = useState("")
-    const [growth, setGrowth] = useState("")
-    const [notes,setNotes] = useState("S = Sensitive I = Intermediate R = Resistant")
-    const [sensitivities, setSensitivities] = useState([])
-    const [drug, setDrug]  = useState("")
-    const [sensitivity, setSensitivity] = useState("")
-    const[sampleId, setSampleId] = useState('')
-    
+  useEffect(() => {
+    if (Array.isArray(previousResult)) {
+      setSamples(previousResult);
+    }
+  }, [previousResult]);
 
-    const [samples, setSamples] = useState(previousResult)
-    const [saveSampleDisabled, setSaveSampleDisabled] = useState(true)
+  const saveSampleDisabled = useMemo(
+    () => !formState.microDate || !formState.microTime || !formState.sampleType || !formState.growth || !formState.notes || formState.sensitivities.length === 0,
+    [formState]
+  );
 
-    const addSensitivity = () => {
-        if(drug != "" && sensitivity != ""){
-            let drugSens = [drug,sensitivity]
-            let sensList = sensitivities
-            sensList.push(drugSens)
-            setSensitivities(sensList)
-            setDrug("")
-        }
-        
+  const resetForm = () => {
+    setFormState(emptyForm);
+    setShowForm(false);
+    setSampleId(null);
+  };
+
+  const addSensitivity = () => {
+    if (!formState.drug || !formState.sensitivity) {
+      return;
     }
 
-    //Load a previous result for editing
-    const editMicro = (index) => {
-        let result = samples[index]
-        //Set form
-        setShowForm('edit')
-        console.log(index)
-        console.log(samples)
-        //convert date
-        let sampleDate = result['datetime']
-        let sampleDateTime = sampleDate.split(" ")
-        sampleDate = sampleDateTime[0].split("/")
-        sampleDate = `${sampleDate[2]}-${sampleDate[1]}-${sampleDate[0]}`
-        setMicroDate(sampleDate)
-        setMicroTime(sampleDateTime[1])
-        
-        //setMicroTime()
-        setSampleType(result['sample_type'])
-        setGrowth(result['growth'])
-        setNotes(result['notes'])
-        setSensitivities(result['sensitivities'])
-        
-    } 
+    setFormState((current) => ({
+      ...current,
+      sensitivities: [...current.sensitivities, [current.drug, current.sensitivity]],
+      drug: '',
+      sensitivity: '',
+    }));
+  };
 
-     //Load a previous result for editing
-     const cancelEdit = () => {
-        setMicroDate('')
-        setMicroTime('')
-        setSampleType('')
-        setGrowth('')
-        setNotes("S = Sensitive I = Intermediate R = Resistant")
-        setSensitivities([])
-        setShowForm(false)
-        setSampleId('')
-        
-    } 
+  const editMicro = (index) => {
+    const result = samples[index];
+    const [datePart = '', timePart = ''] = (result.datetime || '').split(' ');
+    const [day = '', month = '', year = ''] = datePart.split('/');
+    setShowForm(true);
+    setSampleId(index);
+    setFormState({
+      microDate: day && month && year ? `${year}-${month}-${day}` : '',
+      microTime: timePart,
+      sampleType: result.sample_type || '',
+      growth: result.growth || '',
+      notes: result.notes || emptyForm.notes,
+      sensitivities: Array.isArray(result.sensitivities) ? result.sensitivities : [],
+      drug: '',
+      sensitivity: '',
+    });
+  };
 
-    const deleteMicro = (index) => {
-        let sampleList = samples
-        sampleList.splice(index,1)
-        setSamples(sampleList)
-        loadExistingDetails()
-    }
+  const deleteMicro = (index) => {
+    setSamples((current) => current.filter((_item, itemIndex) => itemIndex !== index));
+  };
 
-    //display items for editing 
-    const [editList, setEditList] = useState("")
-    const loadExistingDetails = () => {
-        
-        let list = samples.map((results,index) => (
-            <tr>
-                <td>{results["datetime"]}</td>
-                <td>{results["sample_type"]}</td>
-                <td>{results["growth"]}</td>
-                <td>
-                    {results["sensitivities"].map((x) => (
-                        <li>{x[0]}:  {x[1]} </li>
-                    ))}
-                </td>
-                <td>{results["notes"]}</td>
-                <td><a href='#' onClick={() => {editMicro(index);setSampleId(index)}} >edit</a></td>
-                <td><a href='#' onClick={() => {deleteMicro(index);setSampleId(index)}} >delete</a></td>               
+  const saveSample = () => {
+    const sampleDate = new Date(formState.microDate).toLocaleDateString('en-GB');
+    const microResult = {
+      datetime: `${sampleDate} ${formState.microTime}`,
+      sample_type: formState.sampleType,
+      growth: formState.growth,
+      sensitivities: formState.sensitivities,
+      notes: formState.notes,
+    };
+
+    setSamples((current) =>
+      sampleId === null
+        ? [...current, microResult]
+        : current.map((item, index) => (index === sampleId ? microResult : item))
+    );
+    resetForm();
+  };
+
+  return (
+    <>
+      <h3>Results</h3>
+      <p>Add details of microbiology results for the patient.</p>
+      <Table>
+        <tbody>
+          {samples.map((result, index) => (
+            <tr key={`${result.datetime}-${index}`}>
+              <td>{result.datetime}</td>
+              <td>{result.sample_type}</td>
+              <td>{result.growth}</td>
+              <td>
+                {result.sensitivities.map((item, itemIndex) => (
+                  <li key={`${item[0]}-${itemIndex}`}>{item[0]}: {item[1]}</li>
+                ))}
+              </td>
+              <td>{result.notes}</td>
+              <td>
+                <Button type="button" variant="link" onClick={() => editMicro(index)}>edit</Button>
+              </td>
+              <td>
+                <Button type="button" variant="link" className="text-danger" onClick={() => deleteMicro(index)}>delete</Button>
+              </td>
             </tr>
-        ))
-        setEditList(list)
-    }
-    const checkSaveDisabled = () =>{
-        if(microDate != "" && microTime != "" && sampleType != "" && growth != "" && notes !="" && sensitivities.length > 0){
-            setSaveSampleDisabled(false)
-        }else{
-            setSaveSampleDisabled(true)
-        }
-    }
-    //refresh existing sample
-    useEffect(() => {
-        if(samples != ""){
-            loadExistingDetails()
-        }
-        checkSaveDisabled()
-    },[microDate,microTime,sampleType,growth,notes,sensitivities,drug,sensitivity]);
+          ))}
+        </tbody>
+      </Table>
 
-    //displays the sensitivities added by the user
-    const displaySensitivities = sensitivities.map((x, index) =>(
-        <ListGroup.Item key={index}>{x[0]}: {x[1]}  <a href="#"  onClick={()=>{
-            setSensitivities(sensitivities.filter(s => s !== x))
-        }}> Delete</a></ListGroup.Item>
-    )) 
+      {!showForm ? (
+        <>
+          <Button type="button" variant="success" className="mt-4" onClick={() => setShowForm(true)}>Add New Sample</Button>{' '}
+          <Button type="button" variant="outline-info" className="mt-4" onClick={closeModal}>Cancel</Button>{' '}
+          {samples.length > 0 ? (
+            <Button type="button" variant="success" className="mt-4" onClick={() => { setMicrobiology(samples); closeModal(); }}>Save Samples</Button>
+          ) : null}
+        </>
+      ) : null}
 
-  
+      {showForm ? (
+        <Form className="mt-3">
+          <h3>{sampleId === null ? 'Add New Result' : 'Edit Result'}</h3>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId="microDate">
+              <Form.Label>Result Date</Form.Label>
+              <Form.Control type="date" value={formState.microDate} onChange={(event) => setFormState((current) => ({ ...current, microDate: event.target.value }))} />
+            </Form.Group>
+            <Form.Group as={Col} controlId="microTime">
+              <Form.Label>Result Time</Form.Label>
+              <Form.Control type="time" value={formState.microTime} onChange={(event) => setFormState((current) => ({ ...current, microTime: event.target.value }))} />
+            </Form.Group>
+          </Row>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId="sampleType">
+              <Form.Label>Sample Type</Form.Label>
+              <Form.Control value={formState.sampleType} placeholder="E.g. MSSU" onChange={(event) => setFormState((current) => ({ ...current, sampleType: event.target.value }))} />
+            </Form.Group>
+            <Form.Group as={Col} controlId="growth">
+              <Form.Label>Growth/Organism(s)</Form.Label>
+              <Form.Control value={formState.growth} placeholder="E.g. E.Coli" onChange={(event) => setFormState((current) => ({ ...current, growth: event.target.value }))} />
+            </Form.Group>
+          </Row>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId="notes">
+              <Form.Label>Notes</Form.Label>
+              <Form.Control as="textarea" value={formState.notes} onChange={(event) => setFormState((current) => ({ ...current, notes: event.target.value }))} />
+            </Form.Group>
+          </Row>
+          <hr />
+          <Row className="mb-3">
+            <h4>Add sensitivity details</h4>
+            {formState.sensitivities.length === 0 ? <p style={{ color: 'red' }}>You have not added any sensitivity details</p> : null}
+            <Form.Group as={Col} controlId="drugName">
+              <Form.Label>Add Sensitivity</Form.Label>
+              <Form.Control value={formState.drug} placeholder="Drug" onChange={(event) => setFormState((current) => ({ ...current, drug: event.target.value }))} />
+            </Form.Group>
+            <Form.Group as={Col} controlId="drugSensitivity">
+              <Form.Label>Sensitivity</Form.Label>
+              <InputGroup>
+                <ToggleButtonGroup type="radio" name="sensitivityOptions" value={formState.sensitivity} onChange={(value) => setFormState((current) => ({ ...current, sensitivity: value }))}>
+                  <ToggleButton id="sens1" value="S" variant="outline-primary">Sensitive</ToggleButton>
+                  <ToggleButton id="sens2" value="I" variant="outline-primary">Intermediate</ToggleButton>
+                  <ToggleButton id="sens3" value="R" variant="outline-primary">Resistant</ToggleButton>
+                </ToggleButtonGroup>
+              </InputGroup>
+            </Form.Group>
+            <Form.Group as={Col} controlId="addSensitivityBtn">
+              <Button type="button" variant="outline-success" className="mt-4" onClick={addSensitivity}>Add Sensitivity</Button>
+            </Form.Group>
+          </Row>
+          <Row>
+            <strong>Sensitivities</strong>
+            <ListGroup>
+              {formState.sensitivities.map((item, index) => (
+                <ListGroup.Item key={`${item[0]}-${index}`}>
+                  {item[0]}: {item[1]}{' '}
+                  <Button type="button" variant="link" className="p-0" onClick={() => setFormState((current) => ({ ...current, sensitivities: current.sensitivities.filter((_sensitivity, itemIndex) => itemIndex !== index) }))}>
+                    Delete
+                  </Button>
+                </ListGroup.Item>
+              ))}
+            </ListGroup>
+          </Row>
+          <Form.Group as={Col} controlId="saveSampleBtn">
+            <Button type="button" variant="success" className="mt-4" disabled={saveSampleDisabled} onClick={saveSample}>Save Sample</Button>{' '}
+            <Button type="button" variant="outline-secondary" className="mt-4" onClick={resetForm}>Cancel</Button>
+          </Form.Group>
+        </Form>
+      ) : null}
+    </>
+  );
+};
 
-    const saveSample = () => {
-        //sample id 
-        console.log("sample: " + sampleId + " was saved")
-        let sampleDate = new Date(microDate)
-        sampleDate = sampleDate.toLocaleDateString('en-GB')
-        let microResult = {
-            "datetime": sampleDate + " " + microTime,
-            "sample_type": sampleType,
-            "growth": growth,
-            "sensitivities": sensitivities,
-            "notes": notes
-        }
-        let sampleList = samples 
-        if(sampleId === ""){    
-            if(sampleList.length > 0){
-                sampleList.push(microResult)
-            }else{
-                sampleList =[microResult]
-            }
-        }else{
-            sampleList[sampleId] = microResult
-        }
-        setSamples(sampleList)
-    }
-
-    const saveSamples = () => {
-        setMicrobiology(samples)
-        closeModal()
-    }
-
-
-    return(
-        
-            <>  
-                <h3>Results</h3>
-                <p>Add details of microbiology results for the patient</p>
-                <Table>
-                    <tbody>
-                        {editList} 
-                    </tbody>
-                </Table>
-                {
-                    showForm != 'new' ? (
-                        <>
-                            <Button variant="success" className="mt-4"  onClick={() => {setShowForm("new")}}> Add New Sample </Button>{' '}
-                            <Button variant="outline-info" className="mt-4"  onClick={closeModal}> Cancel</Button>{' '}
-                            {samples != '' ? (
-                                <Button variant="success" className="mt-4"  onClick={saveSamples}> Save Samples </Button>
-                            ):""
-                            }
-                        </>
-                         
-                    ):""
-                }
-                
-                { 
-                    showForm !=  false ? (
-                        <Form className="mt-3">
-                                {
-                                    showForm === "new" ? (
-                                        <h3>Add New Result</h3>
-                                    ):(
-                                        <h3>Edit Result</h3>
-                                    )
-                                }
-
-                            <Row className="mb-3"> 
-                                <Form.Group as={Col} controlId="microDate">
-                                    <Form.Label>Result Date</Form.Label>
-                                    <Form.Control type="date" value={microDate} placeholder="Start Date" onChange={(e) => setMicroDate(e.target.value)} style={microDate === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                                <Form.Group as={Col} controlId="microDate">
-                                    <Form.Label>Result Time</Form.Label>
-                                    <Form.Control type="time" value={microTime} placeholder="Start Date" onChange={(e) => setMicroTime(e.target.value)} style={microTime === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                            <Row className="mb-3">
-                                <Form.Group as={Col} controlId="sampleType">
-                                    <Form.Label>Sample Type</Form.Label>
-                                    <Form.Control type="text" value={sampleType} placeholder="E.g. MSSU" onChange={(e) => setSampleType(e.target.value)} style={sampleType === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                                <Form.Group as={Col} controlId="sampleType">
-                                    <Form.Label>Growth/Organism(s)</Form.Label>
-                                    <Form.Control type="text" value={growth} placeholder="E.g. E.Coli" onChange={(e) => setGrowth(e.target.value)} style={growth === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                            <Row className="mb-3">
-                                <Form.Group as={Col} controlId="notes">
-                                    <Form.Label>Notes</Form.Label>
-                                    <Form.Control as="textarea" value={notes} placeholder="Notes" onChange={(e) => setNotes(e.target.value)}  style={notes === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                            <hr/>
-                            <Row className="mb-3">
-                                <h4>Add sensitivity details</h4>
-                                {
-                                    sensitivities.length === 0 ? (
-                                        <p style={{"color":"red"}}>You have not added any sensitivity details</p>
-                                    ):""
-                                }
-                                <Form.Group as={Col} controlId="Type">
-                                    <Form.Label>Add Sensitivity</Form.Label>
-                                    <Form.Control type="text" value={drug} placeholder="Drug" onChange={(e) => setDrug(e.target.value)}/>
-                                </Form.Group>
-                                <Form.Group as={Col} controlId="sampleType">
-                                    <Form.Label>Sensitivity</Form.Label>
-                                        <InputGroup>
-                                            <ToggleButtonGroup type="radio" name="sensitivityOptions" onChange={setSensitivity}>
-                                                <ToggleButton id="sens1" value={"S"} variant="outline-primary">
-                                                    Sensitive
-                                                </ToggleButton>
-                                                <ToggleButton id="sens2" value={"I"} variant="outline-primary" >
-                                                    Intermediate
-                                                </ToggleButton>
-                                                <ToggleButton id="sens3" value={"R"} variant="outline-primary" >
-                                                    Resistant
-                                                </ToggleButton>
-                                            </ToggleButtonGroup>
-                                        </InputGroup>
-                                </Form.Group>    
-                                <Form.Group as={Col} controlId="sampleType">
-                                    <Button variant="outline-success"className="mt-4"  onClick={addSensitivity}>Add Sensitivity </Button>
-                                </Form.Group>      
-                            </Row>
-                        
-                            <Row>
-                                <strong>Sensitivities</strong>
-                                <ListGroup>
-                                    {displaySensitivities}
-                                </ListGroup>
-                            </Row>
-                            <Form.Group as={Col} controlId="sampleType">
-                                <Button variant="success" className="mt-4" disabled={saveSampleDisabled} onClick={() => {saveSample();cancelEdit()}} >Save Sample </Button>{' '}
-                                <Button variant="success" className="mt-4"  onClick={cancelEdit}> Cancel </Button>
-                            </Form.Group>      
-                        </Form>
-                    ):""
-
-                }
-            </>
-     
-    
-    )
-}
-export default AddMicrobiology
-
+export default AddMicrobiology;

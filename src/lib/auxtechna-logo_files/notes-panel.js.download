@@ -1,0 +1,301 @@
+// notes-panel.js — Clinical Notes panel module (loaded globally via _Layout)
+(function (window) {
+    'use strict';
+
+    // ── helpers ──────────────────────────────────────────────────────────────────
+
+    function getCsrf() {
+        return document.querySelector('input[name="__RequestVerificationToken"]')?.value ?? '';
+    }
+
+    function fmtDate(iso) {
+        const d = new Date(iso);
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' })
+             + ' ' + d.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' });
+    }
+
+    function esc(s) {
+        const div = document.createElement('div');
+        div.textContent = s ?? '';
+        return div.innerHTML;
+    }
+
+    // ── module ────────────────────────────────────────────────────────────────────
+
+    const NP = {
+
+        /** Toggle the panel body open/closed. Lazy-loads on first open. */
+        toggle: function (panelId) {
+            const body = document.getElementById('notesBody_' + panelId);
+            const chev = document.getElementById('notesChevron_' + panelId);
+            if (!body) return;
+
+            if (body.classList.contains('d-none')) {
+                body.classList.remove('d-none');
+                if (chev) { chev.classList.remove('bi-chevron-down'); chev.classList.add('bi-chevron-up'); }
+                NP._ensureLoaded(panelId);
+            } else {
+                body.classList.add('d-none');
+                if (chev) { chev.classList.remove('bi-chevron-up'); chev.classList.add('bi-chevron-down'); }
+            }
+        },
+
+        /**
+         * Programmatically init + auto-expand a panel.
+         * Call this when opening a dedicated Notes modal or after injecting modal HTML.
+         */
+        init: function (panelId, patientId, orderId) {
+            const panel = document.getElementById('notesPanel_' + panelId);
+            if (!panel) return;
+            panel.dataset.patientId = patientId != null ? patientId : '';
+            panel.dataset.orderId   = orderId   != null ? orderId   : '';
+            panel.dataset.npLoaded  = 'false';  // reset so we reload on open
+
+            const body = document.getElementById('notesBody_' + panelId);
+            const chev = document.getElementById('notesChevron_' + panelId);
+            if (body) body.classList.remove('d-none');
+            if (chev) { chev.classList.remove('bi-chevron-down'); chev.classList.add('bi-chevron-up'); }
+
+            NP._ensureLoaded(panelId);
+        },
+
+        _ensureLoaded: function (panelId) {
+            const panel = document.getElementById('notesPanel_' + panelId);
+            if (!panel || panel.dataset.npLoaded === 'true') return;
+            panel.dataset.npLoaded = 'true';
+            NP._loadCategories(panelId).then(() => NP._loadNotes(panelId));
+        },
+
+        // ── data loading ──────────────────────────────────────────────────────────
+
+        _loadCategories: async function (panelId) {
+            try {
+                const resp = await fetch('/ClinicalNotes/Categories');
+                const data = await resp.json();
+                const sel = document.getElementById('notesCategory_' + panelId);
+                if (!sel) return;
+                sel.innerHTML = '<option value="">-- No category --</option>';
+                (data.categories ?? []).forEach(c => {
+                    const o = document.createElement('option');
+                    o.value = c.id; o.textContent = c.name;
+                    if (c.colour) o.dataset.colour = c.colour;
+                    sel.appendChild(o);
+                });
+            } catch { /* categories are optional */ }
+        },
+
+        _loadNotes: async function (panelId) {
+            const panel = document.getElementById('notesPanel_' + panelId);
+            if (!panel) return;
+            const patientId = panel.dataset.patientId;
+            const orderId   = panel.dataset.orderId;
+            const container = document.getElementById('notesList_' + panelId);
+            if (!container) return;
+
+            container.innerHTML = '<div class="text-center py-2"><span class="spinner-border spinner-border-sm text-primary" role="status"></span></div>';
+
+            try {
+                let url = `/ClinicalNotes/ForPatient?patientId=${patientId}`;
+                if (orderId) url += `&orderId=${orderId}`;
+                const resp = await fetch(url);
+                const data = await resp.json();
+
+                const badge = document.getElementById('notesBadge_' + panelId);
+
+                if (!data.success) {
+                    container.innerHTML = '<p class="text-danger small mb-0">Failed to load notes.</p>';
+                    if (badge) badge.textContent = '!';
+                    return;
+                }
+
+                const notes = data.notes ?? [];
+                if (badge) badge.textContent = notes.length;
+
+                if (notes.length === 0) {
+                    container.innerHTML = '<p class="text-muted small text-center mb-0 py-2">No notes recorded yet.</p>';
+                    return;
+                }
+                container.innerHTML = notes.map(n => NP._renderNote(panelId, n)).join('');
+
+            } catch {
+                container.innerHTML = '<p class="text-danger small mb-0">Error loading notes.</p>';
+            }
+        },
+
+        // ── rendering ─────────────────────────────────────────────────────────────
+
+        _renderNote: function (panelId, n) {
+            const dt  = fmtDate(n.createdAt);
+            const colour = n.categoryColour || '#6c757d';
+            const catStyle = `background-color:${esc(colour)};`;
+            const cat = n.categoryName
+                ? `<span class="badge me-1" style="font-size:0.68rem;${catStyle}color:#fff;">${esc(n.categoryName)}</span>`
+                : '';
+            const orderTag = n.orderId
+                ? `<span class="badge bg-info text-dark me-1" style="font-size:0.68rem;"><i class="bi bi-prescription2"></i> Rx #${n.orderId}</span>`
+                : '';
+            const editBtn = n.canEdit
+                ? `<button class="btn btn-link btn-sm p-0 me-1" title="Edit note" onclick="NotesPanel._startEdit('${panelId}',${n.id})" style="font-size:0.8rem;color:#0056b3;line-height:1;"><i class="bi bi-pencil-fill"></i></button>`
+                : '';
+            const histBtn = `<button class="btn btn-link btn-sm p-0 me-1" title="View edit history" onclick="NotesPanel._showHistory(${n.id})" style="font-size:0.8rem;color:#6c757d;line-height:1;"><i class="bi bi-clock-history"></i></button>`;
+            const delBtn = n.canDelete
+                ? `<button class="btn btn-link btn-sm p-0" title="Delete note (soft)" onclick="NotesPanel._deleteNote('${panelId}',${n.id})" style="font-size:0.8rem;color:#dc3545;line-height:1;"><i class="bi bi-trash-fill"></i></button>`
+                : '';
+
+            return `<div class="py-2 border-bottom" id="noteEntry_${n.id}">
+  <div class="d-flex justify-content-between gap-1">
+    <div class="flex-grow-1">
+      <div class="mb-1">${cat}${orderTag}<span class="text-muted" style="font-size:0.75rem;">${dt} &mdash; <strong>${esc(n.createdByName)}</strong></span></div>
+      <div id="noteText_${n.id}" style="font-size:0.85rem; white-space:pre-wrap;">${esc(n.noteText)}</div>
+      <div id="noteEditBox_${n.id}" class="d-none mt-1">
+        <textarea class="form-control form-control-sm" id="noteEditInput_${n.id}" rows="2">${esc(n.noteText)}</textarea>
+        <div class="mt-1 d-flex gap-1">
+          <button class="btn btn-sm btn-primary" style="font-size:0.75rem;" onclick="NotesPanel._saveEdit('${panelId}',${n.id})"><i class="bi bi-check-lg"></i> Save</button>
+          <button class="btn btn-sm btn-secondary" style="font-size:0.75rem;" onclick="NotesPanel._cancelEdit(${n.id})">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <div class="flex-shrink-0 d-flex align-items-start pt-1">${editBtn}${histBtn}${delBtn}</div>
+  </div>
+</div>`;
+        },
+
+        // ── edit / delete ─────────────────────────────────────────────────────────
+
+        _startEdit: function (panelId, noteId) {
+            document.getElementById('noteText_'    + noteId)?.classList.add('d-none');
+            document.getElementById('noteEditBox_' + noteId)?.classList.remove('d-none');
+            document.getElementById('noteEditInput_' + noteId)?.focus();
+        },
+
+        _cancelEdit: function (noteId) {
+            document.getElementById('noteText_'    + noteId)?.classList.remove('d-none');
+            document.getElementById('noteEditBox_' + noteId)?.classList.add('d-none');
+        },
+
+        _saveEdit: async function (panelId, noteId) {
+            const input = document.getElementById('noteEditInput_' + noteId);
+            if (!input) return;
+            const text = input.value.trim();
+            if (!text) { showToast('error', 'Validation', 'Note text cannot be empty.'); return; }
+            try {
+                const resp = await fetch('/ClinicalNotes/Update', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getCsrf() },
+                    body: JSON.stringify({ id: noteId, noteText: text })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    const el = document.getElementById('noteText_' + noteId);
+                    if (el) el.textContent = text;
+                    NP._cancelEdit(noteId);
+                } else {
+                    showToast('error', 'Error', data.message ?? 'Could not save');
+                }
+            } catch { showToast('error', 'Error', 'Failed to save note'); }
+        },
+
+        _deleteNote: function (panelId, noteId) {
+            mppConfirm('Archive this note? It will no longer appear but is kept for audit purposes.', async function (ok) {
+                if (!ok) return;
+                try {
+                    const resp = await fetch('/ClinicalNotes/Delete', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getCsrf() },
+                        body: JSON.stringify({ id: noteId })
+                    });
+                    const data = await resp.json();
+                    if (data.success) {
+                        document.getElementById('noteEntry_' + noteId)?.remove();
+                        await NP._loadNotes(panelId);
+                    } else {
+                        showToast('error', 'Error', data.message ?? 'Could not delete');
+                    }
+                } catch { showToast('error', 'Error', 'Failed to delete note'); }
+            });
+        },
+
+        _showHistory: async function (noteId) {
+            try {
+                const resp = await fetch(`/ClinicalNotes/History?noteId=${noteId}`);
+                const data = await resp.json();
+                const versions = data.versions ?? [];
+                if (versions.length === 0) {
+                    showToast('success', 'No History', 'This note has not been edited since creation.');
+                    return;
+                }
+                let html = '<div class="list-group">';
+                versions.forEach(v => {
+                    html += `<div class="list-group-item">
+                        <small class="text-muted">${fmtDate(v.editedAt)} — <strong>${esc(v.editedByName)}</strong></small>
+                        <div style="font-size:0.85rem;white-space:pre-wrap;">${esc(v.noteText)}</div>
+                    </div>`;
+                });
+                html += '</div>';
+                // Inline Bootstrap modal
+                let modal = document.getElementById('noteHistoryModal');
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'noteHistoryModal';
+                    modal.className = 'modal fade';
+                    modal.innerHTML = `<div class="modal-dialog modal-lg"><div class="modal-content">
+                        <div class="modal-header"><h5 class="modal-title"><i class="bi bi-clock-history"></i> Note Edit History</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                        <div class="modal-body" id="noteHistoryBody"></div>
+                        <div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Close</button></div>
+                    </div></div>`;
+                    document.body.appendChild(modal);
+                }
+                document.getElementById('noteHistoryBody').innerHTML = html;
+                new bootstrap.Modal(modal).show();
+            } catch { showToast('error', 'Error', 'Failed to load history'); }
+        },
+
+        // ── add note ──────────────────────────────────────────────────────────────
+
+        addNote: async function (panelId) {
+            const panel = document.getElementById('notesPanel_' + panelId);
+            if (!panel) return;
+
+            const patientId = parseInt(panel.dataset.patientId);
+            const orderId   = panel.dataset.orderId ? parseInt(panel.dataset.orderId) : null;
+
+            const textEl = document.getElementById('notesNewText_' + panelId);
+            const catEl  = document.getElementById('notesCategory_' + panelId);
+            if (!textEl) return;
+
+            const noteText = textEl.value.trim();
+            if (!noteText) { showToast('error', 'Validation', 'Please enter some note text.'); textEl.focus(); return; }
+
+            const btn = document.querySelector(`#notesPanel_${panelId} .add-note-btn`);
+            if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+
+            try {
+                const resp = await fetch('/ClinicalNotes/Add', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': getCsrf() },
+                    body: JSON.stringify({
+                        patientId,
+                        orderId,
+                        noteCategoryId: catEl?.value ? parseInt(catEl.value) : null,
+                        noteText
+                    })
+                });
+                const data = await resp.json();
+                if (data.success) {
+                    textEl.value = '';
+                    if (catEl) catEl.value = '';
+                    await NP._loadNotes(panelId);
+                } else {
+                    showToast('error', 'Error', data.message ?? 'Could not add note');
+                }
+            } catch { showToast('error', 'Error', 'Failed to add note'); }
+            finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<i class="bi bi-plus-circle"></i> Add'; }
+            }
+        }
+    };
+
+    window.NotesPanel = NP;
+
+})(window);

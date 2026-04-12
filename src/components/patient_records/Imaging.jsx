@@ -3,19 +3,18 @@ import Offcanvas from 'react-bootstrap/Offcanvas';
 import Icon from './Patient_record_icon';
 import Container from 'react-bootstrap/Container';
 import Card from 'react-bootstrap/Card';
+import Table from 'react-bootstrap/Table';
 
 
 const Imaging = (props) => {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
+  const imagesList = Array.isArray(props.images) ? props.images : [];
   const handleClick = () => {
-    if(props.images.length > 0){
-        setShow(true)   
-    } 
-  }
-  console.log(props.images)
-  let images = props.images.map((image) => (
-    <Container className="mt-3">
+    setShow(true);
+  };
+  const images = imagesList.map((image, index) => (
+    <Container className="mt-3" key={`${image.image_url || image.image_date || 'image'}-${index}`}>
       <Card>
         <Card.Img variant="top" src={image['image_url']} />
         <Card.Body>
@@ -30,7 +29,7 @@ const Imaging = (props) => {
   ))
   return (
     <>
-      <td onClick={handleClick} style={props.images.length < 1 ? {"opacity": 0.3}:{"opacity":1}}>
+      <td onClick={handleClick}>
        <Icon logo="bi bi-image" title_text="Imaging"/>
       </td>
 
@@ -39,7 +38,27 @@ const Imaging = (props) => {
           <Offcanvas.Title>Imaging</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body>
-          {images} 
+          {imagesList.length ? images : (
+            <Container>
+              <Table className="tbl-notes container-shadow">
+                <thead>
+                  <tr className="blue-back text-white">
+                    <th colSpan={3}>Imaging</th>
+                  </tr>
+                  <tr>
+                    <th>Date</th>
+                    <th>Type</th>
+                    <th>Report</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td colSpan={3} className="text-center text-muted">No imaging recorded yet.</td>
+                  </tr>
+                </tbody>
+              </Table>
+            </Container>
+          )}
         </Offcanvas.Body>
       </Offcanvas>
     </>

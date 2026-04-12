@@ -1,40 +1,41 @@
 {
   "case_study_name": "test case study",
   "prescribingStatus": false,
-  "case_instructions": "John Smith has been admitted to the Medical Admissions Unit. Read the information provided about the patients admission to hospital before attempting the questions below",
+  "case_instructions": "Mrs V.H. has been admitted to your ward. Read the information provided about the patients admission to hospital before attempting the questions below",
   "patient": {
-    "name": "John Smith",
-    "hospitalNo": "1234567",
-    "dob": "11/02/1944",
+    "name": "V H",
+    "hospitalNo": "1234567A",
+    "dob": "08/08/1935",
     "address": "14 Castle Street, Liverpool, L11 5AT",
-    "weight": "68kg",
-    "height": "175cm",
-    "gender": "Male"
+    "weight": "45kg",
+    "height": "",
+    "gender": "Female"
   },
   "allergies": [{
-    "drug":"penicillin", 
-    "reaction": "unknown reaction"
-  },{
-    "drug": "bisoprolol",
-    "reaction": "hypotension"
+    "drug":"Codeine", 
+    "reaction": "Rash"
   }],
   "case_notes": {
-    "presenting_complaint": "UTI",
-    "history_presenting_complaint": "78 YO Male BIBA Presented with UTI onset 48 hours ago",
+    "presenting_complaint": "Was asleep and then both arms started shaking. ",
+    "history_presenting_complaint": "Deterioration over the last 2 weeks, Less vocal, more sleepy, Worse mobility.",
     "conditions": [
-      "Rheumatoid Arthritis",
-      "Raised Cholesterol",
-      "Hypertension",
-      "DVT 1 month ago following long haul flight"
+      "Alzheimer's dementia", "Anxiety", "HTN", "Hypothyroidism", "Diverticulitis", "OA", "Bilateral PEs – 2021 (apixaban)"
     ],
     "social_history": {
-      "alcohol": "10 units a week",
-      "smoking": "10 a day",
+      "alcohol": "No alcohol > 5 years",
+      "smoking": "none smoker",
       "recreational_drugs": "nil",
       "occupation": "nil",
-      "home_environment": "Lives alone in sheltered accomodation"
+      "home_environment": "Lives in a Bungalow with 4 x a day POC"
     },
     "family_history": "Mother previous MI",
+    "medication_history": {
+      "status": "complete",
+      "added_by": "Mrs Pharmacist",
+      "date_added": "13/05/2024",
+      "details":"<b>sources:</b> GP Record, Patients relative, community pharmacy<br/><br/><b>Acute Medication: Nil</b><br/><br/><b>Regular Medication:</b> <br/><br/>Apixaban 5mg BD<br/>Citalopram 20mg OD<br/>Donepezil 5mg orodispersible tablet OD (to be increased to 10mg if tolerated) –started 2 weeks ago<br/>Doublebase gel – Use as required  <br/>Indapamide 1.5mg MR tablets – 1 OM<br/>Levothyroxine 50 micrograms OD<br/>Peppermint Oil 1 capsules TDS with meals.<br/>"
+    },
+    "diagnoses":"Post-ictal seizures, Hypokalemia",
     "notes": [
       {
        
@@ -59,13 +60,7 @@
       }
     ]
   },
-  "imaging":[{
-    "image_date": "2022-01-01",
-    "image_time": "",
-    "image_url": "data:image/jpeg;base64,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",
-    "image_desc": "Chest x-ray",
-    "image_type": "Chest X-ray"
-  }],
+  "imaging":[],
   "prescriptionList": [
     {
       "drug": "Nitrofurantoin",
@@ -292,41 +287,57 @@
     }
   ],
   "microbiology":
-    [{
-      "datetime":"05/07/2022 09:00",
-      "sample_type": "MSSU",
-      "growth":"E. coli",
-      "sensitivities":[["Amoxicillin","S"],["Cefaclor","R"],["Nitrofurantoin","S"],["Gentamicin","S"],["Trimethoprim","S"]],
-      "notes": "S = Sensitive  R = Resistant"
-    },{
-      "datetime":"04/07/2022 08:00",
-      "sample_type": "CSU",
-      "growth":"Klebsiella",
-      "sensitivities":[["Amoxicillin","S"],["Cefaclor","R"],["Nitrofurantoin","S"],["Gentamicin","S"],["Trimethoprim","S"]],
-      "notes": "S = Sensitive  R = Resistant"
-    }]
+    []
   ,
   "biochemistry": {
+    "pH":{
+      "name": "pH",
+      "category": "Venous Blood Gases",
+      "range": "",
+      "unit": "",
+      "results":[{
+        "datetime": "13/05/2024 08:00",
+        "result": 7.43
+      }]
+    },
+    "lactate":{
+      "name": "lactate",
+      "category": "Venous Blood Gases",
+      "range": "22 – 32",
+      "unit": "mmol/L",
+      "results":[{
+        "datetime": "13/05/2024 08:00",
+        "result": 3.2
+      }]
+    },
+    "PCO2":{
+      "name": "PCO2",
+      "category": "Venous Blood Gases",
+      "range": "4.7 - 6.0",
+      "unit": "kPa",
+      "results":[{
+        "datetime": "13/05/2024 08:00",
+        "result": 6.2
+      }]
+    },
+    "HCO3":{
+      "name": "HCO3",
+      "category": "Venous Blood Gases",
+      "range": "0.5 – 2.2",
+      "unit": "mmol/L",
+      "results":[{
+        "datetime": "13/05/2024 08:00",
+        "result": 30
+      }]
+    },
     "sodium":{
       "name": "sodium",
       "category": "UE",
       "range": "135*145",
       "unit": "mmol/L",
       "results":[{
-        "datetime": "04/07/2022 08:00",
-        "result": 139
-      },{
-        "datetime": "04/07/2022 13:00",
-        "result": 140
-      },{
-        "datetime": "05/07/2022 08:00",
-        "result": 138
-      },{
-        "datetime": "05/07/2022 12:47",
-        "result": 137
-      },{
-        "datetime": "05/07/2022 20:00",
-        "result": 139
+        "datetime": "13/05/2024 08:00",
+        "result": 131
       }]
     },
     "potassium":{
@@ -335,20 +346,8 @@
       "range": "3.5-5.0",
       "unit": "mmol/L",
       "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 4.2
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 5.2
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 4.8
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 4.0
-        },{
-          "datetime": "05/07/2022 20:00",
-          "result": 3.0
+          "datetime": "13/05/2024 08:00",
+          "result": 2.8
         }]
       },
       "Urea":{
@@ -357,20 +356,8 @@
         "range":"2.5-7.5",
         "unit":"mmol/L",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 5.3
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 18.5
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 15.2
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 12.1
-        },{
-          "datetime": "05/07/2022 20:00",
-          "result": 8.6
+          "datetime": "13/05/2024 08:00",
+          "result": 11
         }]
       },
       "CRP":{
@@ -379,17 +366,8 @@
         "range": ">4",
         "unit": "x 10^9",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 138
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 82
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 65
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 68
+          "datetime": "13/05/2024 08:00",
+          "result": 5
         }]
       },
       "Creatinine":{
@@ -398,17 +376,8 @@
         "range": "80-120",
         "unit": "mmol/L",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 98
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 110
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 215
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 198
+          "datetime": "13/05/2024 08:00",
+          "result": 101
         }]
       },
       "Haemogoblin":{
@@ -417,17 +386,8 @@
         "range": "12-15",
         "unit": "g/dL",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 138
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 82
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 65
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 68
+          "datetime": "13/05/2024 08:00",
+          "result": 150
         }]
       },
       "Platelets":{
@@ -436,17 +396,8 @@
         "range": "150-450",
         "unit": "x 10^9",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 175
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 170
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 165
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 180
+          "datetime": "13/05/202408:00",
+          "result": 238
         }]
       },
       "WCC":{
@@ -455,36 +406,8 @@
         "range": "4-11",
         "unit": "x 10^9",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 5.8
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 12.1
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 14.0
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 13.1
-        }]
-      },
-      "Neutrophils":{
-        "name": "Neutrophils",
-        "category":"FBC",
-        "range": "2.5-7.5",
-        "unit": "g/dL",
-        "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 3.2
-        },{
-          "datetime": "04/07/2022 13:00",
-          "result": 4.8
-        },{
-          "datetime": "05/07/2022 08:00",
-          "result": 8.4
-        },{
-          "datetime": "05/07/2022 12:47",
-          "result": 10.1
+          "datetime": "13/05/2024 08:00",
+          "result": 7.0
         }]
       },
       "blood glucose":{
@@ -493,83 +416,49 @@
         "range": "4.0-8.0",
         "unit": "mmol/L",
         "results":[{
-          "datetime": "04/07/2022 08:00",
-          "result": 5.7
+          "datetime": "13/05/2024 08:00",
+          "result": 9.8
+        }]
+      },
+      "ecg":{
+        "name": "ECG",
+        "category":"Cardio",
+        "range": "",
+        "unit": "",
+        "results":[{
+          "datetime": "13/05/2024 08:00",
+          "result":  "ECG: SR + ventricular ectopics. ST depression / T wave flattening I, aVL, II, III, aVF. U waves V2-V3. Prolonged QTc"
         }]
       }
   },
   "observations": {
     "blood_pressure": [{
-      "datetime": "2022-07-04 08:00",
-      "systolic": 110,
-      "diastolic": 80
-    },{
-      "datetime": "2022-07-04 13:00",
-      "systolic": 116,
-      "diastolic": 87
-    },{
-      "datetime": "2022-07-05 07:45",
-      "systolic": 125,
-      "diastolic": 92
-    },{
-      "datetime": "2022-07-05 12:45",
-      "systolic": 118,
-      "diastolic": 78
+      "datetime": "13/05/2024 08:00",
+      "systolic": 96,
+      "diastolic": 60
     }],
     "heart_rate": [{
-      "datetime": "04/07/2022 08:00",
-      "rate": 110
-    },{
-      "datetime": "04/07/2022 13:00",
-      "rate": 116      
-    },{
-      "datetime": "05/07/2022 07:45",
-      "rate": 125
-    },{
-      "datetime": "05/07/2022 12:45",
-      "rate": 118
+      "datetime": "13/05/2024 08:00",
+      "rate": 30
     }],
-    "temperature": [{
-      "datetime": "04/07/2022 08:00",
-      "temperature": 37.3
-    },{
-      "datetime": "04/07/2022 13:00",
-      "temperature": 37.6     
-    },{
-      "datetime": "05/07/2022 07:45",
-      "temperature": 36.9
-    },{
-      "datetime": "05/07/2022 12:45",
-      "temperature": 37.4
-    }],
-    "resp_rate": [{
-      "datetime": "04/07/2022 08:00",
-      "bpm": 15
-    },{
-      "datetime": "04/07/2022 13:00",
-      "bpm": 16
-    },{
-      "datetime": "05/07/2022 07:45",
-      "bpm": 18
-    },{
-      "datetime": "05/07/2022 12:45",
-      "bpm": 15
-    }],"oxygen": [{
-      "datetime": "04/07/2022 08:00",
-      "percentage": 15
-    },{
-      "datetime": "04/07/2022 13:00",
-      "percentage": 16
-    },{
-      "datetime": "05/07/2022 07:45",
-      "percentage": 18
-    },{
-      "datetime": "05/07/2022 12:45",
-      "percentage": 15
-    }]
+    "temperature": [],
+    "resp_rate": [],
+    "oxygen": []
   },
   "questions": [{
     "questionNumber": 1,
+    "questionType": "Calculation",
+    "questionTitle": "Creatinine Clearance",
+    "questionText": "Calculate the patients creatinine clearance to 1 dp",
+    "answer": 24.1
+    },{
+      "questionNumber": 2,
+      "questionType": "DrugChoice",
+      "questionTitle": "Hypokalaemia",
+      "questionText": "Which medication prescribed is most likely to cause hypokalemia",
+      "answer": "Naproxen"
+      },{
+    "questionNumber": 3,
     "questionType": "MultipleChoice",
     "questionTitle": "Nitrofurantoin",
     "questionText": "What would the most appropriate duration for nitrofurantoin be for this patient?",
@@ -577,7 +466,7 @@
     "answer": "7 days",
     "answerExplanation":""
   },{
-    "questionNumber": 2,
+    "questionNumber": 4,
     "questionType": "MultipleChoice",
     "questionTitle": "Enoxaparin",
     "questionText": "What class of drug is enoxparin?",
@@ -585,11 +474,12 @@
     "answer": "low-molecular weight heparin",
     "answerExplanation":""
   },{
-    "questionNumber": 3,
-    "questionType": "CarePlan",
-    "questionTitle": "Care Plan",
-    "questionText": "Outline a pharmaceutical care plan for the patient",
-    "Model Answer":""
+    "questionNumber": 5,
+    "questionType": "MultipleAnswer",
+    "questionTitle": "Target Blood Pressure",
+    "questionText": "What would this patient’s target blood pressure be?",
+    "optionsLabels": ["Systolic","Diastolic","unit"],
+    "answer": [120,80,"mmHg"]
     }]
 
 }

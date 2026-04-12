@@ -1,353 +1,242 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useMemo, useState } from 'react';
+import Alert from 'react-bootstrap/Alert';
 import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
-import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 import ToggleButton from 'react-bootstrap/ToggleButton';
 import ToggleButtonGroup from 'react-bootstrap/ToggleButtonGroup';
-import data from './randomFields'
-import PatientDetails from "../patient_records/Patient_details"
-import ListGroup from 'react-bootstrap/ListGroup';
-import Alert from "react-bootstrap/Alert";
-import ContentHeader from "../Content_header";
+import data from './randomFields';
+import PatientDetails from '../patient_records/Patient_details';
+import ContentHeader from '../Content_header';
 
+const buildRandomHospitalNo = () => {
+  const characters = 'ABCDEFGHIJKLMNOPQRSTUVQXYZ';
+  const suffix = characters[Math.floor(Math.random() * characters.length)];
+  return `${Math.floor(Math.random() * 1000000)}${suffix}`;
+};
 
-const NewCaseForm = ({closeNewPatient, patientDemographics, setPatientAllergies, currentDemographics, currentAllergies}) => {
-    const [name, setName] = useState("")
-    const [age, setAge] = useState("")
-    const [dob, setDob] = useState("")  
-    const [weight, setWeight] = useState("")
-    const [height, setHeight] = useState("")
-    const [gender, setGender] = useState("")
-    const [address, setAddress] = useState("")
+const emptyPatient = {
+  name: '',
+  hospitalNo: buildRandomHospitalNo(),
+  dob: '',
+  address: '',
+  weight: '',
+  height: '',
+  gender: '',
+};
 
-    //Generate Random hospital Number
-    const randomCharacter = () =>{
-        let characters = "ABCDEFGHIJKLMNOPQRSTUVQXYZ"
-        return(characters[Math.floor(Math.random() * characters.length)])
-     } 
-          
-    let randomHospNo = Math.floor(Math.random() * 1000000) + randomCharacter()
-    const [hospNo, setHospNo] = useState(randomHospNo)
-    
-    //Patient objects
-    let patient = { 
-        "name": name,
-        "hospitalNo": hospNo,
-        "dob": dob,
-        "address": address,
-        "weight": weight + "kg",
-        "height": height + "cm",
-        "gender": gender,
+const NewCaseForm = ({ closeNewPatient, patientDemographics, setPatientAllergies, currentDemographics, currentAllergies }) => {
+  const [patient, setPatient] = useState(emptyPatient);
+  const [age, setAge] = useState('');
+  const [allergies, setAllergies] = useState([]);
+  const [newAllergyInput, setAllergyInput] = useState('');
+  const [newReactionInput, setReactionInput] = useState('');
+
+  useEffect(() => {
+    if (currentDemographics && typeof currentDemographics === 'object' && !Array.isArray(currentDemographics) && currentDemographics.name) {
+      setPatient({
+        name: currentDemographics.name || '',
+        hospitalNo: currentDemographics.hospitalNo || buildRandomHospitalNo(),
+        dob: currentDemographics.dob || '',
+        address: currentDemographics.address || '',
+        weight: (currentDemographics.weight || '').replace('kg', ''),
+        height: (currentDemographics.height || '').replace('cm', ''),
+        gender: currentDemographics.gender || '',
+      });
     }
 
-    //load previous patient 
-    const loadExistingDetails = () =>{
-        console.log(currentDemographics)
-
-        setName(currentDemographics['name'])
-        setDob(currentDemographics['dob'])
-        setAddress(currentDemographics['address'])
-
-        let wt = currentDemographics['weight'].replace('kg','')
-        setWeight(wt)
-
-        let ht = currentDemographics['height'].replace('cm','')
-        setHeight(ht)
-
-        setGender(currentDemographics['gender'])
-
-        setAllergies(currentAllergies)
-
+    if (Array.isArray(currentAllergies)) {
+      setAllergies(currentAllergies);
     }
+  }, [currentDemographics, currentAllergies]);
 
-    //Load previous data n first rerender only
-    useEffect(() => {
-        if(currentDemographics.length != ""){
-            loadExistingDetails()
-        }
-    },[]);
+  const updatePatientField = (field, value) => {
+    setPatient((current) => ({ ...current, [field]: value }));
+  };
 
-    //generate a random name
-    const randomName = (gender) => {       
-        let firstname = data["names"][gender][Math.floor(Math.random() * data["names"][gender].length)]  
-        let surname = data["names"]["surnames"][Math.floor(Math.random() * data["names"]["surnames"].length)]   
-        setName(firstname + " " + surname)
-    }
+  const randomName = (genderKey) => {
+    const firstName = data.names[genderKey][Math.floor(Math.random() * data.names[genderKey].length)];
+    const surname = data.names.surnames[Math.floor(Math.random() * data.names.surnames.length)];
+    updatePatientField('name', `${firstName} ${surname}`);
+  };
 
-    //Takes an age and converts it to a dob   
-    const birthdate = (age) =>{
-        setAge(age)
-        let today = new Date(new Date().setFullYear(new Date().getFullYear()))
-        let tomorrow = new Date()
-        tomorrow.setDate(tomorrow.getDate()+1)
-        
-        let earliest =  today.setFullYear(today.getFullYear() - age);       
-        earliest = new Date(earliest).getTime()
+  const randomAddress = () => {
+    const characters = 'ABCDEFGHIJKLMNOPQRSTUVQXYZ';
+    const postcode = `${characters[Math.floor(Math.random() * characters.length)]}${characters[Math.floor(Math.random() * characters.length)]}${Math.ceil(Math.random() * 10)} ${Math.ceil(Math.random() * 10)}${characters[Math.floor(Math.random() * characters.length)]}${characters[Math.floor(Math.random() * characters.length)]}`;
+    const houseNo = Math.ceil(Math.random() * 120);
+    const street = data.addresses.streets[Math.floor(Math.random() * data.addresses.streets.length)];
+    const town = data.addresses.towns[Math.floor(Math.random() * data.addresses.towns.length)];
+    updatePatientField('address', `${houseNo} ${street}, ${town}, ${postcode}`);
+  };
 
-        let latest =  tomorrow.setFullYear(tomorrow.getFullYear() - age-1)
-        latest = new Date(latest).getTime()
+  const birthdate = (nextAge) => {
+    setAge(nextAge);
+    const ageNumber = Number(nextAge);
+    const today = new Date();
+    const maxDate = new Date(today.getFullYear() - ageNumber, today.getMonth(), today.getDate());
+    const minDate = new Date(today.getFullYear() - ageNumber - 1, today.getMonth(), today.getDate() + 1);
+    const randomDate = new Date(minDate.getTime() + Math.random() * (maxDate.getTime() - minDate.getTime()));
+    updatePatientField('dob', randomDate.toLocaleDateString());
+  };
 
-        let randomDate = new Date(earliest + Math.random() * (latest-earliest))
-        setDob(randomDate.toLocaleDateString())
-    }
-    
-    const randomAddress = () => {
-        let houseNo = Math.ceil(Math.random() * 120)
-        let street = data["addresses"]["streets"][Math.floor(Math.random() * data["addresses"]["streets"].length)] 
-        let town = data["addresses"]["towns"][Math.floor(Math.random() * data["addresses"]["towns"].length)]
-        let postCode = `${randomCharacter()}${randomCharacter()}${Math.ceil(Math.random() * 10)} ${Math.ceil(Math.random() * 10)}${randomCharacter()}${randomCharacter()}`
-        let addressStr= `${houseNo} ${street}, ${town}, ${postCode}`
-        setAddress(addressStr)
-    }
+  const randomPatient = (genderKey) => {
+    randomName(genderKey);
+    randomAddress();
+    const randomAge = Math.floor(Math.random() * (100 - 18 + 1) + 18);
+    birthdate(randomAge);
+    updatePatientField('gender', genderKey === 'male_names' ? 'Male' : 'Female');
+    updatePatientField('weight', Math.floor(Math.random() * (150 - 50 + 1) + 30).toString());
+    updatePatientField('height', Math.floor(Math.random() * (220 - 150 + 1) + 150).toString());
+  };
 
-    const updateGender = (val) => setGender(val) 
-
-    //Handle Allergies
-    const [allergies, setAllergies] = useState([])
-    const [newAllergyInput, setAllergyInput] = useState("")
-    const [newReactionInput, setReactionInput] = useState("")
-    
-    const handleAddAllergy = () => {
-        let newAllergy =  {
-            "drug":newAllergyInput, 
-            "reaction": newReactionInput
-        }
-        //check if NKDA present
-        let allergyList = allergies
-        if(allergies.length > 0){
-            if(allergies[0]["drug"] == "NKDA" || allergies[0]["drug"] == "Unconfirmed Allergy Status" ){
-                allergyList.shift()
-                allergyList.push(newAllergy)
-            }else{
-                allergyList.push(newAllergy)
-            }
-        }else{
-            allergyList.push(newAllergy)
-        }
-        
-        setAllergies(allergyList)   
-        setAllergyInput("")     
-        setReactionInput("")
-    }
-
-    const deleteAllergy = (allergy) => {
-        let allergyList = allergies
-        allergyList.splice(allergy,1)
-        setAllergies(allergyList)
-        checkComplete()
-    }
-
-    const randomPatient = (gender) => {
-        //generates an entirely random patient except for allergies
-        randomName(gender)
-        randomAddress()
-        let randomAge = Math.floor(Math.random() * (100 - 18 + 1) + 18)
-        birthdate(randomAge)
-        gender == "male_names" ? setGender("Male"):setGender("Female")
-        let randomWeight = Math.floor(Math.random() * (150 - 50 + 1) + 30)
-        let randomHeight = Math.floor(Math.random() * (220 - 150 + 1) + 150)
-        setWeight(randomWeight)
-        setHeight(randomHeight)
-
-    }
-
-    //toggle disabled for save button
-    const [continueDisabled, setContinueDisabled] = useState(true)
-    const [patientComplete, setPatientComplete] = useState(false)        
-   
-    //check all details have been completed and changes colours
-    const checkComplete = () =>{
-        if(name != "" && hospNo != "" && dob != "" && address != "" && weight != "" && height != "" && gender != ""){
-            if(allergies != ""){
-                setContinueDisabled(false)
-            }else{
-                setContinueDisabled(true)
-            }            
-            setPatientComplete(true)
-        }else{
-            setContinueDisabled(true)
-            setPatientComplete(false)
-        }
-    }
-
-    //Send patient to parent element and closes offcanvas
-    const savePatient = () =>{
-        patientDemographics(patient)
-        setPatientAllergies(allergies)
-        closeNewPatient()
-    }
-    
-    //Check for completion each render each time
-    useEffect(() => {
-        checkComplete()
+  const handleAddAllergy = () => {
+    const newAllergy = { drug: newAllergyInput, reaction: newReactionInput };
+    setAllergies((current) => {
+      const next = [...current].filter((item) => !['NKDA', 'Unconfirmed Allergy Status'].includes(item.drug));
+      return [...next, newAllergy];
     });
-    
-    
+    setAllergyInput('');
+    setReactionInput('');
+  };
 
+  const savePatient = () => {
+    patientDemographics({
+      ...patient,
+      weight: `${patient.weight}kg`,
+      height: `${patient.height}cm`,
+    });
+    setPatientAllergies(allergies);
+    closeNewPatient();
+  };
 
-    return(
-        <> 
-        <ContentHeader title="Patient Demographics" complete={patientComplete === true ? "true":""}/>
+  const patientComplete = useMemo(
+    () => Boolean(patient.name && patient.hospitalNo && patient.dob && patient.address && patient.weight && patient.height && patient.gender),
+    [patient]
+  );
 
-        <Container>
-            <Form>              
-                {/* <Row className=" mt-3 mb-3">
-                    <Col>
-                        <ListGroup horizontal>
-                            <ListGroup.Item style={name.length > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Patient Name</ListGroup.Item>
-                            <ListGroup.Item style={hospNo.length > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Hospital No</ListGroup.Item>
-                            <ListGroup.Item style={dob.length > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>DOB</ListGroup.Item>
-                            <ListGroup.Item style={address.length > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Address</ListGroup.Item>
-                            <ListGroup.Item style={weight > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Weight</ListGroup.Item>
-                            <ListGroup.Item style={height > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Height</ListGroup.Item>
-                            <ListGroup.Item style={gender.length > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Gender</ListGroup.Item>
-                            <ListGroup.Item style={allergies.length > 0 ? {backgroundColor : "#77DD77"}: {backgroundColor : ""}}>Allergy Status</ListGroup.Item>
-                        </ListGroup>
-                    </Col>            
-                </Row> */}
-                <Row className="mb-3">
-                    <Alert variant="info" className="mt-3">
-                        <p>Patient demographics can be set manually using the fields below or a random patient can be generated using the randomise buttons</p>
-                        <Button variant="outline-primary" onClick={() => randomPatient('male_names')}>Random Male Patient</Button>{' '}
-                        <Button variant="outline-primary" onClick={() => randomPatient('female_names')}>Random Female Patient</Button>   
-                    </Alert>                
-                </Row>
-                <Row className="mb-3">
-                    <Col>
-                    Patient Name
-                        <InputGroup>
-                            <Form.Control aria-label="Patients name" defaultvalue={name} value={name}  onChange={(e) => setName(e.target.value)}/>
-                            <Button variant="outline-secondary" onClick= {() => randomName("male_names")}>Random Male</Button>
-                            <Button variant="outline-secondary" onClick= {() => randomName("female_names")}>Random Female</Button>
-                        </InputGroup>
-                    </Col>
-                </Row>
-                <Row className="mb-3">
-                    <Form.Group as={Col} controlId="formHospitalno">
-                        <Form.Label>Hospital Number</Form.Label>
-                        <Form.Control type="text" onChange={(e) => setHospNo(e.target.value)} value={hospNo}/>
-                    </Form.Group> 
-                </Row>
-                <Row className="mb-3">
-                    <Form.Group as={Col} controlId="formBirthDate">
-                        <Form.Label>Age <span>{age}</span></Form.Label>
-                        <Form.Range  value={age} onChange={e => birthdate(e.target.value)}/>
-                    </Form.Group>
-                    <Form.Group as={Col} controlId="formHospitalno">
-                        <Form.Label>Date of Birth</Form.Label>
-                        <Form.Control type="text" defaultvalue={dob} value={dob}/>
-                    </Form.Group> 
-                </Row>
-                <Row className="mb-3">
-                    <Form.Group as={Col} controlId="formAddress">
-                        <Form.Label>Address</Form.Label>
-                        <InputGroup>
-                            <Form.Control type="text" onChange={(e) => setAddress(e.target.value)} defaultvalue={address} value={address}/>
-                            <Button variant="outline-secondary" onClick= {() => randomAddress()}>Random Address</Button>
-                        </InputGroup>
-                    </Form.Group>
-                </Row>
-                <Row className="mb-3">
-                    <Form.Group as={Col} controlId="formWeight">
-                        <Form.Label>Weight</Form.Label>
-                        <InputGroup>
-                            <Form.Control type="text" onChange={(e) => setWeight(e.target.value)} defaultvalue={weight} value={weight}/>
-                            <Button variant="secondary" disabled>kg</Button>
-                        </InputGroup>
-                    </Form.Group>
-                    <Form.Group as={Col} controlId="formWeight">
-                        <Form.Label>Height</Form.Label>
-                        <InputGroup>
-                            <Form.Control type="text" onChange={(e) => setHeight(e.target.value)} defaultvalue={height} value={height}/>
-                            <Button variant="secondary" disabled>cm</Button>
-                        </InputGroup>
-                    </Form.Group>
-            
-                    <Form.Group as={Col}>
-                        <Form.Label>Gender</Form.Label>
-                            <InputGroup>
-                                <ToggleButtonGroup type="radio" name="genderOptions" value={gender} defaultvalue={gender} onChange={updateGender}>
-                                    <ToggleButton id="gender1" value={"Male"} variant="outline-primary">
-                                        Male
-                                    </ToggleButton>
-                                    <ToggleButton id="gender2" value={"Female"} variant="outline-primary" >
-                                        Female
-                                    </ToggleButton>
-                                </ToggleButtonGroup>
-                            </InputGroup>
-                    </Form.Group>
-                </Row>
-            </Form>
-            </Container>
-            <Container>
-            <ContentHeader title="Allergies" className="mt-5" complete={allergies != "" ? "true":""}/>
-            <Form className="mt-3 mb-3">
-            <Container>
-                <Row className="mb-3">
-                    <Alert variant="info" className="mt-3">
-                        <p>Use the text boxes below to enter an unlimited number of allergies. Alternatively set the allergies to unconfirmed or NKDA</p>
-                    </Alert>
-                </Row>
-                <Row className="mb-3">
-                    <Col>
-                        <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"NKDA","reaction":""}])}>Set to NKDA</Button>{' '}
-                        <Button variant="outline-primary" onClick={() => setAllergies([{"drug":"Unconfirmed Allergy Status","reaction":""}])}>Set to Unconfirmed Allergies</Button>{' '}
-                    </Col>
-                </Row>
-                <Row className="mb-3">
-                    <Form.Group as={Col} controlId="formAllergy">
-                            <Form.Control type="text" placeholder="Allergen" value={newAllergyInput} onChange={(e) => setAllergyInput(e.target.value)}/>           
-                    </Form.Group>
-                    <Form.Group as={Col} controlId="formAllergyReaction">
-                        <Form.Control type="text" placeholder="Reaction" value={newReactionInput} onChange={(e) => setReactionInput(e.target.value)}/>                     
-                    </Form.Group>
-                </Row>
-            </Container>
-            <Row>
-                <Col>
-                    {
-                        newAllergyInput.length > 0 ? (
-                            <Button variant="outline-primary" onClick={handleAddAllergy}>Add Allergy</Button>
-                        ):""
-                    }
-                    {' '}
-                    {
-                     
-                        allergies.map(((allergy, index) => (
-                            <p>
-                                {allergy.drug} {allergy.reaction} <a href='#' onClick={() => {setAllergies(allergies.filter(x => x !== allergy))}} > delete</a>
-                            </p>
-                        )))   
-                    }
-                    
-                </Col>
-               
-            </Row>
-            <hr/>
-        </Form>
-        </Container>
-        
-        <Container className="mt-3">
-            <ContentHeader title="Patient Preview" className="mb-5"/>
-            <Row>
-                <PatientDetails patient={patient} allergies={allergies} />
-            </Row>
-            <hr/>
-            <Row>
-                <Col>
-                    <Button variant="primary" disabled={continueDisabled} onClick={savePatient}>Save Patient</Button>
-                </Col>
-            </Row>
-        </Container>
-        
-        
+  return (
+    <>
+      <ContentHeader title="Patient Demographics" complete={patientComplete ? 'true' : ''} />
+      <Form>
+        <Row className="mb-3">
+          <Alert variant="info" className="mt-3">
+            <p>Patient demographics can be entered manually or generated with the randomise buttons.</p>
+            <Button type="button" variant="outline-primary" onClick={() => randomPatient('male_names')}>Random Male Patient</Button>{' '}
+            <Button type="button" variant="outline-primary" onClick={() => randomPatient('female_names')}>Random Female Patient</Button>
+          </Alert>
+        </Row>
+        <Row className="mb-3">
+          <Col>
+            Patient Name
+            <InputGroup>
+              <Form.Control value={patient.name} onChange={(event) => updatePatientField('name', event.target.value)} />
+              <Button type="button" variant="outline-secondary" onClick={() => randomName('male_names')}>Random Male</Button>
+              <Button type="button" variant="outline-secondary" onClick={() => randomName('female_names')}>Random Female</Button>
+            </InputGroup>
+          </Col>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formHospitalno">
+            <Form.Label>Hospital Number</Form.Label>
+            <Form.Control type="text" value={patient.hospitalNo} onChange={(event) => updatePatientField('hospitalNo', event.target.value)} />
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formBirthDate">
+            <Form.Label>Age <span>{age}</span></Form.Label>
+            <Form.Range value={age} onChange={(event) => birthdate(event.target.value)} />
+          </Form.Group>
+          <Form.Group as={Col} controlId="formDob">
+            <Form.Label>Date of Birth</Form.Label>
+            <Form.Control type="text" value={patient.dob} readOnly />
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formAddress">
+            <Form.Label>Address</Form.Label>
+            <InputGroup>
+              <Form.Control type="text" value={patient.address} onChange={(event) => updatePatientField('address', event.target.value)} />
+              <Button type="button" variant="outline-secondary" onClick={randomAddress}>Random Address</Button>
+            </InputGroup>
+          </Form.Group>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formWeight">
+            <Form.Label>Weight</Form.Label>
+            <InputGroup>
+              <Form.Control type="text" value={patient.weight} onChange={(event) => updatePatientField('weight', event.target.value)} />
+              <Button variant="secondary" disabled>kg</Button>
+            </InputGroup>
+          </Form.Group>
+          <Form.Group as={Col} controlId="formHeight">
+            <Form.Label>Height</Form.Label>
+            <InputGroup>
+              <Form.Control type="text" value={patient.height} onChange={(event) => updatePatientField('height', event.target.value)} />
+              <Button variant="secondary" disabled>cm</Button>
+            </InputGroup>
+          </Form.Group>
+          <Form.Group as={Col} controlId="formGender">
+            <Form.Label>Gender</Form.Label>
+            <InputGroup>
+              <ToggleButtonGroup type="radio" name="genderOptions" value={patient.gender} onChange={(value) => updatePatientField('gender', value)}>
+                <ToggleButton id="gender1" value="Male" variant="outline-primary">Male</ToggleButton>
+                <ToggleButton id="gender2" value="Female" variant="outline-primary">Female</ToggleButton>
+              </ToggleButtonGroup>
+            </InputGroup>
+          </Form.Group>
+        </Row>
+      </Form>
 
-        </>
-    
-    )
-}
-export default NewCaseForm
+      <ContentHeader title="Allergies" className="mt-5" complete={allergies.length > 0 ? 'true' : ''} />
+      <Form className="mt-3 mb-3">
+        <Row className="mb-3">
+          <Alert variant="info" className="mt-3">
+            <p>Enter one or more allergies below, or set the allergy status directly.</p>
+          </Alert>
+        </Row>
+        <Row className="mb-3">
+          <Col>
+            <Button type="button" variant="outline-primary" onClick={() => setAllergies([{ drug: 'NKDA', reaction: '' }])}>Set to NKDA</Button>{' '}
+            <Button type="button" variant="outline-primary" onClick={() => setAllergies([{ drug: 'Unconfirmed Allergy Status', reaction: '' }])}>Set to Unconfirmed Allergies</Button>
+          </Col>
+        </Row>
+        <Row className="mb-3">
+          <Form.Group as={Col} controlId="formAllergy">
+            <Form.Control type="text" placeholder="Allergen" value={newAllergyInput} onChange={(event) => setAllergyInput(event.target.value)} />
+          </Form.Group>
+          <Form.Group as={Col} controlId="formAllergyReaction">
+            <Form.Control type="text" placeholder="Reaction" value={newReactionInput} onChange={(event) => setReactionInput(event.target.value)} />
+          </Form.Group>
+        </Row>
+        <Row>
+          <Col>
+            {newAllergyInput ? (
+              <Button type="button" variant="outline-primary" onClick={handleAddAllergy}>Add Allergy</Button>
+            ) : null}
+            {' '}
+            {allergies.map((allergy, index) => (
+              <p key={`${allergy.drug}-${index}`}>
+                {allergy.drug} {allergy.reaction}{' '}
+                <Button type="button" variant="link" className="p-0" onClick={() => setAllergies((current) => current.filter((_item, itemIndex) => itemIndex !== index))}>
+                  delete
+                </Button>
+              </p>
+            ))}
+          </Col>
+        </Row>
+        <hr />
+      </Form>
 
+      <div className="mt-3">
+        <ContentHeader title="Patient Preview" className="mb-5" />
+        <PatientDetails patient={{ ...patient, weight: `${patient.weight}kg`, height: `${patient.height}cm` }} allergies={allergies} />
+        <hr />
+        <Button type="button" variant="primary" disabled={!patientComplete} onClick={savePatient}>Save Patient</Button>
+      </div>
+    </>
+  );
+};
+
+export default NewCaseForm;

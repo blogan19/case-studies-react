@@ -1,508 +1,430 @@
-import React, { useState, useEffect } from "react";
-import Button from 'react-bootstrap/Button';
-import ListGroup from 'react-bootstrap/ListGroup';
-import Offcanvas from 'react-bootstrap/Offcanvas';
+import React, { useMemo, useState } from 'react';
 import Alert from 'react-bootstrap/Alert';
-import Modal from 'react-bootstrap/Modal';
-import NewCaseForm from './components/casestudy_editor/NewPatientDetails';
-import './style.css';
-import PatientDetails from './components/patient_records/Patient_details';
-import { ButtonGroup, Container } from 'react-bootstrap';
-import Prescription from './components/prescriptions/Prescriptions';
-import AddPrescription from './components/prescriptions/addPrescription';
-import AddCaseNotes from './components/casestudy_editor/NewCaseNotes';
-import AddMicrobiology from './components/casestudy_editor/NewMicrobiology'
-import AddBiochemistry from './components/casestudy_editor/NewBiochemistry';
-import AddObservations from "./components/casestudy_editor/NewObservations";
-import AddImages from "./components/casestudy_editor/NewImages";
-import AddQuestions from "./components/casestudy_editor/NewQuestions";
-import Form from 'react-bootstrap/Form';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import Card from 'react-bootstrap/Card';
-import CaseNotes from "./components/patient_records/Case_notes";
-import Laboratory from "./components/patient_records/Laboratory";
-import Observations from "./components/patient_records/Observations";
-import ContentHeader from "./components/Content_header";
-import Imaging from "./components/patient_records/Imaging";
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
+import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
+import Offcanvas from 'react-bootstrap/Offcanvas';
+import Row from 'react-bootstrap/Row';
 import Table from 'react-bootstrap/Table';
-import data from './case_study.json';
-import QuestionContainer from "./components/questions/QuestionContainer";
-import CaseStudyDisplay from "./Case_study_display";
+import NewCaseForm from './components/casestudy_editor/NewPatientDetails';
+import AddCaseNotes from './components/casestudy_editor/NewCaseNotes';
+import AddMicrobiology from './components/casestudy_editor/NewMicrobiology';
+import AddBiochemistry from './components/casestudy_editor/NewBiochemistry';
+import AddObservations from './components/casestudy_editor/NewObservations';
+import AddImages from './components/casestudy_editor/NewImages';
+import AddQuestions from './components/casestudy_editor/NewQuestions';
+import AddPrescription from './components/prescriptions/addPrescription';
+import PatientDetails from './components/patient_records/Patient_details';
+import CaseNotes from './components/patient_records/Case_notes';
+import Laboratory from './components/patient_records/Laboratory';
+import Observations from './components/patient_records/Observations';
+import Imaging from './components/patient_records/Imaging';
+import Prescription from './components/prescriptions/Prescriptions';
+import QuestionContainer from './components/questions/QuestionContainer';
+import ContentHeader from './components/Content_header';
+import CaseStudyDisplay from './Case_study_display';
+import { hasContent, isCaseStudyReady, normalizeCaseStudy } from './lib/caseStudy';
+import DrugLibraryManager from './components/dashboard/DrugLibraryManager';
 
-const CaseStudyEdit = ({completedCasePreview}) => {
-  
-  const [completedCase,setCompletedCase] = useState("")
-  const [showLoadPrevious, setShowLoadPrevious] = useState(true)
-  const [show ,setShow] = useState(false)
-  const handleClose = () => setShow(false);
-  const [modalContents,setModalContents] = useState("")
+const CaseStudyEdit = ({
+  caseStudy,
+  caseStudies,
+  drugLibrary,
+  onImportDrugLibrary,
+  onChange,
+  onSave,
+  onLoadCase,
+  onPublish,
+  isSaving,
+  activeSessionCode,
+}) => {
+  const [showEditor, setShowEditor] = useState(false);
+  const [editorMode, setEditorMode] = useState('demographics');
+  const [showPreview, setShowPreview] = useState(false);
+  const [editPrescription, setEditPrescription] = useState('');
+  const [editPrescriptionIndex, setEditPrescriptionIndex] = useState(null);
 
-  const createNew = () => setShow(true);
+  const draft = useMemo(() => normalizeCaseStudy(caseStudy), [caseStudy]);
 
-  //case study settings 
-  const [prescribingCaseStudy, setPrescribingCaseStudy] = useState(true)
-  
-  //Case Study Name 
-  const [showCaseStudyName, setShowCaseStudyName] = useState(false)
-  const [caseStudyName, setCaseStudyName] = useState("")
-  const [caseInstructions, setCaseInstructions] = useState("")
+  const completion = {
+    details: Boolean(draft.case_study_name && draft.case_instructions),
+    patient: hasContent(draft.patient),
+    caseNotes: hasContent(draft.case_notes),
+    prescriptions: hasContent(draft.prescriptionList),
+    microbiology: hasContent(draft.microbiology),
+    biochemistry: hasContent(draft.biochemistry),
+    observations: hasContent(draft.observations),
+    images: hasContent(draft.imaging),
+    questions: hasContent(draft.questions),
+  };
 
-  //handle patient details
-  const createPatientDetails = () => setShow(true)
-  const [createPatientDemographics, setCreatePatientDemographics] = useState(true)
-  const [patientDemographics, setPatientDemographics] = useState("")
-  const [allergies, setPatientAllergies] = useState("")
+  const updateDraft = (patch) => onChange({ ...draft, ...patch });
 
-  const [ patientComplete, setPatientComplete ] = useState(false)
+  const upsertPrescription = (prescription) => {
+    const next = [...draft.prescriptionList, prescription];
+    updateDraft({ prescriptionList: next });
+  };
 
-  //handle prescriptions
-  const [createPrescriptions, setCreatePrescriptions] = useState(false)
-  const [prescriptionList, setPrescriptions] = useState([]);
-  const [noPrescriptions, setNoPrescriptions] = useState(false)
-  const [editPrescription, setEditPrescription] = useState("")
-  const [editPrescriptionIndex, setEditPrescriptionIndex] = useState("")
+  const saveEditedPrescription = (prescription, index) => {
+    const next = draft.prescriptionList.map((item, itemIndex) =>
+      itemIndex === index ? prescription : item
+    );
+    updateDraft({ prescriptionList: next });
+  };
 
-  //handle a new prescription
-  const handleNew = (script) => {
-    let prescriptions = [...prescriptionList];
-    prescriptions = [...prescriptions, script]
-    setPrescriptions(prescriptions)
-  }
-  //Delete a prescription
-  const handleDelete = (index) => {
-    let confirmDelete =  window.confirm(`${prescriptionList[index].drug} will be removed from the inpatient chart`)
-      setPrescriptions([
-        ...prescriptionList.slice(0, index),
-        ...prescriptionList.slice(index + 1)
-      ]);
+  const deletePrescription = (index) => {
+    updateDraft({
+      prescriptionList: draft.prescriptionList.filter((_item, itemIndex) => itemIndex !== index),
+    });
+  };
 
-    console.log(`${index} Deleted`)
-} 
-
-  //Set up prescription to edit
-  const setupEdit = (index) => {
-    setShow(true)
-    setModalContents("prescriptions")
-    setEditPrescription(prescriptionList[index])
-    setEditPrescriptionIndex(index)
-  }
-  //save edited prescription
-  const handleEdit = (script, index) => {
-    //takes edited script and its index and saves script list
-    let prescriptions = prescriptionList
-    prescriptions[index] = script
-    setPrescriptions(prescriptions)
-  }
-
-  const [caseNotes, setCaseNotes] = useState("")
-  const [microbiology, setMicrobiology] = useState("")
-  const [biochemistry, setBiochemistry] = useState("")
-  const [observations, setObservations] = useState("")
-  const [images, setImages] = useState("")
-  const [questions, setQuestions] = useState("")
-
-
-  const [noMicrobiology, setNoMicrobiology] = useState(false)
-  const [noBiochemistry, setNoBiochemistry] = useState(false)
-  const [noObservations, setNoObservations] = useState(false)
-  const [noImages, setNoImages] = useState(false)
-  const [noQuestions, setNoQuestions] = useState(false)
-  
-
-  const loadPrevious = () =>{
-      let previousCase = data
-      setCaseStudyName(data["case_study_name"])
-      setCaseInstructions(data["case_instructions"])
-      setPatientDemographics(data["patient"])
-      setPatientAllergies(data["allergies"])
-      setPrescriptions(data["prescriptionList"])
-      setCaseNotes(data["case_notes"])
-      setMicrobiology(data["microbiology"])
-      setBiochemistry(data["biochemistry"])
-      setObservations(data["observations"])
-      setImages(data["imaging"])
-      setQuestions(data["questions"])
-
-  }  
-  const resetPatient = () => {
-    setCaseStudyName("")
-    setCaseInstructions("")
-    setPatientDemographics("")
-    setPatientAllergies("")
-    setPrescriptions("")
-    setCaseNotes("")
-    setMicrobiology("")
-    setBiochemistry("")
-    setObservations("")
-    setImages("")
-    setQuestions("")
-
-  }
-  const updateCase = () => {
-    let completeCase = {"data":{
-      "case_study_name" : caseStudyName,
-      "prescribingStatus": false,
-      "case_instructions": caseInstructions,
-      "patient": patientDemographics,
-      "allergies": allergies,
-      "case_notes": caseNotes,
-      "imaging": images,
-      "prescriptionList": prescriptionList,
-      "microbiology": microbiology,
-      "biochemistry": biochemistry,
-      "observations": observations,
-      "questions": questions
+  const openEditor = (mode, prescriptionIndex = null) => {
+    setEditorMode(mode);
+    if (mode === 'prescriptions' && prescriptionIndex !== null) {
+      setEditPrescription(draft.prescriptionList[prescriptionIndex]);
+      setEditPrescriptionIndex(prescriptionIndex);
+    } else {
+      setEditPrescription('');
+      setEditPrescriptionIndex(null);
     }
-    }
-    console.log(completeCase)
-    console.log(complete)
-    setCompletedCase(completeCase)    
-  }
+    setShowEditor(true);
+  };
 
-  const [caseNotesComplete, setCaseNotesComplete] = useState(false)
-  const [prescriptionsComplete, setPrescriptionsComplete] = useState(false)
-  const [microbiologyComplete, setMicrobiologyComplete] = useState(false)
-  const [biochemistryComplete, setBiochemistryComplete] = useState(false)
-  const [observationsComplete, setObservationsComplete] = useState(false)
-  const [imagesComplete, setImagesComplete] = useState(false)
-  const [questionsComplete, setQuestionsComplete] = useState(false)
-
-
-  
-  const updateStatuses = () => {
-    if(caseNotes != ""){
-      setCaseNotesComplete(true)
+  const renderEditor = () => {
+    switch (editorMode) {
+      case 'demographics':
+        return (
+          <NewCaseForm
+            closeNewPatient={() => setShowEditor(false)}
+            patientDemographics={(patient) => updateDraft({ patient })}
+            currentDemographics={draft.patient}
+            setPatientAllergies={(allergies) => updateDraft({ allergies })}
+            currentAllergies={draft.allergies}
+          />
+        );
+      case 'prescriptions':
+        return (
+          <AddPrescription
+            newPrescription={upsertPrescription}
+            editPrescription={editPrescription}
+            editPrescriptionIndex={editPrescriptionIndex}
+            saveEdit={saveEditedPrescription}
+            drugLibrary={drugLibrary}
+            closeModal={() => setShowEditor(false)}
+            allowHistoricalAdministrations
+            actorName="Educator"
+          />
+        );
+      case 'case_notes':
+        return (
+          <AddCaseNotes
+            newCaseNotes={(caseNotes) => updateDraft({ case_notes: caseNotes })}
+            previousNotes={draft.case_notes}
+            closeModal={() => setShowEditor(false)}
+          />
+        );
+      case 'microbiology':
+        return (
+          <AddMicrobiology
+            setMicrobiology={(microbiology) => updateDraft({ microbiology })}
+            previousResult={draft.microbiology}
+            closeModal={() => setShowEditor(false)}
+          />
+        );
+      case 'biochemistry':
+        return (
+          <AddBiochemistry
+            setBiochemistry={(biochemistry) => updateDraft({ biochemistry })}
+            previousResult={draft.biochemistry}
+            closeModal={() => setShowEditor(false)}
+          />
+        );
+      case 'observations':
+        return (
+          <AddObservations
+            setObservations={(observations) => updateDraft({ observations })}
+            previousResult={draft.observations}
+            closeModal={() => setShowEditor(false)}
+          />
+        );
+      case 'images':
+        return (
+          <AddImages
+            setImages={(imaging) => updateDraft({ imaging })}
+            previousResult={draft.imaging}
+            closeModal={() => setShowEditor(false)}
+          />
+        );
+      case 'questions':
+        return (
+          <AddQuestions
+            setQuestions={(questions) => updateDraft({ questions })}
+            previousResult={draft.questions}
+            closeModal={() => setShowEditor(false)}
+          />
+        );
+      default:
+        return null;
     }
-    if(prescriptionList != ""){
-      setPrescriptionsComplete(true)
-    }
-    if(microbiology != ""){
-      setMicrobiologyComplete(true)
-    }
-    if(biochemistry != ""){
-      setBiochemistryComplete(true)
-    }
-    if(observations != ""){
-      setObservationsComplete(true)
-    }
-    if(images != ""){
-      setImagesComplete(true)
-    }
-    if(questions != ""){
-      setQuestionsComplete(true)
-    }
-    
-  }
-
-  //check if all fields complete
-  const [complete, setComplete] = useState(false)
-  const checkComplete = () => {
-    if(caseNotesComplete && prescriptionsComplete && microbiologyComplete && biochemistryComplete && observationsComplete && imagesComplete && questionsComplete){
-      setComplete(true)
-    }else{
-      setComplete(false)
-    }
-  }
-
-  useEffect(() => {
-    updateCase()
-    updateStatuses()
-    checkComplete()
-  },[caseStudyName,caseInstructions,patientDemographics,allergies,caseNotes,images,prescriptionList,microbiology,biochemistry,observations,questions]);
-
-  const saveCase = () =>{
-    alert("case was saved")
-  }
-  const [showModal, setShowModal] = useState(false);
-  const handleCloseModal = () => setShowModal(false)
+  };
 
   return (
     <>
-      <Container className="container mt-3 mb-3">  
-        {
-          showLoadPrevious === true ? (
-            <>
-            <ListGroup  className="mt-3">
-                <ListGroup.Item  className="blue-black">
-                  <h5>Load Previous Case Study</h5>
-                </ListGroup.Item>
-                <ListGroup.Item onClick={() => {loadPrevious(); setShowLoadPrevious(false)}}><a href='#'>Case Study One 01/01/2022</a></ListGroup.Item>
-            </ListGroup>
-            <ListGroup  className="mt-3">
-                <ListGroup.Item  className="blue-black">
-                  <h5>Present Case Study</h5>
-                </ListGroup.Item>
-                <ListGroup.Item><a href='#'>Case Study One</a>
-                  <i className="bi bi-share-fill float-end"></i>
-                </ListGroup.Item>
-            </ListGroup>
-            
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setShowCaseStudyName(true); setShowLoadPrevious(false)}}>Create New Case Study</Button>
-            
-            </>
-            
-          ):""              
-        }        
-      </Container>
-        
-      {
-        showLoadPrevious === false ? (<>
-          {/* <Container>
-            <Row className="mt-3 mb-3">
-              <Col>
-                <Card>
-                  <Card.Body>
-                    <h4>Case Study Settings</h4> 
-                    <Col>
-                      <Form>
-                        <Form.Check type="switch" id="prescribing-switch" label="Allow User to prescribe?" />
-                      </Form>
-                      <Form>
-                        <Form.Check type="switch" id="prescribing-switch" label="User gets instant feedback?" />
-                      </Form>
-                      get titles to change colour when part complete
-                    </Col>      
-                  </Card.Body>
-                </Card>
-              </Col>                  
-            </Row>
-            <hr/>
-          </Container> */}
-            <Container className="mt-3 mb-3">
-              <Button variant="outline-info" onClick={() => {setShowLoadPrevious(true);resetPatient()}}> Restart </Button> {' '}
-              {complete === true ? (
-                <>
-                  <Button variant="outline-info" onClick={() => {setShow(true);setModalContents('preview_case')}}> Preview </Button> {' '}
-                  <Button variant="success" onClick={()=> {setShowModal(true)}}> Save </Button>
-                </>
-              ): ""}
-              
-           </Container>
-           <ContentHeader title="Case Study Details" complete={caseInstructions != "" ? "true":""}/>
-           <Container>
-              <Form className="mt-3"> 
-                <Form.Group as={Col} controlId="formCaseStudyName">
-                    <Form.Label><strong>Case Study Details</strong></Form.Label>
-                    <Form.Control placeholder="Enter Case Study Name" value={caseStudyName} type="text" onChange={(e) => setCaseStudyName(e.target.value)} />
-                </Form.Group> 
-                {
-                  caseStudyName != "" ? (
-                    <Form.Group as={Col} controlId="formCaseInstructions" className="mt-3">
-                      <Form.Label><strong>Case Instructions</strong></Form.Label>
-                      <p>Detail any specific instructions the user may need to complete the case study</p>
-                      <Form.Control as="textarea" value={caseInstructions} placeholder="Case Instructions" onChange={(e) => setCaseInstructions(e.target.value)} />
+      <Container className="mt-4 mb-4">
+        <Row className="g-4">
+          <Col lg={4}>
+            <Card className="container-shadow h-100">
+              <Card.Body>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <h4 className="mb-0">Your case studies</h4>
+                  <Button variant="outline-primary" onClick={() => onChange(normalizeCaseStudy())}>
+                    New draft
+                  </Button>
+                </div>
+                {caseStudies.length === 0 ? (
+                  <Alert variant="light">No saved case studies yet.</Alert>
+                ) : (
+                  caseStudies.map((item) => (
+                    <Button
+                      key={item.id}
+                      variant={item.id === draft.id ? 'primary' : 'outline-primary'}
+                      className="w-100 text-start mb-2"
+                      onClick={() => onLoadCase(item.id)}
+                    >
+                      <strong>{item.title}</strong>
+                      <br />
+                      <small>{item.summary}</small>
+                    </Button>
+                  ))
+                )}
+              </Card.Body>
+            </Card>
+          </Col>
+          <Col lg={8}>
+            <Card className="container-shadow h-100">
+              <Card.Body>
+                <div className="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-3">
+                  <div>
+                    <h3 className="mb-1">Builder workspace</h3>
+                    <p className="text-muted mb-0">
+                      Save your draft to PostgreSQL, then publish a live session for students.
+                    </p>
+                  </div>
+                  <ButtonGroup>
+                    <Button variant="outline-info" onClick={() => setShowPreview(true)}>
+                      Preview
+                    </Button>
+                    <Button
+                      variant="success"
+                      onClick={() => onSave(draft)}
+                      disabled={!isCaseStudyReady(draft) || isSaving}
+                    >
+                      {isSaving ? 'Saving...' : 'Save'}
+                    </Button>
+                    <Button
+                      variant="primary"
+                      onClick={() => onPublish(draft)}
+                      disabled={!draft.id || !isCaseStudyReady(draft) || isSaving}
+                    >
+                      Publish live
+                    </Button>
+                  </ButtonGroup>
+                </div>
+                {activeSessionCode ? (
+                  <Alert variant="info">Students can join the live case with code {activeSessionCode}.</Alert>
+                ) : null}
+
+                <DrugLibraryManager
+                  items={drugLibrary?.items || []}
+                  metadata={drugLibrary?.metadata || {}}
+                  onImport={onImportDrugLibrary}
+                  importing={isSaving}
+                />
+
+                <ContentHeader title="Case Study Details" complete={completion.details ? 'true' : ''} />
+                <Form className="mt-3">
+                  <Form.Group className="mb-3" controlId="caseStudyName">
+                    <Form.Label>Case study name</Form.Label>
+                    <Form.Control
+                      type="text"
+                      value={draft.case_study_name}
+                      onChange={(event) => updateDraft({ case_study_name: event.target.value })}
+                    />
+                  </Form.Group>
+                  <Form.Group controlId="caseStudyInstructions">
+                    <Form.Label>Case instructions</Form.Label>
+                    <Form.Control
+                      as="textarea"
+                      rows={3}
+                      value={draft.case_instructions}
+                      onChange={(event) => updateDraft({ case_instructions: event.target.value })}
+                    />
+                  </Form.Group>
+                  <Row className="mt-3">
+                    <Form.Group as={Col} controlId="caseStudyShortDescription">
+                      <Form.Label>Brief description</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={draft.short_description || ''}
+                        onChange={(event) => updateDraft({ short_description: event.target.value })}
+                      />
                     </Form.Group>
-                  ):""
-                }
-                
-              </Form>
-            </Container>
-         
-        </>):""
+                    <Form.Group as={Col} controlId="caseStudyRevisionTopic">
+                      <Form.Label>Revision topic</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={draft.revision_topic || ''}
+                        onChange={(event) => updateDraft({ revision_topic: event.target.value })}
+                        placeholder="e.g. Cardiology"
+                      />
+                    </Form.Group>
+                  </Row>
+                </Form>
 
-      }
-      {caseInstructions.length> 0 ? 
-        (
-          <>
-            <ContentHeader title="Patient Demographics" complete={patientDemographics != "" ? "true":""}/>
-            <Container className="mt-3">
-              
-              {patientDemographics != "" ? (
-                  <PatientDetails patient={patientDemographics} allergies={allergies} />  
-              ):("")}
-            </Container>
-            <Container className="mt-3">
-                  <Button variant="outline-primary" onClick={() => {setShow(true); setModalContents('demographics');}}>
-                    {patientDemographics != '' ? 'Edit Patient Details': 'Add Patient Details'}</Button>
-            </Container>
-          </>
-        ):
-        ""
-      }
-      { //Display rest of fields once patient demographics complete
-        patientDemographics != "" && caseInstructions.length >0 ? (
-          <>
-           <ContentHeader title="Case Notes" className="mb-3" complete={caseNotesComplete === true ? "true":""}/>
-          <Container className="mt-3">
-            
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('case_notes');}}>
-              {caseNotes != "" ? "Edit Case Notes":"Add Case Notes"}
-            </Button>
-            <Table bordered className="text-center container-shadow mt-3">
-              <tbody>
-                <tr></tr>
-                  {
-                    caseNotes != '' ? (
-                      <CaseNotes case_notes={caseNotes} />
-                    ):""
-                  }
-              </tbody>
-            </Table>
-          </Container>
+                <ContentHeader title="Patient Demographics" complete={completion.patient ? 'true' : ''} />
+                <Container className="mt-3 px-0">
+                  {completion.patient ? (
+                    <PatientDetails patient={draft.patient} allergies={draft.allergies} />
+                  ) : (
+                    <Alert variant="light">Add the patient record to unlock the rest of the case.</Alert>
+                  )}
+                  <Button className="mt-3" variant="outline-primary" onClick={() => openEditor('demographics')}>
+                    {completion.patient ? 'Edit patient details' : 'Add patient details'}
+                  </Button>
+                </Container>
 
-          <ContentHeader title="Prescriptions" complete={prescriptionsComplete === true ? "true":""}/>
-          <Container className="mb-3">
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true); setModalContents('prescriptions'); setEditPrescription("")}}>Add Prescription</Button>{' '} 
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setPrescriptionsComplete(true)}}>
-                No Prescriptions
-            </Button>
-          </Container>
+                {completion.patient ? (
+                  <>
+                    <ContentHeader title="Case Notes" complete={completion.caseNotes ? 'true' : ''} />
+                    <Container className="mt-3 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('case_notes')}>
+                        {completion.caseNotes ? 'Edit case notes' : 'Add case notes'}
+                      </Button>
+                      {completion.caseNotes ? (
+                        <Table bordered className="text-center container-shadow mt-3">
+                          <tbody>
+                            <tr />
+                            <CaseNotes case_notes={draft.case_notes} />
+                          </tbody>
+                        </Table>
+                      ) : null}
+                    </Container>
 
-          <Container className='mb-3'>
-            {prescriptionList.map((prescription, index) => (
-              <Prescription  key={index} index={index} prescribingStatus={true} prescription={prescription} editPrescription={setupEdit}  deletePrescription={handleDelete} />
-            ))}
-          </Container>
+                    <ContentHeader title="Prescriptions" complete={completion.prescriptions ? 'true' : ''} />
+                    <Container className="mt-3 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('prescriptions')}>
+                        Add prescription
+                      </Button>
+                      <div className="mt-3">
+                        {draft.prescriptionList.map((prescription, index) => (
+                          <Prescription
+                            key={`${prescription.drug}-${index}`}
+                            index={index}
+                            prescribingStatus
+                            prescription={prescription}
+                            editPrescription={(itemIndex) => openEditor('prescriptions', itemIndex)}
+                            deletePrescription={deletePrescription}
+                          />
+                        ))}
+                      </div>
+                    </Container>
 
-          <ContentHeader title="Microbiology" className="mb-3" complete={microbiologyComplete === true  ? "true":""}/>
-          <Container className="mt-3">
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('microbiology')}}>
-              {microbiology === "" ? "Add Microbiology":"Edit Microbiology" }
-            </Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setMicrobiologyComplete(true)}}>
-                No Microbiology
-            </Button>
-            <Table bordered className="text-center container-shadow mt-3">
-              <tbody>
-                <tr></tr>
-                  {
-                    microbiology != '' ? (
-                      <Laboratory biochemistry='' microbiology={microbiology}/> 
-                    ):""
-                  }
-              </tbody>
-            </Table>
-          </Container>
+                    <ContentHeader title="Microbiology" complete={completion.microbiology ? 'true' : ''} />
+                    <Container className="mt-3 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('microbiology')}>
+                        {completion.microbiology ? 'Edit microbiology' : 'Add microbiology'}
+                      </Button>
+                      {completion.microbiology ? (
+                        <Table bordered className="text-center container-shadow mt-3">
+                          <tbody>
+                            <tr />
+                            <Laboratory biochemistry={{}} microbiology={draft.microbiology} />
+                          </tbody>
+                        </Table>
+                      ) : null}
+                    </Container>
 
-          <ContentHeader title="Biochemistry" className="mb-3" complete={biochemistryComplete === true? "true":""}/>
-          <Container className="mt-3">
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('biochemistry')}}>
-              {biochemistry === "" ? "Add Biochemistry":"Edit Biochemistry" }
-            </Button>{' '}
-            <Button variant="outline-primary" className="mt-3" onClick={() => {setBiochemistryComplete(true)}}>
-                No Biochemistry
-            </Button>
-            <Table bordered className="text-center container-shadow mt-3">
-              <tbody>
-                <tr></tr>
-                  {
-                    biochemistry != '' ? (
-                      <Laboratory biochemistry={biochemistry} microbiology={microbiology} /> 
-                    ):""
-                  }
-              </tbody>
-            </Table>
-          </Container>
+                    <ContentHeader title="Biochemistry" complete={completion.biochemistry ? 'true' : ''} />
+                    <Container className="mt-3 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('biochemistry')}>
+                        {completion.biochemistry ? 'Edit biochemistry' : 'Add biochemistry'}
+                      </Button>
+                      {completion.biochemistry ? (
+                        <Table bordered className="text-center container-shadow mt-3">
+                          <tbody>
+                            <tr />
+                            <Laboratory biochemistry={draft.biochemistry} microbiology={[]} />
+                          </tbody>
+                        </Table>
+                      ) : null}
+                    </Container>
 
-          <ContentHeader title="Observations" className="mb-3" complete={observationsComplete === true ? "true":""}/>
-          <Container className="mt-3">
-          <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('observations')}}>
-            {observations === "" ? "Add Observations":"Edit Observations" }
-          </Button>{' '}
-          <Button variant="outline-primary" className="mt-3" onClick={() => {setObservationsComplete(true); setObservations([])}}>
-                No Observations
-            </Button>
-          <Table bordered className="text-center container-shadow mt-3">
-              <tbody>
-                <tr></tr>
-                  {
-                    observations != '' ? (
-                      <Observations observations={observations}  /> 
-                    ):""
-                  }
-              </tbody>
-            </Table>
-          </Container>
-  
-        <ContentHeader title="Images" className="mb-3" complete={imagesComplete === true ? "true":""}/>
-        <Container className="mt-3">
-        <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('images')}}>
-            {images === "" ? "Add Images":"Edit Images" }
-        </Button>{' '}
-        <Button variant="outline-primary" className="mt-3" onClick={() => {setImagesComplete(true); setImages([])}}>
-                No Images
-        </Button>
-        <Table bordered className="text-center container-shadow mt-3">
-              <tbody>
-                <tr></tr>
-                  {
-                    images != '' ? (
-                      <Imaging images={images}  /> 
-                    ):""
-                  }
-              </tbody>
-            </Table>
-        </Container>
+                    <ContentHeader title="Observations" complete={completion.observations ? 'true' : ''} />
+                    <Container className="mt-3 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('observations')}>
+                        {completion.observations ? 'Edit observations' : 'Add observations'}
+                      </Button>
+                      {completion.observations ? (
+                        <Table bordered className="text-center container-shadow mt-3">
+                          <tbody>
+                            <tr />
+                            <Observations observations={draft.observations} />
+                          </tbody>
+                        </Table>
+                      ) : null}
+                    </Container>
 
-        <ContentHeader title="Case Study Questions" className="mb-3" complete={questionsComplete === true ? "true":""}/>
-        <Container className="mt-3 mb-5">
-          <Button variant="outline-primary" className="mt-3" onClick={() => {setShow(true);setModalContents('questions')}}>{questions === "" ? "Add Questions" :"Edit Questions"}</Button>{' '}
-          <Button variant="outline-primary" className="mt-3" onClick={() => {setQuestionsComplete(true); setQuestions([])}}>
-              No Questions
-          </Button>
-          {
-            questions != "" ? (
-              <QuestionContainer questions={questions}/>
-            ):""
-          }
-        </Container>       
-        </>
-        ):""
-      }
-        
+                    <ContentHeader title="Images" complete={completion.images ? 'true' : ''} />
+                    <Container className="mt-3 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('images')}>
+                        {completion.images ? 'Edit images' : 'Add images'}
+                      </Button>
+                      {completion.images ? (
+                        <Table bordered className="text-center container-shadow mt-3">
+                          <tbody>
+                            <tr />
+                            <Imaging images={draft.imaging} />
+                          </tbody>
+                        </Table>
+                      ) : null}
+                    </Container>
 
-          
+                    <ContentHeader title="Case Study Questions" complete={completion.questions ? 'true' : ''} />
+                    <Container className="mt-3 mb-5 px-0">
+                      <Button variant="outline-primary" onClick={() => openEditor('questions')}>
+                        {completion.questions ? 'Edit questions' : 'Add questions'}
+                      </Button>
+                      {completion.questions ? <QuestionContainer questions={draft.questions} /> : null}
+                    </Container>
+                  </>
+                ) : null}
+              </Card.Body>
+            </Card>
+          </Col>
+        </Row>
+      </Container>
 
-      <Offcanvas show={show} onHide={handleClose} style={{ width: '100%'}}>
+      <Offcanvas show={showEditor} onHide={() => setShowEditor(false)} placement="end" style={{ width: '100%' }}>
         <Offcanvas.Header closeButton className="blue-back text-white">
-          <Offcanvas.Title>edit</Offcanvas.Title>
+          <Offcanvas.Title>Edit case study</Offcanvas.Title>
         </Offcanvas.Header>
-        <Offcanvas.Body>
-          {
-             (() => {
-              console.log(modalContents)
-              switch(modalContents){
-                case "demographics" : return <NewCaseForm closeNewPatient={handleClose} patientDemographics={setPatientDemographics} currentDemographics={patientDemographics}  setPatientAllergies={setPatientAllergies} currentAllergies={allergies} />;
-                case "prescriptions" : return <AddPrescription newPrescription={handleNew} closeModal={handleClose} editPrescription={editPrescription} editPrescriptionIndex={editPrescriptionIndex} saveEdit={handleEdit}/>
-                case "case_notes": return <AddCaseNotes newCaseNotes={setCaseNotes} closeModal={handleClose} previousNotes={caseNotes}/>
-                case "microbiology": return <AddMicrobiology setMicrobiology={setMicrobiology} closeModal={handleClose} previousResult={microbiology}/>
-                case "biochemistry": return <AddBiochemistry setBiochemistry={setBiochemistry} closeModal={handleClose} previousResult={biochemistry}/>
-                case "observations": return <AddObservations setObservations={setObservations} closeModal={handleClose} previousResult={observations} />
-                case "images": return <AddImages setImages={setImages} closeModal={handleClose} previousResult={images} />
-                case "questions": return <AddQuestions setQuestions={setQuestions} closeModal={handleClose} previousResult={questions}/>
-                case "preview_case" : return <CaseStudyDisplay data={completedCase['data']}/>
-              }
-            })()
-          }
-        </Offcanvas.Body>
+        <Offcanvas.Body>{renderEditor()}</Offcanvas.Body>
       </Offcanvas>
 
-
-
-      <Modal show={showModal} onHide={handleCloseModal} >
+      <Modal show={showPreview} onHide={() => setShowPreview(false)} size="xl">
         <Modal.Header closeButton>
-        <Modal.Title>Save Case Study</Modal.Title>
+          <Modal.Title>{draft.case_study_name || 'Draft preview'}</Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          <>
-              <p>
-                <Alert variant="info">
-                  <Alert.Heading>
-                    You are saving the case study: 
-                  </Alert.Heading>
-                  {caseStudyName}               
-                </Alert>
-              </p>
-              <Button variant="success" onClick= {saveCase}>Save</Button>{' '}
-              <Button variant="outline-info" onClick= {handleCloseModal}>Cancel</Button>
-          </>       
+          <CaseStudyDisplay data={draft} />
         </Modal.Body>
-        </Modal>
-      
+      </Modal>
     </>
   );
 };
 
 export default CaseStudyEdit;
-

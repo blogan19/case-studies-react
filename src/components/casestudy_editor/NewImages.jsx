@@ -1,95 +1,88 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from 'react';
 import Button from 'react-bootstrap/Button';
-import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import Col from 'react-bootstrap/Col';
 import Form from 'react-bootstrap/Form';
 import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
 
-// "imaging":[{
-//     "image_date": "2022-01-01",
-//     "image_url": "",
-//     "image_desc": "Chest x-ray",
-//     "image_type": 
-const AddImages = ({closeModal,setImages, previousResult}) => {
-    const newRecord = {image_date: '',image_time:'',image_url:'',image_type:'',image_desc:''}
-    const [recordState, setRecordState] = useState([
-        { ...newRecord },
-    ]);
+const emptyRecord = { image_date: '', image_time: '', image_url: '', image_type: '', image_desc: '' };
 
-    const addRecord = () => { 
-        setRecordState([...recordState, {...newRecord}])
+const AddImages = ({ closeModal, setImages, previousResult }) => {
+  const [recordState, setRecordState] = useState([{ ...emptyRecord }]);
+
+  useEffect(() => {
+    if (Array.isArray(previousResult) && previousResult.length > 0) {
+      setRecordState(previousResult);
     }
-    const handleChange = (e) => {
-        const updatedRecord = [...recordState];
-        updatedRecord[e.target.dataset.idx][e.target.name] = e.target.value;
-        setRecordState(updatedRecord);
-    };
+  }, [previousResult]);
 
-    const loadPrevious = () => {
-        setRecordState(previousResult)
-    }
+  const updateRecord = (index, name, value) => {
+    setRecordState((current) => current.map((record, recordIndex) => (recordIndex === index ? { ...record, [name]: value } : record)));
+  };
 
-    const saveRecords = () => {
-        setImages(recordState)
-        closeModal()
-    }
+  const addRecord = () => {
+    setRecordState((current) => [...current, { ...emptyRecord }]);
+  };
 
-    useEffect(() => {
-        if(previousResult != ""){
-            loadPrevious()
-        }
-    },[]);
-    console.log(recordState)
-    return(
-        <Form>
-            {
-                recordState.map((val,idx) => {
-                    return(
-                        <>
-                            <Row className="mb-3"> 
-                                <Form.Group as={Col} controlId="imageDate">
-                                    <Form.Label>Image Date</Form.Label>
-                                    <Form.Control type="date" name="image_date" data-idx={idx}  value={recordState[idx].image_date} onChange={handleChange} style={recordState[idx].image_date === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                                <Form.Group as={Col} controlId="imagetime">
-                                    <Form.Label>Image Time</Form.Label>
-                                    <Form.Control type="time" name="image_time" data-idx={idx}  value={recordState[idx].image_time} onChange={handleChange} style={recordState[idx].image_time === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                            <Row className="mb-3"> 
-                                <Form.Group as={Col} controlId="imageURL">
-                                    <Form.Label>Image URL</Form.Label>
-                                    <Form.Control type="text" name="image_url" data-idx={idx}  value={recordState[idx].image_url} onChange={handleChange} style={recordState[idx].image_url === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                            <Row className="mb-3"> 
-                                <Form.Group as={Col} controlId="imageDate">
-                                    <Form.Label>Image Title (e.g. Chest X-Ray)</Form.Label>
-                                    <Form.Control type="text" name="image_type" data-idx={idx}  value={recordState[idx].type} onChange={handleChange} style={recordState[idx].type === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                            <Row className="mb-3"> 
-                                <Form.Group as={Col} controlId="imageDesc">
-                                    <Form.Label>Image Description</Form.Label>
-                                    <Form.Control type="text" name="image_desc" data-idx={idx}  value={recordState[idx].image_desc} onChange={handleChange} style={recordState[idx].image_desc === "" ? {border: "solid 1px red"}: {border: ""}}/>
-                                </Form.Group>
-                            </Row>
-                        </>
-                    )
-                })
-            }
-            <Row>
-                <Col sm={3}>
-                    <Button variant="outline-success" onClick={addRecord} size="sm">Add Another Image<i class="bi bi-plus"></i></Button>
-                </Col>
-                <Col>
-                    <Button variant="success" onClick={saveRecords} size="sm">Save Images</Button>
-                </Col>
-                
-            </Row>
-        </Form>
-        
-    ) 
-}
+  const removeRecord = (index) => {
+    setRecordState((current) => (current.length === 1 ? [{ ...emptyRecord }] : current.filter((_item, recordIndex) => recordIndex !== index)));
+  };
 
-export default AddImages
+  const saveRecords = () => {
+    setImages(recordState.filter((record) => record.image_url || record.image_desc || record.image_type));
+    closeModal();
+  };
+
+  return (
+    <Form>
+      {recordState.map((record, index) => (
+        <div key={`image-${index}`} className="mb-4">
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId={`imageDate-${index}`}>
+              <Form.Label>Image Date</Form.Label>
+              <Form.Control type="date" value={record.image_date} onChange={(event) => updateRecord(index, 'image_date', event.target.value)} />
+            </Form.Group>
+            <Form.Group as={Col} controlId={`imageTime-${index}`}>
+              <Form.Label>Image Time</Form.Label>
+              <Form.Control type="time" value={record.image_time} onChange={(event) => updateRecord(index, 'image_time', event.target.value)} />
+            </Form.Group>
+          </Row>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId={`imageUrl-${index}`}>
+              <Form.Label>Image URL</Form.Label>
+              <Form.Control type="text" value={record.image_url} onChange={(event) => updateRecord(index, 'image_url', event.target.value)} />
+            </Form.Group>
+          </Row>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId={`imageType-${index}`}>
+              <Form.Label>Image Title</Form.Label>
+              <Form.Control type="text" value={record.image_type} onChange={(event) => updateRecord(index, 'image_type', event.target.value)} />
+            </Form.Group>
+          </Row>
+          <Row className="mb-3">
+            <Form.Group as={Col} controlId={`imageDesc-${index}`}>
+              <Form.Label>Image Description</Form.Label>
+              <Form.Control type="text" value={record.image_desc} onChange={(event) => updateRecord(index, 'image_desc', event.target.value)} />
+            </Form.Group>
+          </Row>
+          <Button type="button" variant="outline-danger" size="sm" onClick={() => removeRecord(index)}>
+            Remove image
+          </Button>
+        </div>
+      ))}
+      <Row>
+        <Col sm={3}>
+          <Button type="button" variant="outline-success" onClick={addRecord} size="sm">
+            Add Another Image <i className="bi bi-plus" />
+          </Button>
+        </Col>
+        <Col>
+          <Button type="button" variant="success" onClick={saveRecords} size="sm">
+            Save Images
+          </Button>
+        </Col>
+      </Row>
+    </Form>
+  );
+};
+
+export default AddImages;

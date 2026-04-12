@@ -1,78 +1,39 @@
-import React from "react";
-import Container from 'react-bootstrap/Container';
-import Nav from 'react-bootstrap/Nav';
-import Navbar from 'react-bootstrap/Navbar';
+import React from 'react';
 import Table from 'react-bootstrap/Table';
 
-const ObsTable = (props) => {
+const ObsTable = ({ data }) => {
+  const observations = data.observations;
 
-    const dates = props.data.observations.blood_pressure.map((bp)=> (
-        <th>
-            {bp['datetime']}
-        </th>           
-))
+  return (
+    <Table>
+      <tbody>
+        <tr>
+          <th>Date Recorded</th>
+          {observations.blood_pressure.map((bp, index) => <th key={`date-${index}`}>{bp.datetime}</th>)}
+        </tr>
+        <tr>
+          <th>Blood Pressure (mmHg)</th>
+          {observations.blood_pressure.map((bp, index) => <td key={`bp-${index}`}>{bp.systolic}/{bp.diastolic}</td>)}
+        </tr>
+        <tr>
+          <th>Heart Rate <br />(Beats per minute)</th>
+          {observations.heart_rate.map((hr, index) => <td key={`hr-${index}`}>{hr.rate}</td>)}
+        </tr>
+        <tr>
+          <th>Temperature <br />(Degrees Celsius)</th>
+          {observations.temperature.map((temp, index) => <td key={`temp-${index}`}>{temp.temperature}</td>)}
+        </tr>
+        <tr>
+          <th>Respiratory Rate <br />(Breaths per minute)</th>
+          {observations.resp_rate.map((rr, index) => <td key={`rr-${index}`}>{rr.bpm}</td>)}
+        </tr>
+        <tr>
+          <th>Oxygen Sats <br />(Percentage)</th>
+          {observations.oxygen.map((oxy, index) => <td key={`oxy-${index}`}>{oxy.percentage}</td>)}
+        </tr>
+      </tbody>
+    </Table>
+  );
+};
 
-    const bloodpressure = props.data.observations.blood_pressure.map((bp)=> (
-        <td>
-            {bp['systolic']}/{bp['diastolic']}
-        </td>
-    ))
-
-    const heartrate = props.data.observations.heart_rate.map((hr)=> (
-        <td>
-            {hr['rate']}
-        </td>
-    ))
-
-    const temperature = props.data.observations.temperature.map((temp)=> (
-        <td>
-            {temp['temperature']}
-        </td>
-    ))
-
-    const resp_rate = props.data.observations.resp_rate.map((rr)=> (
-        <td>
-            {rr['bpm']}
-        </td>
-    ))
-
-    const oxygen = props.data.observations.oxygen.map((oxy)=> (
-        <td>
-            {oxy['percentage']}
-        </td>
-    ))
-    
-    
-    return(
-        <Table>
-        
-            <tbody>
-                <tr>
-                    <th>Date Recorded</th>
-                    {dates}
-                </tr>
-                <tr>
-                    <th>Blood Pressure (mmhg)</th>
-                    {bloodpressure}
-                </tr>
-                <tr>
-                    <th>Heart Rate <br/>(Beats per minute)</th>
-                    {heartrate}
-                </tr>
-                <tr>
-                    <th>Temperature <br/>(Degrees Celcius)</th>
-                    {temperature}
-                </tr>
-                <tr>
-                    <th>Respiratory Rate <br/>(Breaths per minute)</th>
-                    {resp_rate}
-                </tr>
-                <tr>
-                    <th>0yxgen Sats<br/>(Percentage)</th>
-                    {oxygen}
-                </tr>
-            </tbody>
-        </Table>
-    )
-}
-export default ObsTable
+export default ObsTable;
