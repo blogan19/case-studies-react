@@ -1,4 +1,5 @@
 import React, { useMemo, useState } from 'react';
+import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
@@ -19,11 +20,33 @@ import Allergies from './allergies';
 
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
-const PatientDetails = ({ patient, allergies, allergyHistory, onOpenAllergyManagement, onSaveMeasurements, onDeleteMeasurement }) => {
-  const birthdate = Date.parse(patient.dob);
+const normalizeMedRecStatus = (medicationHistory = {}) => {
+  const nextStatus = String(medicationHistory?.reconciliationStatus || 'Not started').trim() || 'Not started';
+  return ['Not started', 'In progress', 'Complete'].includes(nextStatus) ? nextStatus : 'Not started';
+};
+
+const medRecBadgeClass = (status) => {
+  if (status === 'Complete') {
+    return 'epma-med-rec-badge epma-med-rec-badge--complete';
+  }
+  if (status === 'In progress') {
+    return 'epma-med-rec-badge epma-med-rec-badge--in-progress';
+  }
+  return 'epma-med-rec-badge epma-med-rec-badge--not-started';
+};
+
+const normalizeVteStatus = (vteAssessment = {}) => {
+  const nextStatus = String(vteAssessment?.status || 'Not done').trim() || 'Not done';
+  return nextStatus === 'Complete' ? 'Complete' : 'Not done';
+};
+
+const PatientDetails = ({ patient, allergies, allergyHistory, medicationHistory = {}, vteAssessment = {}, onOpenAllergyManagement, onOpenMedicationHistory, onOpenVteAssessment, onSaveMeasurements, onDeleteMeasurement }) => {
+ const [day, month, year] = patient.dob.split("/");
+  const birthdate = new Date(year, month - 1, day);
   const currentDate = new Date();
   const diff = currentDate - birthdate;
   const age = Math.floor(diff / 31557600000);
+  
   const [showMeasurementsModal, setShowMeasurementsModal] = useState(false);
   const [draftWeight, setDraftWeight] = useState('');
   const [draftHeight, setDraftHeight] = useState('');
@@ -65,6 +88,8 @@ const PatientDetails = ({ patient, allergies, allergyHistory, onOpenAllergyManag
     () => (Array.isArray(patient.measurementHistory) ? patient.measurementHistory : []),
     [patient.measurementHistory]
   );
+  const medRecStatus = useMemo(() => normalizeMedRecStatus(medicationHistory), [medicationHistory]);
+  const vteStatus = useMemo(() => normalizeVteStatus(vteAssessment), [vteAssessment]);
 
   const weightTrend = useMemo(
     () =>
@@ -173,7 +198,7 @@ const PatientDetails = ({ patient, allergies, allergyHistory, onOpenAllergyManag
           <thead>
             <tr>
               <th colSpan={4} className="epma-section-banner blue-back text-white">
-                Patient Demographics
+                Patient Details
               </th>
             </tr>
           </thead>
@@ -223,6 +248,40 @@ const PatientDetails = ({ patient, allergies, allergyHistory, onOpenAllergyManag
               <td colSpan={4}>
                 <i className="text-muted">Address </i>
                 {patient.address}
+              </td>
+            </tr>
+            <tr>
+              <td colSpan={4}>
+                  <div className="epma-summary-statuses">
+                    <div className="epma-med-rec-row">
+                     <span className="text-muted">Med rec status </span>
+                     {onOpenMedicationHistory ? (
+                       <button type="button" className="epma-status-badge-button" onClick={onOpenMedicationHistory}>
+                         <Badge bg={null} className={medRecBadgeClass(medRecStatus)}>
+                            {medRecStatus}
+                          </Badge>
+                        </button>
+                      ) : (
+                       <Badge bg={null} className={medRecBadgeClass(medRecStatus)}>
+                         {medRecStatus}
+                       </Badge>
+                     )}
+                    </div>
+                  <div className="epma-med-rec-row">
+                    <span className="text-muted">VTE assessment </span>
+                    {onOpenVteAssessment ? (
+                      <button type="button" className="epma-status-badge-button" onClick={onOpenVteAssessment}>
+                        <Badge bg={null} className={medRecBadgeClass(vteStatus)}>
+                          {vteStatus}
+                        </Badge>
+                      </button>
+                    ) : (
+                      <Badge bg={null} className={medRecBadgeClass(vteStatus)}>
+                        {vteStatus}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>

@@ -7,16 +7,27 @@ import Form from 'react-bootstrap/Form';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Row from 'react-bootstrap/Row';
 
-const DrugChoice = ({ question, prescriptions = [] }) => {
+const getDrugName = (item) => String(item?.drugName || item?.drug_name || item?.name || item || '').trim();
+
+const DrugChoice = ({ question, drugLibrary }) => {
   const [input, setInput] = useState('');
+  const [search, setSearch] = useState('');
   const [badgeText, setBadgeText] = useState('');
   const [badgeType, setBadgeType] = useState('');
   const [submitted, setSubmitted] = useState(false);
 
+  const libraryOptions = useMemo(() => Array.from(new Set((drugLibrary?.items || []).map(getDrugName).filter(Boolean))).sort(), [drugLibrary]);
+  const librarySet = useMemo(() => new Set(libraryOptions), [libraryOptions]);
   const options = useMemo(
-    () => Array.from(new Set(prescriptions.map((item) => item.drug).filter(Boolean))).sort(),
-    [prescriptions]
+    () => {
+      const authoredOptions = Array.from(new Set((question.answerOptions || [])
+        .map((item) => String(item || '').trim())
+        .filter((item) => librarySet.has(item))));
+      return authoredOptions.length ? authoredOptions : libraryOptions;
+    },
+    [libraryOptions, librarySet, question.answerOptions]
   );
+  const filteredOptions = options.filter((item) => item.toLowerCase().includes(search.trim().toLowerCase())).slice(0, 12);
 
   const checkAnswer = () => {
     setSubmitted(true);
@@ -45,13 +56,18 @@ const DrugChoice = ({ question, prescriptions = [] }) => {
             <Form.Group className="mb-3">
               <Form.Label>{question.questionText}</Form.Label>
             </Form.Group>
-            <InputGroup className="mb-3">
-              <Form.Select value={input} disabled={submitted} aria-label="select an option" onChange={(event) => setInput(event.target.value)}>
-                <option value="" disabled>Select an option</option>
-                {options.map((item) => <option value={item} key={item}>{item}</option>)}
-              </Form.Select>
-              <Button type="button" variant="primary" onClick={checkAnswer} disabled={!input || submitted}>Submit</Button>
+            <InputGroup className="mb-2">
+              <Form.Control value={search} disabled={submitted} type="search" placeholder="Search drug library" onChange={(event) => setSearch(event.target.value)} />
+              <Button type="button" variant="outline-secondary" disabled={!search || submitted} onClick={() => setSearch('')}>Clear</Button>
             </InputGroup>
+            <div className="d-flex gap-2 flex-wrap mb-3">
+              {filteredOptions.map((item) => (
+                <Button key={item} type="button" size="sm" variant={input === item ? 'primary' : 'outline-primary'} disabled={submitted} onClick={() => { setInput(item); setSearch(''); }}>
+                  {item}
+                </Button>
+              ))}
+            </div>
+            <Button type="button" variant="primary" onClick={checkAnswer} disabled={!input || submitted}>Submit</Button>
           </Form>
         </Col>
       </Row>

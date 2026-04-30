@@ -27,7 +27,6 @@ const MultipleChoice = (props) => {
   const handleClick = () => {
     setRadioDisabled(true);
     setSubmitbtn(false);
-    console.log(selected)
     //answer feedback
 
     const answer = question.answer

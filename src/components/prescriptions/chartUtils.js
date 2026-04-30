@@ -62,6 +62,32 @@ export function normalizeAdminTimes(times = []) {
   });
 }
 
+export function isWeeklyFrequency(frequency) {
+  const normalized = String(frequency || '').trim().toLowerCase();
+  return normalized === 'once weekly' || normalized === 'weekly';
+}
+
+export function dateMatchesFrequency(frequency, candidate, startDate) {
+  if (!candidate) {
+    return false;
+  }
+
+  if (!isWeeklyFrequency(frequency)) {
+    return true;
+  }
+
+  if (!startDate) {
+    return true;
+  }
+
+  const startOfCandidate = startOfDay(candidate);
+  const startOfReference = startOfDay(startDate);
+  const msPerDay = 24 * 60 * 60 * 1000;
+  const dayDifference = Math.round((startOfCandidate - startOfReference) / msPerDay);
+
+  return dayDifference >= 0 && dayDifference % 7 === 0;
+}
+
 export function getFrequencySchedule(frequency, frequencyOptions = [], explicitTimes = []) {
   const normalizedExplicitTimes = normalizeAdminTimes(explicitTimes);
   if (normalizedExplicitTimes.length) {
@@ -75,6 +101,8 @@ export function getFrequencySchedule(frequency, frequencyOptions = [], explicitT
   }
   const presets = {
     'once daily': ['08:00'],
+    'once weekly': ['08:00'],
+    'weekly': ['08:00'],
     'each morning': ['08:00'],
     'once in the morning': ['08:00'],
     'once each morning': ['08:00'],
@@ -111,7 +139,7 @@ export function getFrequencySchedule(frequency, frequencyOptions = [], explicitT
   return normalizeAdminTimes(['08:00', '20:00']);
 }
 
-export function buildUpcomingScheduledSlots(frequency, administrations = [], count = 1, frequencyOptions = [], explicitTimes = []) {
+export function buildUpcomingScheduledSlots(frequency, administrations = [], count = 1, frequencyOptions = [], explicitTimes = [], startDate = null) {
   const schedule = getFrequencySchedule(frequency, frequencyOptions, explicitTimes);
   if (!schedule.length) {
     return [];
@@ -122,16 +150,17 @@ export function buildUpcomingScheduledSlots(frequency, administrations = [], cou
     .sort((a, b) => a.parsedDate - b.parsedDate);
 
   const anchor = parsedAdministrations.length ? parsedAdministrations[parsedAdministrations.length - 1].parsedDate : new Date();
+  const frequencyReference = startDate || parsedAdministrations[0]?.scheduledParsedDate || parsedAdministrations[0]?.parsedDate || anchor;
   const upcoming = [];
   let dayCursor = startOfDay(anchor);
   let safetyCounter = 0;
 
-  while (upcoming.length < count && safetyCounter < 20) {
+  while (upcoming.length < count && safetyCounter < 120) {
     const currentDay = new Date(dayCursor);
     for (const slot of schedule) {
       const [hour, minute] = slot.split(':').map(Number);
       const candidate = new Date(currentDay.getFullYear(), currentDay.getMonth(), currentDay.getDate(), hour, minute);
-      if (candidate > anchor && upcoming.length < count) {
+      if (candidate > anchor && dateMatchesFrequency(frequency, candidate, frequencyReference) && upcoming.length < count) {
         upcoming.push(candidate);
       }
     }

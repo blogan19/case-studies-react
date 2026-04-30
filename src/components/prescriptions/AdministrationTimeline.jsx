@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
-import { addDays, formatDateTimeLabel, formatTimeLabel, getFrequencySchedule, parseChartDate, parseDateTime, startOfDay } from './chartUtils';
+import { addDays, dateMatchesFrequency, formatDateTimeLabel, formatTimeLabel, getFrequencySchedule, parseChartDate, parseDateTime, startOfDay } from './chartUtils';
 
 const defaultScaffoldSlots = ['08:00', '14:00', '20:00', '02:00'];
+const WEEKDAY_ORDER = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 function sortTimes(times) {
   return [...times].sort((left, right) => {
@@ -27,7 +28,10 @@ function findMatchingAdministration(administrations, target) {
   const windowStart = new Date(target.getTime() - 3 * 60 * 60 * 1000);
   const windowEnd = new Date(target.getTime() + 3 * 60 * 60 * 1000);
 
-  return administrations.find((item) => item.parsedDate >= windowStart && item.parsedDate <= windowEnd);
+  return administrations.find((item) => {
+    const anchorDate = item.scheduledParsedDate || item.parsedDate;
+    return anchorDate && anchorDate >= windowStart && anchorDate <= windowEnd;
+  });
 }
 
 function getDisplaySlots(schedule) {
@@ -115,10 +119,14 @@ const AdministrationTimeline = ({
   administrationList = [],
   frequency = '',
   scheduledTimes = [],
+  variableDoseSchedule = {},
+  warfarinWeekdaySchedule = null,
+  unit = '',
   frequencyOptions = [],
   admissionDate,
   startDate,
   endDate,
+  isStat = false,
   isCriticalMedicine = false,
   suspendMode = false,
   onSelectScheduledDose,
@@ -127,7 +135,11 @@ const AdministrationTimeline = ({
 
   const chart = useMemo(() => {
     const administrations = administrationList
-      .map((item) => ({ ...item, parsedDate: parseDateTime(item.adminDateTime) }))
+      .map((item) => ({
+        ...item,
+        parsedDate: parseDateTime(item.adminDateTime),
+        scheduledParsedDate: parseDateTime(item.scheduledSlotDateTime),
+      }))
       .filter((item) => item.parsedDate)
       .sort((a, b) => a.parsedDate - b.parsedDate);
 
@@ -136,11 +148,17 @@ const AdministrationTimeline = ({
     const admissionDateTime = parseAdmissionDateTime(admissionDate);
     const admissionDay = startOfDay(admissionDateTime || parseChartDate(admissionDate) || today);
     const prescriptionStart = parseChartDate(startDate) || today;
+    const earliestAdministrationDay = administrations.length
+      ? startOfDay(administrations[0].scheduledParsedDate || administrations[0].parsedDate)
+      : null;
+    const earliestRelevantDay = earliestAdministrationDay && earliestAdministrationDay < admissionDay
+      ? earliestAdministrationDay
+      : admissionDay;
     const scheduledSlotTimes = getFrequencySchedule(frequency, frequencyOptions, scheduledTimes);
     const rowSlots = getDisplaySlots(scheduledSlotTimes);
 
     const firstVisibleBase = addDays(today, -3);
-    const minWindowOffset = Math.min(0, differenceInDays(admissionDay, firstVisibleBase));
+    const minWindowOffset = Math.min(0, differenceInDays(earliestRelevantDay, firstVisibleBase));
     const clampedWindowOffset = Math.max(minWindowOffset, windowOffset);
 
     const dayColumns = [-3, -2, -1, 0, 1, 2, 3].map((offset) => {
@@ -153,23 +171,42 @@ const AdministrationTimeline = ({
       };
     });
 
-    return {
-      administrations,
-      now,
-      minWindowOffset,
-      clampedWindowOffset,
-      scheduledSlotTimes,
-      rowSlots,
-      dayColumns,
-      startDate: admissionDateTime && admissionDateTime > prescriptionStart ? admissionDateTime : prescriptionStart,
-      endDate: endDate ? startOfDay(parseChartDate(endDate)) : null,
-    };
+      return {
+        administrations,
+        now,
+        minWindowOffset,
+        clampedWindowOffset,
+        frequency,
+        scheduledSlotTimes,
+        rowSlots,
+        dayColumns,
+        startDate: earliestAdministrationDay && earliestAdministrationDay < prescriptionStart
+          ? earliestAdministrationDay
+          : (admissionDateTime && admissionDateTime > prescriptionStart ? admissionDateTime : prescriptionStart),
+        endDate: endDate
+          ? parseChartDate(endDate)
+          : null,
+      };
   }, [administrationList, admissionDate, endDate, frequency, frequencyOptions, scheduledTimes, startDate, windowOffset]);
+
+  useEffect(() => {
+    if (chart.minWindowOffset < 0 && windowOffset === 0) {
+      setWindowOffset(chart.minWindowOffset);
+    }
+  }, [chart.minWindowOffset, windowOffset]);
 
   const renderCell = (column, slotTime) => {
     const [hour, minute] = slotTime.split(':').map(Number);
     const candidate = new Date(column.dayStart.getFullYear(), column.dayStart.getMonth(), column.dayStart.getDate(), hour, minute);
     const administration = findMatchingAdministration(chart.administrations, candidate);
+    const weekdayName = WEEKDAY_ORDER[candidate.getDay()];
+    const warfarinScheduledDose = String(warfarinWeekdaySchedule?.[weekdayName]?.dose ?? warfarinWeekdaySchedule?.[weekdayName] ?? '').trim();
+    const scheduledDose = warfarinWeekdaySchedule
+      ? warfarinScheduledDose
+      : String(variableDoseSchedule?.[slotTime]?.dose ?? variableDoseSchedule?.[slotTime] ?? '').trim();
+    const isScheduledSlot = chart.scheduledSlotTimes.includes(slotTime)
+      && (!warfarinWeekdaySchedule || Boolean(scheduledDose))
+      && dateMatchesFrequency(chart.frequency, candidate, chart.startDate);
     const descriptor = getCellDescriptor({
       administration,
       candidate,
@@ -177,14 +214,16 @@ const AdministrationTimeline = ({
       startDate: chart.startDate,
       endDate: chart.endDate,
       suspendMode,
-      isScheduledSlot: chart.scheduledSlotTimes.includes(slotTime),
+      isScheduledSlot,
       isCriticalMedicine,
     });
 
     const tooltip = (
       <Tooltip id={`admin-cell-${column.key}-${slotTime}`}>
         <div><strong>{`Scheduled ${slotTime}`}</strong></div>
+        {scheduledDose ? <div>Scheduled dose: {scheduledDose}{unit ? ` ${unit}` : ''}</div> : null}
         {administration?.parsedDate ? <div>Actual time: {formatTimeLabel(administration.parsedDate)}</div> : null}
+        {administration?.actualDose ? <div>Dose administered: {administration.actualDose}{unit ? ` ${unit}` : ''}</div> : null}
         <div>{administration?.adminNote || (descriptor.status === 'unavailable' ? 'Outside prescription date range' : 'No administration recorded')}</div>
         <div>
           {administration?.administeredBy

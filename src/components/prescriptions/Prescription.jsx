@@ -42,6 +42,41 @@ const formatPrescriptionDateTime = (value) => {
   return value;
 };
 
+const formatPrescriptionStop = (value) => {
+  if (!value) {
+    return '';
+  }
+
+  const parsed = new Date(value);
+  if (!Number.isNaN(parsed.getTime())) {
+    return parsed.getHours() === 0 && parsed.getMinutes() === 0
+      ? parsed.toLocaleDateString('en-GB')
+      : formatDateTimeLabel(parsed);
+  }
+
+  return value;
+};
+
+const normalizeHistoryReason = (value) => {
+  const normalized = String(value || '').trim();
+  return normalized && normalized !== 'No reason recorded' ? normalized : '';
+};
+
+const formatHistoryDetails = (value) => String(value || '').replace(
+  /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z/g,
+  (match) => {
+    const parsed = new Date(match);
+    return Number.isNaN(parsed.getTime()) ? match : formatDateTimeLabel(parsed);
+  }
+);
+
+const formatHistoryAction = (entry) => {
+  if (entry?.details && String(entry.details).trim() !== 'Initial prescription created.') {
+    return String(entry.action || 'updated').trim();
+  }
+  return String(entry?.action || '').trim() || 'updated';
+};
+
 const formatHoursSinceAdministration = (value) => {
   if (!value) {
     return '';
@@ -55,6 +90,84 @@ const formatHoursSinceAdministration = (value) => {
   const diffHours = Math.max(0, Math.round(((Date.now() - parsed.getTime()) / (1000 * 60 * 60)) * 10) / 10);
   return `${diffHours}h ago`;
 };
+
+const formatIsoDateForInput = (date) => date.toISOString().slice(0, 10);
+const formatTimeForInput = (date) => `${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`;
+const parseInputDateTime = (dateValue, timeValue) => {
+  if (!dateValue || !timeValue) {
+    return null;
+  }
+
+  const parsed = new Date(`${dateValue}T${timeValue}`);
+  return Number.isNaN(parsed.getTime()) ? null : parsed;
+};
+
+const getStatAutoStopDate = (prescription) => {
+  if (!prescription?.stat || !prescription?.start_date) {
+    return null;
+  }
+
+  const parsedStart = new Date(prescription.start_date);
+  if (Number.isNaN(parsedStart.getTime())) {
+    return null;
+  }
+
+  return new Date(parsedStart.getTime() + (24 * 60 * 60 * 1000));
+};
+
+const normalizePrescriptionForDisplay = (prescription) => {
+  const autoStopDate = getStatAutoStopDate(prescription);
+  const shouldAutoStop = Boolean(autoStopDate && autoStopDate <= new Date());
+
+  if (!shouldAutoStop) {
+    return prescription;
+  }
+
+  return {
+    ...prescription,
+    status: 'stopped',
+    end_date: autoStopDate.toISOString(),
+  };
+};
+
+const createPrescriptionId = () => `prescription-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const normalizePrescriptionId = (prescription) => String(prescription?.id || '').trim();
+const ensurePrescriptionIds = (items = []) => {
+  let changed = false;
+  const nextItems = (Array.isArray(items) ? items : []).map((item) => {
+    if (normalizePrescriptionId(item)) {
+      return item;
+    }
+    changed = true;
+    return {
+      ...item,
+      id: createPrescriptionId(),
+    };
+  });
+
+  return { nextItems, changed };
+};
+
+const createTaskId = () => `task-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+const TASK_PROFESSIONS = ['Doctor', 'Nurse', 'Pharmacist', 'Dietitian', 'Physiotherapist', 'Radiographer', 'Other'];
+const normalizeTasks = (caseNotes = {}) => (Array.isArray(caseNotes?.tasks) ? caseNotes.tasks : [])
+  .map((item, index) => ({
+    id: String(item?.id || `task-${index}`).trim(),
+    title: String(item?.title || '').trim(),
+    description: String(item?.description || '').trim(),
+    assignedProfession: String(item?.assignedProfession || '').trim(),
+    linkedPrescriptionId: String(item?.linkedPrescriptionId || '').trim(),
+    linkedDrug: String(item?.linkedDrug || '').trim(),
+    status: String(item?.status || 'open').trim() || 'open',
+    createdAt: String(item?.createdAt || '').trim(),
+    createdBy: String(item?.createdBy || '').trim(),
+    completedAt: String(item?.completedAt || '').trim(),
+    completedBy: String(item?.completedBy || '').trim(),
+    suppressedAt: String(item?.suppressedAt || '').trim(),
+    suppressedBy: String(item?.suppressedBy || '').trim(),
+    suppressionReason: String(item?.suppressionReason || '').trim(),
+  }))
+  .filter((item) => item.title);
 const administrationKeyItems = [
   {
     short: 'Sch',
@@ -93,12 +206,20 @@ const Prescriptions = ({
   prescribingStatus,
   drugLibrary,
   patient,
+  allergies = [],
+  caseNotes,
   onChange,
+  onSaveCaseNotes,
   onApprovalToast,
   prescriberName,
   administratorName = 'Student user',
   onVerifyWitness,
   onBlockedPrescribe,
+  allowPrescribeWithoutAllergyStatus = false,
+  allowHistoricalAdministrations = false,
+  allowPrescriptionRemoval = false,
+  activeChartTutorialStepKey = '',
+  tutorialRefs = {},
 }) => {
   const [show, setShow] = React.useState(false);
   const [prescriptionList, setPrescriptions] = React.useState(prescriptions);
@@ -106,21 +227,97 @@ const Prescriptions = ({
   const [editingPrescription, setEditingPrescription] = useState('');
   const [editingIndex, setEditingIndex] = useState(null);
   const [actionModal, setActionModal] = useState({ show: false, type: '', index: null, slotDateTime: '', existingAdminDateTime: '' });
-  const [administrationModal, setAdministrationModal] = useState({ show: false, index: null, slotDateTime: '', requiresWitness: false, outcome: 'administered' });
+  const [administrationModal, setAdministrationModal] = useState({
+    show: false,
+    index: null,
+    slotDateTime: '',
+    requiresWitness: false,
+    outcome: 'administered',
+    requiresVariableDose: false,
+    scheduledDose: '',
+    unit: '',
+  });
   const [actionReason, setActionReason] = useState('');
   const [holdCount, setHoldCount] = useState(1);
   const [suspendReasonCache, setSuspendReasonCache] = useState({});
   const [administrationNote, setAdministrationNote] = useState('');
   const [actualDose, setActualDose] = useState('');
+  const [actualAdministrationDate, setActualAdministrationDate] = useState('');
+  const [actualAdministrationTime, setActualAdministrationTime] = useState('');
   const [witnessUsername, setWitnessUsername] = useState('');
   const [witnessPassword, setWitnessPassword] = useState('');
   const [administrationError, setAdministrationError] = useState('');
   const [stoppedHistoryPrescription, setStoppedHistoryPrescription] = useState(null);
+  const [activeSuspendPrescriptionIndex, setActiveSuspendPrescriptionIndex] = useState(null);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskTitle, setTaskTitle] = useState('');
+  const [taskDescription, setTaskDescription] = useState('');
+  const [taskProfession, setTaskProfession] = useState('');
+  const [taskLinkedPrescriptionIndex, setTaskLinkedPrescriptionIndex] = useState(null);
+  const [taskError, setTaskError] = useState('');
   const missedDoseOptions = useMemo(() => drugLibrary?.metadata?.nonAdmins || [], [drugLibrary]);
+  const tasks = useMemo(() => normalizeTasks(caseNotes), [caseNotes]);
+  const activeTaskLookup = useMemo(() => {
+    const lookup = new Map();
+
+    tasks.forEach((task) => {
+      if (task.status !== 'open') {
+        return;
+      }
+
+      const linkedPrescriptionId = String(task.linkedPrescriptionId || '').trim();
+      if (!linkedPrescriptionId) {
+        return;
+      }
+
+      const existingTasks = lookup.get(linkedPrescriptionId) || [];
+      existingTasks.push(task);
+      lookup.set(linkedPrescriptionId, existingTasks);
+    });
+
+    return lookup;
+  }, [tasks]);
 
   React.useEffect(() => {
-    setPrescriptions(Array.isArray(prescriptions) ? prescriptions : []);
-  }, [prescriptions]);
+    const { nextItems, changed } = ensurePrescriptionIds(prescriptions);
+    setPrescriptions(nextItems);
+
+    if (changed && onChange) {
+      onChange(nextItems, { suppressToast: true });
+    }
+  }, [onChange, prescriptions]);
+
+  React.useEffect(() => {
+    if (activeChartTutorialStepKey?.startsWith('prescribe-') && activeChartTutorialStepKey !== 'prescribe-button') {
+      setShow(true);
+      return;
+    }
+    if (activeChartTutorialStepKey && !activeChartTutorialStepKey.startsWith('prescribe-')) {
+      setShow(false);
+      setEditingPrescription('');
+      setEditingIndex(null);
+    }
+  }, [activeChartTutorialStepKey]);
+
+  React.useEffect(() => {
+    if (activeChartTutorialStepKey && ['task-title', 'task-profession', 'task-description'].includes(activeChartTutorialStepKey)) {
+      setTaskLinkedPrescriptionIndex(null);
+      setTaskTitle('');
+      setTaskDescription('');
+      setTaskProfession('');
+      setTaskError('');
+      setShowTaskModal(true);
+      return;
+    }
+    if (activeChartTutorialStepKey && (!activeChartTutorialStepKey.startsWith('task-') || activeChartTutorialStepKey === 'task-list')) {
+      setShowTaskModal(false);
+      setTaskTitle('');
+      setTaskDescription('');
+      setTaskProfession('');
+      setTaskLinkedPrescriptionIndex(null);
+      setTaskError('');
+    }
+  }, [activeChartTutorialStepKey]);
 
   const commitPrescriptions = (nextPrescriptions, options = {}) => {
     setPrescriptions(nextPrescriptions);
@@ -130,7 +327,10 @@ const Prescriptions = ({
   };
 
   const sortedPrescriptions = useMemo(() => {
-    const next = prescriptionList.map((item, index) => ({ prescription: item, originalIndex: index }));
+    const next = prescriptionList.map((item, index) => ({
+      prescription: normalizePrescriptionForDisplay(item),
+      originalIndex: index,
+    }));
     next.sort((a, b) => {
       const aDrug = String(a.prescription.drug || '').trim().toLowerCase();
       const bDrug = String(b.prescription.drug || '').trim().toLowerCase();
@@ -169,7 +369,10 @@ const Prescriptions = ({
     setEditingIndex(null);
   };
 
-  const hasAllergyStatus = Boolean(patient?.nkda) || Boolean((patient?.allergies || []).length);
+  const hasAllergyStatus = allowPrescribeWithoutAllergyStatus
+    || Boolean(patient?.nkda)
+    || Boolean((patient?.allergies || []).length)
+    || Boolean((allergies || []).length);
 
   const handleOpenPrescribe = () => {
     if (!hasAllergyStatus) {
@@ -194,6 +397,22 @@ const Prescriptions = ({
 
   const handleSaveEdit = (script, index) => {
     commitPrescriptions(prescriptionList.map((item, itemIndex) => (itemIndex === index ? script : item)));
+  };
+
+  const handleRemovePrescription = (index) => {
+    if (!allowPrescriptionRemoval) {
+      return;
+    }
+
+    const prescription = prescriptionList[index];
+    const label = prescription?.drug || 'this prescription';
+    const confirmed = window.confirm(`Remove ${label} from this case study? This will delete it from the case template rather than move it to stopped medications.`);
+
+    if (!confirmed) {
+      return;
+    }
+
+    commitPrescriptions(prescriptionList.filter((_item, itemIndex) => itemIndex !== index));
   };
 
   const openActionModal = (type, index) => {
@@ -289,6 +508,10 @@ const Prescriptions = ({
 
   const openAdministrationModal = (index, slotDate) => {
     const prescription = prescriptionList[index] || {};
+    const now = new Date();
+    const slotTime = formatTimeForInput(slotDate);
+    const variableDoseSchedule = prescription.variableDoseSchedule || {};
+    const scheduledDose = String(variableDoseSchedule?.[slotTime]?.dose ?? variableDoseSchedule?.[slotTime] ?? '').trim();
     setAdministrationModal({
       show: true,
       index,
@@ -300,25 +523,61 @@ const Prescriptions = ({
       doseMin: prescription.doseMin || '',
       doseMax: prescription.doseMax || '',
       doseIncrement: prescription.doseIncrement || '',
+      requiresVariableDose: Boolean(Object.keys(variableDoseSchedule).length),
+      scheduledDose,
       unit: prescription.unit || '',
     });
     setAdministrationNote('');
-    setActualDose('');
+    setActualDose(scheduledDose);
+    setActualAdministrationDate(formatIsoDateForInput(now));
+    setActualAdministrationTime(formatTimeForInput(now));
     setWitnessUsername('');
     setWitnessPassword('');
     setAdministrationError('');
   };
 
   const closeAdministrationModal = () => {
-    setAdministrationModal({ show: false, index: null, slotDateTime: '', requiresWitness: false, outcome: 'administered', whenRequired: false });
+    setAdministrationModal({
+      show: false,
+      index: null,
+      slotDateTime: '',
+      requiresWitness: false,
+      outcome: 'administered',
+      whenRequired: false,
+      requiresVariableDose: false,
+      scheduledDose: '',
+      unit: '',
+    });
     setAdministrationNote('');
     setActualDose('');
+    setActualAdministrationDate('');
+    setActualAdministrationTime('');
     setWitnessUsername('');
     setWitnessPassword('');
     setAdministrationError('');
   };
 
+  const openTaskModal = (prescriptionIndex = null) => {
+    const linkedPrescription = prescriptionIndex !== null ? prescriptionList[prescriptionIndex] || null : null;
+    setTaskLinkedPrescriptionIndex(prescriptionIndex);
+    setTaskTitle(linkedPrescription ? `Review ${linkedPrescription.drug}` : '');
+    setTaskDescription('');
+    setTaskProfession('');
+    setTaskError('');
+    setShowTaskModal(true);
+  };
+
+  const closeTaskModal = () => {
+    setShowTaskModal(false);
+    setTaskTitle('');
+    setTaskDescription('');
+    setTaskProfession('');
+    setTaskLinkedPrescriptionIndex(null);
+    setTaskError('');
+  };
+
   const administrationModalPrescription = administrationModal.index !== null ? prescriptionList[administrationModal.index] || null : null;
+  const taskLinkedPrescription = taskLinkedPrescriptionIndex !== null ? prescriptionList[taskLinkedPrescriptionIndex] || null : null;
   const administrationModalRecentAdmins = [...(administrationModalPrescription?.administrations || [])]
     .sort((left, right) => {
       const leftTime = (parseDateTime(left.adminDateTime) || new Date(left.adminDateTime || 0)).getTime();
@@ -334,6 +593,15 @@ const Prescriptions = ({
     }
 
     const recordingAdministration = administrationModal.outcome === 'administered';
+    const actualAdministrationDateTime = parseInputDateTime(actualAdministrationDate, actualAdministrationTime);
+    if (recordingAdministration && !actualAdministrationDateTime) {
+      setAdministrationError('Enter a valid administration date and time.');
+      return;
+    }
+
+    const signedAtLabel = recordingAdministration
+      ? formatDateTimeLabel(actualAdministrationDateTime)
+      : formatDateTimeLabel(new Date());
     let actualDoseSuffix = '';
     if (recordingAdministration && administrationModal.doseType === 'range') {
       const selectedDose = Number(actualDose);
@@ -344,6 +612,14 @@ const Prescriptions = ({
 
       if (!actualDose || Number.isNaN(selectedDose) || selectedDose < min || selectedDose > max || !incrementFits) {
         setAdministrationError(`Enter an administered dose between ${administrationModal.doseMin}${administrationModal.unit} and ${administrationModal.doseMax}${administrationModal.unit} in increments of ${administrationModal.doseIncrement}${administrationModal.unit}.`);
+        return;
+      }
+
+      actualDoseSuffix = ` Dose administered: ${actualDose}${administrationModal.unit}.`;
+    } else if (recordingAdministration && administrationModal.requiresVariableDose) {
+      const selectedDose = Number(actualDose);
+      if (!actualDose || Number.isNaN(selectedDose) || selectedDose <= 0) {
+        setAdministrationError('Enter the dose administered for this insulin administration.');
         return;
       }
 
@@ -371,14 +647,25 @@ const Prescriptions = ({
         return item;
       }
 
+      const administrationDateTime = recordingAdministration && (item.stat || item.whenRequired)
+        ? signedAtLabel
+        : recordingAdministration
+          ? signedAtLabel
+          : administrationModal.slotDateTime;
+      const scheduledSlotDateTime = !item.whenRequired ? administrationModal.slotDateTime : '';
+      const scheduledVsActualSuffix = recordingAdministration && scheduledSlotDateTime && administrationDateTime !== scheduledSlotDateTime
+        ? ` (Scheduled ${scheduledSlotDateTime})`
+        : '';
+
       return {
         ...item,
         administrations: [
           ...(item.administrations || []),
           {
-            adminDateTime: administrationModal.slotDateTime,
+            adminDateTime: administrationDateTime,
+            scheduledSlotDateTime,
             administeredBy: administratorName,
-            actualDose: recordingAdministration && administrationModal.doseType === 'range' ? actualDose : '',
+            actualDose: recordingAdministration && (administrationModal.doseType === 'range' || administrationModal.requiresVariableDose) ? actualDose : '',
             adminNote: `${recordingAdministration ? 'Administered' : 'Missed'}${actualDoseSuffix}${administrationNote.trim() ? ` - ${administrationNote.trim()}` : ''}${witnessSuffix}`,
           },
         ],
@@ -386,7 +673,7 @@ const Prescriptions = ({
           ...(item.amendmentHistory || []),
           {
             action: recordingAdministration ? 'administered-dose' : 'missed-dose',
-            reason: `${administrationModal.slotDateTime}${actualDoseSuffix}${administrationNote.trim() ? ` - ${administrationNote.trim()}` : ''}${witnessSuffix}`,
+            reason: `${administrationDateTime}${scheduledVsActualSuffix}${actualDoseSuffix}${administrationNote.trim() ? ` - ${administrationNote.trim()}` : ''}${witnessSuffix}`,
             timestamp: new Date().toISOString(),
             actor: administratorName,
           },
@@ -396,6 +683,60 @@ const Prescriptions = ({
 
     commitPrescriptions(nextPrescriptions);
     closeAdministrationModal();
+  };
+
+  const saveTask = async () => {
+    if (!onSaveCaseNotes) {
+      closeTaskModal();
+      return;
+    }
+
+    if (!taskTitle.trim()) {
+      setTaskError('Enter a task title.');
+      return;
+    }
+
+    let linkedPrescription = taskLinkedPrescription;
+    let nextPrescriptions = prescriptionList;
+
+    if (linkedPrescription && !normalizePrescriptionId(linkedPrescription)) {
+      const assignedPrescriptionId = createPrescriptionId();
+      nextPrescriptions = prescriptionList.map((item, itemIndex) => (
+        itemIndex === taskLinkedPrescriptionIndex
+          ? { ...item, id: assignedPrescriptionId }
+          : item
+      ));
+      linkedPrescription = nextPrescriptions[taskLinkedPrescriptionIndex] || linkedPrescription;
+      commitPrescriptions(nextPrescriptions, { suppressToast: true });
+    }
+
+    const nextTask = {
+      id: createTaskId(),
+      title: taskTitle.trim(),
+      description: taskDescription.trim(),
+      assignedProfession: taskProfession,
+      linkedPrescriptionId: normalizePrescriptionId(linkedPrescription),
+      linkedDrug: linkedPrescription?.drug || '',
+      status: 'open',
+      createdAt: new Date().toISOString(),
+      createdBy: administratorName,
+      completedAt: '',
+      completedBy: '',
+    };
+
+    await onSaveCaseNotes({
+      fieldKey: 'tasks',
+      fieldLabel: 'Added task',
+      previousValue: null,
+      nextValue: nextTask,
+      caseNotes: {
+        ...(caseNotes || {}),
+        tasks: [nextTask, ...tasks],
+      },
+      successMessage: 'Task added.',
+    });
+
+    closeTaskModal();
   };
 
   const applyPrescriptionAction = () => {
@@ -485,7 +826,8 @@ const Prescriptions = ({
           item.administrations || [],
           holdCount,
           drugLibrary?.metadata?.frequencyOptions || [],
-          item.scheduledTimes || []
+          item.scheduledTimes || [],
+          item.start_date ? new Date(item.start_date) : null
         ).map((scheduledDate) => ({
           adminDateTime: formatDateTimeLabel(scheduledDate),
           administeredBy: 'Student user',
@@ -595,10 +937,25 @@ const Prescriptions = ({
             <Col lg={12}>
               <hr className="prescription-chart-header__rule" />
             </Col>
-            <Col lg={12} className="d-flex justify-content-between align-items-center gap-2 flex-wrap">
-              <div>
-                {prescribingStatus ? <Button type="button" variant="outline-light" className="btn-sm" onClick={handleOpenPrescribe}>Prescribe medication</Button> : null}
-              </div>
+              <Col lg={12} className="d-flex justify-content-between align-items-center gap-2 flex-wrap">
+                <div className="d-flex gap-2 flex-wrap">
+                  {prescribingStatus ? (
+                    <span
+                      ref={tutorialRefs.prescribeButton}
+                      className={activeChartTutorialStepKey === 'prescribe-button' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}
+                    >
+                      <Button type="button" variant="outline-light" className="btn-sm" onClick={handleOpenPrescribe}>Prescribe medication</Button>
+                    </span>
+                  ) : null}
+                  {prescribingStatus ? (
+                    <span
+                      ref={tutorialRefs.taskButton}
+                      className={activeChartTutorialStepKey === 'task-button' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}
+                    >
+                      <Button type="button" variant="outline-light" className="btn-sm" onClick={() => openTaskModal()}>New task</Button>
+                    </span>
+                  ) : null}
+                </div>
               <ButtonGroup aria-label="Prescription tools">
                 <Button
                   type="button"
@@ -629,7 +986,7 @@ const Prescriptions = ({
           </Row>
         </Container>
       </Container>
-      <Container fluid className="mb-4 px-0">
+        <Container fluid className="mb-4 px-0">
         {activePrescriptions.map(({ prescription, originalIndex }, displayIndex) => (
           <React.Fragment key={`${prescription.drug}-${originalIndex}`}>
             {firstPrnIndex === displayIndex ? (
@@ -644,17 +1001,27 @@ const Prescriptions = ({
             <PrescriptionCard
               index={originalIndex}
               prescribingStatus={prescribingStatus}
-              prescription={prescription}
-              admissionDate={patient?.admittedAt || patient?.createdAt}
-              editPrescription={handleEditOpen}
+                prescription={prescription}
+                activeTasks={activeTaskLookup.get(normalizePrescriptionId(prescription)) || []}
+                admissionDate={patient?.admittedAt || patient?.createdAt}
+                biochemistry={patient?.biochemistry || {}}
+                editPrescription={handleEditOpen}
               onStartPrescription={(_index) => openActionModal('start', originalIndex)}
               onStopPrescription={(_index) => openActionModal('stop', originalIndex)}
-              onSuspendDose={(_index, slotDate, administration) => openSuspendDoseModal(originalIndex, slotDate, administration)}
-              onChartAdministration={(_index, slotDate) => openAdministrationModal(originalIndex, slotDate)}
-              onExitSuspendMode={(_index) => setSuspendReasonCache((current) => ({ ...current, [originalIndex]: undefined }))}
-              onToggleApproval={handleToggleApproval}
-              frequencyOptions={drugLibrary?.metadata?.frequencyOptions || []}
-            />
+                onRemovePrescription={allowPrescriptionRemoval ? () => handleRemovePrescription(originalIndex) : undefined}
+                onSuspendDose={(_index, slotDate, administration) => openSuspendDoseModal(originalIndex, slotDate, administration)}
+                onChartAdministration={(_index, slotDate) => openAdministrationModal(originalIndex, slotDate)}
+                onExitSuspendMode={(_index) => {
+                  setSuspendReasonCache((current) => ({ ...current, [originalIndex]: undefined }));
+                  setActiveSuspendPrescriptionIndex((current) => (current === originalIndex ? null : current));
+                }}
+                onEnterSuspendMode={(_index) => setActiveSuspendPrescriptionIndex(originalIndex)}
+                onToggleApproval={handleToggleApproval}
+                onCreateTask={(_index) => openTaskModal(originalIndex)}
+                frequencyOptions={drugLibrary?.metadata?.frequencyOptions || []}
+                globalSuspendMode={activeSuspendPrescriptionIndex !== null}
+                isSuspendOwner={activeSuspendPrescriptionIndex === originalIndex}
+              />
           </React.Fragment>
         ))}
         {stoppedPrescriptions.length ? (
@@ -693,7 +1060,7 @@ const Prescriptions = ({
                       <td>{prescription.drug || 'Not recorded'}</td>
                       <td>{prescription.dose || 'Not set'}</td>
                       <td>{prescription.route || 'Not set'}</td>
-                      <td>{formatPrescriptionDate(prescription.end_date) || 'Not recorded'}</td>
+                      <td>{formatPrescriptionStop(prescription.end_date) || 'Not recorded'}</td>
                       <td>{prescription.prescriber || 'Not recorded'}</td>
                       <td>{prescription.pharmacistApprovalStatus?.approved ? 'Approved' : 'Not approved'}</td>
                       <td className="text-end">
@@ -708,6 +1075,20 @@ const Prescriptions = ({
                         >
                           Restart
                         </Button>
+                        {allowPrescriptionRemoval ? (
+                          <Button
+                            type="button"
+                            size="sm"
+                            variant="outline-danger"
+                            className="ms-2"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              handleRemovePrescription(originalIndex);
+                            }}
+                          >
+                            Remove
+                          </Button>
+                        ) : null}
                       </td>
                     </tr>
                   ))}
@@ -748,7 +1129,7 @@ const Prescriptions = ({
                     <td>{stoppedHistoryPrescription.whenRequired && stoppedHistoryPrescription.maxDose24h ? `${stoppedHistoryPrescription.frequency} (max ${stoppedHistoryPrescription.maxDose24h}/24h)` : stoppedHistoryPrescription.frequency}</td>
                     <td>{stoppedHistoryPrescription.route}</td>
                     <td>{stoppedHistoryPrescription.stat ? (formatPrescriptionDateTime(stoppedHistoryPrescription.start_date) || 'Not set') : (formatPrescriptionDate(stoppedHistoryPrescription.start_date) || 'Not set')}</td>
-                    <td>{formatPrescriptionDate(stoppedHistoryPrescription.end_date) || 'Open ended'}</td>
+                    <td>{formatPrescriptionStop(stoppedHistoryPrescription.end_date) || 'Open ended'}</td>
                     <td>{stoppedHistoryPrescription.indication || 'Not recorded'}</td>
                     <td>{stoppedHistoryPrescription.prescriber || 'Not recorded'}</td>
                     <td>
@@ -762,30 +1143,38 @@ const Prescriptions = ({
               </Table>
 
               <h5 className="mt-4">Amendment history</h5>
+              {(() => {
+                const amendmentEntries = (stoppedHistoryPrescription.amendmentHistory || []).slice().reverse();
+                const showReasonColumn = amendmentEntries.some((entry) => normalizeHistoryReason(entry.reason));
+                return (
               <Table responsive bordered size="sm">
                 <thead>
                   <tr>
                     <th>Timestamp</th>
                     <th>Action</th>
                     <th>Actor</th>
-                    <th>Reason</th>
+                    <th>Details</th>
+                    {showReasonColumn ? <th>Reason</th> : null}
                   </tr>
                 </thead>
                 <tbody>
-                  {(stoppedHistoryPrescription.amendmentHistory || []).length ? stoppedHistoryPrescription.amendmentHistory.slice().reverse().map((item, itemIndex) => (
+                  {amendmentEntries.length ? amendmentEntries.map((item, itemIndex) => (
                     <tr key={`${item.timestamp}-${itemIndex}`}>
                       <td>{formatDateTimeLabel(new Date(item.timestamp))}</td>
-                      <td>{item.action}</td>
+                      <td>{formatHistoryAction(item)}</td>
                       <td>{item.actor || 'Unknown user'}</td>
-                      <td>{item.reason}</td>
+                      <td>{formatHistoryDetails(item.details) || 'No further detail recorded.'}</td>
+                      {showReasonColumn ? <td>{normalizeHistoryReason(item.reason)}</td> : null}
                     </tr>
                   )) : (
                     <tr>
-                      <td colSpan={4} className="text-center text-muted">No amendment history recorded yet.</td>
+                      <td colSpan={showReasonColumn ? 5 : 4} className="text-center text-muted">No amendment history recorded yet.</td>
                     </tr>
                   )}
                 </tbody>
               </Table>
+                );
+              })()}
 
               <h5 className="mt-4">Administration history</h5>
               <Table responsive bordered size="sm">
@@ -841,6 +1230,9 @@ const Prescriptions = ({
             patient={patient}
             prescriberName={prescriberName}
             actorName={prescriberName}
+            allowHistoricalAdministrations={allowHistoricalAdministrations}
+            activeChartTutorialStepKey={activeChartTutorialStepKey}
+            tutorialRefs={tutorialRefs}
           />
         </Modal.Body>
       </Modal>
@@ -956,8 +1348,34 @@ const Prescriptions = ({
                 </Button>
               </div>
             </Form.Group>
-          ) : null}
-          <Form.Group className="mb-3" controlId="administrationNote">
+            ) : null}
+            {administrationModal.outcome === 'administered' ? (
+              <Row className="g-3 mb-3">
+                <Form.Group as={Col} md={6} controlId="actualAdministrationDate">
+                  <Form.Label>Actual administration date</Form.Label>
+                  <Form.Control
+                    type="date"
+                    value={actualAdministrationDate}
+                    onChange={(event) => {
+                      setActualAdministrationDate(event.target.value);
+                      setAdministrationError('');
+                    }}
+                  />
+                </Form.Group>
+                <Form.Group as={Col} md={6} controlId="actualAdministrationTime">
+                  <Form.Label>Actual administration time</Form.Label>
+                  <Form.Control
+                    type="time"
+                    value={actualAdministrationTime}
+                    onChange={(event) => {
+                      setActualAdministrationTime(event.target.value);
+                      setAdministrationError('');
+                    }}
+                  />
+                </Form.Group>
+              </Row>
+            ) : null}
+            <Form.Group className="mb-3" controlId="administrationNote">
             <Form.Label>{administrationModal.outcome === 'missed' ? 'Reason for missed dose' : 'Administration note'}</Form.Label>
             {administrationModal.outcome === 'missed' && !administrationModal.whenRequired ? (
               <Form.Select
@@ -979,10 +1397,12 @@ const Prescriptions = ({
               />
             )}
           </Form.Group>
-          {administrationModal.outcome === 'administered' && administrationModal.doseType === 'range' ? (
+          {administrationModal.outcome === 'administered' && (administrationModal.doseType === 'range' || administrationModal.requiresVariableDose) ? (
             <Form.Group className="mb-3" controlId="actualDose">
               <Form.Label>
-                Dose administered ({administrationModal.doseMin}-{administrationModal.doseMax}{administrationModal.unit}, increments of {administrationModal.doseIncrement}{administrationModal.unit})
+                {administrationModal.requiresVariableDose
+                  ? `Dose administered${administrationModal.scheduledDose ? ` (scheduled ${administrationModal.scheduledDose}${administrationModal.unit})` : ''}`
+                  : `Dose administered (${administrationModal.doseMin}-${administrationModal.doseMax}${administrationModal.unit}, increments of ${administrationModal.doseIncrement}${administrationModal.unit})`}
               </Form.Label>
               <Form.Control
                 type="number"
@@ -1017,12 +1437,56 @@ const Prescriptions = ({
             onClick={applyAdministration}
             disabled={
               (administrationModal.outcome === 'administered' && administrationModal.requiresWitness && (!witnessUsername.trim() || !witnessPassword.trim()))
-              || (administrationModal.outcome === 'administered' && administrationModal.doseType === 'range' && !actualDose)
+              || (administrationModal.outcome === 'administered' && (administrationModal.doseType === 'range' || administrationModal.requiresVariableDose) && !actualDose)
               || (administrationModal.outcome === 'missed' && !administrationNote.trim())
             }
           >
             {administrationModal.whenRequired ? 'Administer medication' : administrationModal.outcome === 'missed' ? 'Record missed dose' : 'Chart administration'}
           </Button>
+        </Modal.Footer>
+      </Modal>
+      <Modal show={showTaskModal} onHide={closeTaskModal}>
+        <Modal.Header closeButton>
+          <Modal.Title>{taskLinkedPrescription ? `Add task for ${taskLinkedPrescription.drug}` : 'New general task'}</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          {taskLinkedPrescription ? (
+            <Alert variant="info">
+              This task will be linked to <strong>{taskLinkedPrescription.drug}</strong>.
+            </Alert>
+          ) : null}
+          <Form.Group
+            ref={tutorialRefs.taskTitle}
+            className={`mb-3 ${activeChartTutorialStepKey === 'task-title' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}`}
+            controlId="taskTitle"
+          >
+            <Form.Label>Task</Form.Label>
+            <Form.Control value={taskTitle} onChange={(event) => { setTaskTitle(event.target.value); setTaskError(''); }} placeholder="Task Name" />
+          </Form.Group>
+          <Form.Group
+            ref={tutorialRefs.taskProfession}
+            className={`mb-3 ${activeChartTutorialStepKey === 'task-profession' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}`}
+            controlId="taskProfession"
+          >
+            <Form.Label>Assigned to</Form.Label>
+            <Form.Select value={taskProfession} onChange={(event) => setTaskProfession(event.target.value)}>
+              <option  value=""  disabled>Select a profession</option>
+              {TASK_PROFESSIONS.map((profession) => <option key={profession} value={profession}>{profession}</option>)}
+            </Form.Select>
+          </Form.Group>
+          <Form.Group
+            ref={tutorialRefs.taskDescription}
+            className={activeChartTutorialStepKey === 'task-description' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}
+            controlId="taskDescription"
+          >
+            <Form.Label>Additional detail</Form.Label>
+            <Form.Control as="textarea" rows={3} value={taskDescription} onChange={(event) => setTaskDescription(event.target.value)} placeholder="Detail" />
+          </Form.Group>
+          {taskError ? <Alert variant="danger" className="mt-3 mb-0">{taskError}</Alert> : null}
+        </Modal.Body>
+        <Modal.Footer>
+          <Button type="button" variant="outline-secondary" onClick={closeTaskModal}>Cancel</Button>
+          <Button type="button" onClick={saveTask}>Save task</Button>
         </Modal.Footer>
       </Modal>
     </>

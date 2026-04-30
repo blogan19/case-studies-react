@@ -6,7 +6,13 @@ import Card from 'react-bootstrap/Card';
 import Container from 'react-bootstrap/Container';
 import Form from 'react-bootstrap/Form';
 import ProgressBar from 'react-bootstrap/ProgressBar';
-import { normalizeCaseStudy } from '../../lib/caseStudy';
+import CaseStudyDisplay from '../../Case_study_display';
+import {
+  getActiveLiveStageIndex,
+  getLivePresentationCase,
+  hasStagedLiveCase,
+  normalizeCaseStudy,
+} from '../../lib/caseStudy';
 
 const renderExpectedAnswer = (expectedAnswer) => {
   if (expectedAnswer === null || expectedAnswer === undefined) {
@@ -27,14 +33,26 @@ const renderExpectedAnswer = (expectedAnswer) => {
   return String(expectedAnswer);
 };
 
-const LiveSessionView = ({ liveState, drugLibrary, liveResponses, onSubmitAnswer, onLeave }) => {
+const LiveSessionView = ({ liveState, drugLibrary, liveResponses, participantId, onSubmitAnswer, onLeave }) => {
   const caseStudy = normalizeCaseStudy(liveState?.payload || {});
-  const questions = caseStudy.questions || [];
+  const sessionEnded = liveState?.status && liveState.status !== 'active';
+  const presentationCaseStudy = useMemo(() => getLivePresentationCase(caseStudy), [caseStudy]);
+  const presentationStage = caseStudy.livePresentationStage === 'initial' ? 'initial' : 'full';
+  const isStaged = hasStagedLiveCase(caseStudy);
+  const activeStageIndex = getActiveLiveStageIndex(caseStudy);
+  const activeStage = caseStudy.liveStages?.[activeStageIndex];
+  const questions = presentationCaseStudy.questions || [];
   const activeIndex = Math.min(liveState?.stepIndex || 0, Math.max(questions.length - 1, 0));
   const activeQuestion = questions[activeIndex];
   const totalQuestions = questions.length;
   const progress = totalQuestions ? Math.round(((activeIndex + 1) / totalQuestions) * 100) : 0;
   const responseGroup = activeQuestion ? liveResponses?.[String(activeQuestion.questionNumber)] : null;
+  const participants = Array.isArray(liveResponses?.__participants) ? liveResponses.__participants : [];
+  const mySummary = participants.find((participant) => participant.participantId === participantId) || null;
+  const myActiveAnswer = activeQuestion ? mySummary?.answers?.[String(activeQuestion.questionNumber)] : null;
+  const activeCounts = Array.isArray(responseGroup?.counts) ? responseGroup.counts : [];
+  const revealedQuestionNumbers = Array.isArray(caseStudy.revealedQuestionNumbers) ? caseStudy.revealedQuestionNumbers.map(String) : [];
+  const isActiveAnswerRevealed = Boolean(liveState?.revealAnswers || (activeQuestion && revealedQuestionNumbers.includes(String(activeQuestion.questionNumber))));
   const routes = drugLibrary?.metadata?.routes || [];
   const frequencies = drugLibrary?.metadata?.frequencies || [];
   const drugs = drugLibrary?.items || [];
@@ -66,7 +84,7 @@ const LiveSessionView = ({ liveState, drugLibrary, liveResponses, onSubmitAnswer
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    if (!activeQuestion || !onSubmitAnswer) {
+    if (!activeQuestion || !onSubmitAnswer || sessionEnded || myActiveAnswer) {
       return;
     }
 
@@ -213,9 +231,22 @@ const LiveSessionView = ({ liveState, drugLibrary, liveResponses, onSubmitAnswer
   };
 
   return (
-    <Container className="mt-4 mb-5">
-      <Card className="container-shadow mb-4">
-        <Card.Body>
+    <>
+      <Container className="mt-4 mb-3">
+        {sessionEnded ? (
+          <Alert variant="info">
+            <div className="d-flex justify-content-between align-items-center gap-3 flex-wrap">
+              <span>This live session has ended. Please end your session when you are ready.</span>
+              {onLeave ? (
+                <Button type="button" variant="primary" size="sm" onClick={onLeave}>
+                  End session
+                </Button>
+              ) : null}
+            </div>
+          </Alert>
+        ) : null}
+        <Card className="container-shadow mb-3">
+          <Card.Body>
           <div className="d-flex justify-content-between align-items-start flex-wrap gap-3">
             <div>
               <h3 className="mb-1">{caseStudy.case_study_name || 'Live case'}</h3>
@@ -223,49 +254,52 @@ const LiveSessionView = ({ liveState, drugLibrary, liveResponses, onSubmitAnswer
               <Badge bg="secondary">
                 {totalQuestions ? `Question ${activeIndex + 1} of ${totalQuestions}` : 'Waiting for the first question'}
               </Badge>
+              {mySummary ? (
+                <Badge bg="success" className="ms-2">
+                  {mySummary.correctCount} / {mySummary.totalScorable} correct{mySummary.score === null || mySummary.score === undefined ? '' : ` (${mySummary.score}%)`}
+                </Badge>
+              ) : null}
+              <div className="small text-muted">
+                {isStaged
+                  ? `The lecturer is presenting ${activeStage?.title || `stage ${activeStageIndex + 1}`}.`
+                  : presentationStage === 'initial' ? 'The lecturer is presenting the initial scenario.' : 'More case information has been revealed.'}
+              </div>
             </div>
-            {onLeave ? (
-              <Button type="button" variant="outline-secondary" onClick={onLeave}>
-                Leave live session
-              </Button>
-            ) : null}
+            <div className="d-flex gap-2 flex-wrap">
+              {onLeave ? (
+                <Button type="button" variant="outline-secondary" onClick={onLeave}>
+                  Leave live session
+                </Button>
+              ) : null}
+            </div>
           </div>
           {totalQuestions ? <ProgressBar now={progress} className="mt-3" label={`${progress}%`} /> : null}
-        </Card.Body>
-      </Card>
+          </Card.Body>
+        </Card>
 
-      {caseStudy.case_instructions ? (
-        <Alert variant="info">
-          <strong>Case instructions:</strong> {caseStudy.case_instructions}
-        </Alert>
-      ) : null}
+      </Container>
 
-      {activeQuestion ? (
-        <Card className="container-shadow">
-          <Card.Body>
+      <CaseStudyDisplay data={presentationCaseStudy} hideQuestions readOnly />
+
+      <Container className="mb-5">
+        {activeQuestion ? (
+          <Card className="container-shadow">
+            <Card.Body>
             <div className="d-flex justify-content-between align-items-center gap-2 mb-3">
               <h4 className="mb-0">Question {activeQuestion.questionNumber}</h4>
               <Badge bg="primary">{activeQuestion.questionType}</Badge>
             </div>
             <h5>{activeQuestion.questionTitle}</h5>
             <p>{activeQuestion.questionText}</p>
-            {Array.isArray(activeQuestion.answerOptions) && activeQuestion.answerOptions.length > 0 ? (
-              <ul>
-                {activeQuestion.answerOptions.map((option) => <li key={option}>{option}</li>)}
-              </ul>
-            ) : null}
-            {Array.isArray(activeQuestion.optionsLabels) && activeQuestion.optionsLabels.length > 0 ? (
-              <ul>
-                {activeQuestion.optionsLabels.map((label) => <li key={label}>{label}</li>)}
-              </ul>
-            ) : null}
             <Form onSubmit={handleSubmit} className="mt-4">
               {renderAnswerInput()}
               <div className="d-flex align-items-center gap-3 flex-wrap">
                 <Button
                   type="submit"
                   disabled={
-                    !onSubmitAnswer
+                    sessionEnded
+                    || Boolean(myActiveAnswer)
+                    || !onSubmitAnswer
                     || (activeQuestion.questionType === 'WorkthroughTask'
                       ? !canSubmitStructured
                       : (
@@ -275,25 +309,54 @@ const LiveSessionView = ({ liveState, drugLibrary, liveResponses, onSubmitAnswer
                     ))
                   }
                 >
-                  Submit answer
+                  {myActiveAnswer ? 'Answer submitted' : 'Submit answer'}
                 </Button>
                 <span className="text-muted">{responseGroup?.totalResponses || 0} learners have responded so far.</span>
               </div>
             </Form>
-            {liveState?.revealAnswers ? (
-              <Alert variant="success" className="mt-3 mb-0">
+            {myActiveAnswer ? (
+              <Alert variant={myActiveAnswer.isCorrect === true ? 'success' : myActiveAnswer.isCorrect === false ? 'danger' : 'info'} className="mt-3 mb-0">
+                <div><strong>Your answer:</strong> {myActiveAnswer.answer || 'Blank response'}</div>
+                {myActiveAnswer.isCorrect === true ? <div className="mt-1">Correct</div> : null}
+                {myActiveAnswer.isCorrect === false ? <div className="mt-1">Incorrect</div> : null}
+              </Alert>
+            ) : null}
+            {isActiveAnswerRevealed ? (
+              <Alert variant={myActiveAnswer?.isCorrect === false ? 'danger' : 'success'} className="mt-3 mb-0">
                 <div><strong>Answer:</strong> {renderExpectedAnswer(activeQuestion.taskConfig || activeQuestion.answer)}</div>
                 {activeQuestion.answerExplanation ? <div className="mt-2"><strong>Explanation:</strong> {activeQuestion.answerExplanation}</div> : null}
               </Alert>
             ) : (
               <Alert variant="light" className="mt-3 mb-0">Answer hidden until the lecturer reveals it. Follow along and discuss before the reveal.</Alert>
             )}
-          </Card.Body>
-        </Card>
-      ) : (
-        <Alert variant="light">No question is active in this live session yet. The lecturer can sync the case and move the class onto the first question when ready.</Alert>
-      )}
-    </Container>
+            {isActiveAnswerRevealed && activeCounts.length ? (
+              <Alert variant="light" className="mt-3 mb-0">
+                <strong>Class answers:</strong>
+                {activeCounts.length ? (
+                  <div className="mt-3">
+                    {activeCounts.map((item) => {
+                      const percentage = responseGroup?.totalResponses ? Math.round((item.count / responseGroup.totalResponses) * 100) : 0;
+                      return (
+                        <div key={item.answer || 'blank'} className="mt-2">
+                          <div className="d-flex justify-content-between align-items-center gap-2">
+                            <span>{item.answer || 'Blank response'}</span>
+                            <span>{item.count} ({percentage}%)</span>
+                          </div>
+                          <ProgressBar now={percentage} variant="success" />
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </Alert>
+            ) : null}
+            </Card.Body>
+          </Card>
+        ) : (
+          <Alert variant="light">No question is active in this live session yet. The lecturer can sync the case and move the class onto the first question when ready.</Alert>
+        )}
+      </Container>
+    </>
   );
 };
 

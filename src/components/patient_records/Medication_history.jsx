@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
@@ -9,51 +9,72 @@ import Table from 'react-bootstrap/Table';
 const emptyEntry = {
   id: '',
   drug: '',
-  strength: '',
   dose: '',
   unit: '',
   route: '',
   frequency: '',
   form: '',
   status: 'Current',
-  lastTaken: '',
   notes: '',
 };
 
 const createEntryId = () => window.crypto?.randomUUID?.() || `med-history-${Date.now()}`;
+const AUTOSAVE_DELAY_MS = 600;
+const RECONCILIATION_STATUS_OPTIONS = ['Not started', 'In progress', 'Complete'];
+
+const normalizeReconciliationStatus = (value, fallback = 'Not started') => {
+  const normalizedValue = String(value || '').trim().toLowerCase();
+  return RECONCILIATION_STATUS_OPTIONS.find((option) => option.toLowerCase() === normalizedValue) || fallback;
+};
+
+const getAutosaveMetadataFields = (history = {}) => ({
+  usesBlisterPack: history.usesBlisterPack,
+  communityPharmacy: String(history.communityPharmacy || '').trim(),
+  sourcesUsed: String(history.sourcesUsed?.[0] || '').trim() ? [String(history.sourcesUsed[0] || '').trim()] : [],
+  reconciliationStatus: history.reconciliationStatus,
+});
+
+const areAutosaveMetadataFieldsEqual = (left = {}, right = {}) => (
+  JSON.stringify(getAutosaveMetadataFields(left)) === JSON.stringify(getAutosaveMetadataFields(right))
+);
 
 const normalizeMedicationHistory = (medicationHistory = {}) => {
   const normalized = medicationHistory && typeof medicationHistory === 'object' ? medicationHistory : {};
-  const blisterPackValue = String(normalized.usesBlisterPack || '').trim();
-  const reconciliationStatus = String(normalized.reconciliationStatus || 'Not started').trim() || 'Not started';
+  const blisterPackRawValue = normalized.usesBlisterPack ?? normalized.uses_blister_pack;
+  const blisterPackValue = typeof blisterPackRawValue === 'boolean'
+    ? (blisterPackRawValue ? 'Yes' : 'No')
+    : String(blisterPackRawValue || '').trim();
+  const reconciliationStatus = normalizeReconciliationStatus(
+    normalized.reconciliationStatus ?? normalized.reconciliation_status ?? normalized.status
+  );
+  const sourcesUsedValue = normalized.sourcesUsed ?? normalized.sources_used ?? normalized.sourceText;
 
   return {
     entries: Array.isArray(normalized.entries)
       ? normalized.entries.map((item, index) => ({
           id: String(item?.id || `medication-history-${index}`),
           drug: String(item?.drug || '').trim(),
-          strength: String(item?.strength || '').trim(),
           dose: String(item?.dose || '').trim(),
           unit: String(item?.unit || '').trim(),
           route: String(item?.route || '').trim(),
           frequency: String(item?.frequency || '').trim(),
           form: String(item?.form || '').trim(),
           status: String(item?.status || 'Current').trim() || 'Current',
-          lastTaken: String(item?.lastTaken || '').trim(),
           notes: String(item?.notes || '').trim(),
         })).filter((item) => item.drug)
       : [],
     usesBlisterPack: ['Yes', 'No', 'Unknown'].includes(blisterPackValue) ? blisterPackValue : 'Unknown',
-    communityPharmacy: String(normalized.communityPharmacy || '').trim(),
-    sourcesUsed: Array.isArray(normalized.sourcesUsed)
-      ? normalized.sourcesUsed.map((item) => String(item || '').trim()).filter(Boolean)
-      : (String(normalized.sourcesUsed || normalized.sourceText || '').trim()
-        ? [String(normalized.sourcesUsed || normalized.sourceText || '').trim()]
+    communityPharmacy: String(normalized.communityPharmacy ?? normalized.community_pharmacy ?? '').trim(),
+    patientOwnSupply: String(normalized.patientOwnSupply ?? normalized.patient_own_supply ?? '').trim(),
+    sourcesUsed: Array.isArray(sourcesUsedValue)
+      ? sourcesUsedValue.map((item) => String(item || '').trim()).filter(Boolean)
+      : (String(sourcesUsedValue || '').trim()
+        ? [String(sourcesUsedValue || '').trim()]
         : []),
-    generalNotes: String(normalized.generalNotes || '').trim(),
-    completedAt: String(normalized.completedAt || '').trim(),
-    completedBy: String(normalized.completedBy || '').trim(),
-    reconciliationStatus: ['Not started', 'In progress', 'Complete'].includes(reconciliationStatus) ? reconciliationStatus : 'Not started',
+    generalNotes: String(normalized.generalNotes ?? normalized.general_notes ?? normalized.details ?? '').trim(),
+    completedAt: String(normalized.completedAt ?? normalized.completed_at ?? normalized.date_added ?? '').trim(),
+    completedBy: String(normalized.completedBy ?? normalized.completed_by ?? normalized.added_by ?? '').trim(),
+    reconciliationStatus,
   };
 };
 
@@ -70,38 +91,16 @@ const formatDateTime = (value) => {
   return value;
 };
 
-const toDateTimeLocalValue = (value) => {
-  if (!value) {
-    return '';
-  }
-
-  if (String(value).includes('T') && String(value).length >= 16) {
-    return String(value).slice(0, 16);
-  }
-
-  const parsed = new Date(value);
-  if (Number.isNaN(parsed.getTime())) {
-    return '';
-  }
-
-  const year = parsed.getFullYear();
-  const month = String(parsed.getMonth() + 1).padStart(2, '0');
-  const day = String(parsed.getDate()).padStart(2, '0');
-  const hours = String(parsed.getHours()).padStart(2, '0');
-  const minutes = String(parsed.getMinutes()).padStart(2, '0');
-  return `${year}-${month}-${day}T${hours}:${minutes}`;
-};
-
-const formatStatusTone = (status) => {
-  const value = String(status || '').toLowerCase();
-  if (value === 'complete') {
-    return 'success';
-  }
-  if (value === 'in progress') {
-    return 'warning';
-  }
-  return 'danger';
-};
+  const formatStatusTone = (status) => {
+    const value = String(status || '').toLowerCase();
+    if (value === 'complete') {
+      return 'success';
+    }
+    if (value === 'in progress') {
+      return 'warning';
+    }
+    return 'secondary';
+  };
 
 const formatEntrySummary = (entry) => {
   const details = [
@@ -131,12 +130,16 @@ const formatHistoryValue = (value) => {
 const MedicationHistory = ({
   medicationHistory,
   caseNotesHistory = [],
+  prescriptions = [],
   drugLibrary,
   disabled = false,
   showHistoryModal = false,
   onOpenHistoryModal,
   onCloseHistoryModal,
+  onClosePanel,
   hideInlineHistoryButton = false,
+  activeChartTutorialStepKey = '',
+  tutorialRefs = {},
   onSaveMedicationHistory,
 }) => {
   const [metadataDraft, setMetadataDraft] = useState(() => normalizeMedicationHistory(medicationHistory));
@@ -149,11 +152,24 @@ const MedicationHistory = ({
   const [showHistory, setShowHistory] = useState(false);
   const [drugSearch, setDrugSearch] = useState('');
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [selectedPrescriptionIndex, setSelectedPrescriptionIndex] = useState('');
+  const autosaveTimerRef = useRef(null);
+  const metadataDraftRef = useRef(metadataDraft);
   const normalizedHistory = useMemo(() => normalizeMedicationHistory(medicationHistory), [medicationHistory]);
 
   useEffect(() => {
     setMetadataDraft(normalizedHistory);
   }, [normalizedHistory]);
+
+  useEffect(() => {
+    metadataDraftRef.current = metadataDraft;
+  }, [metadataDraft]);
+
+  useEffect(() => () => {
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+  }, []);
 
   const medicationHistoryEvents = useMemo(
     () => (Array.isArray(caseNotesHistory) ? caseNotesHistory : []).filter((entry) => entry.fieldKey === 'medicationHistory').slice().reverse(),
@@ -191,23 +207,83 @@ const MedicationHistory = ({
 
   const routeOptions = drugLibrary?.metadata?.routeOptions || [];
   const frequencyOptions = drugLibrary?.metadata?.frequencyOptions || [];
+  const inpatientPrescriptionOptions = useMemo(
+    () => (Array.isArray(prescriptions) ? prescriptions : [])
+      .map((item, index) => ({ item, index }))
+      .filter(({ item }) => String(item?.drug || '').trim())
+      .map(({ item, index }) => ({
+        value: String(index),
+        label: [
+          item.drug,
+          item.dose || '',
+          item.route || '',
+          item.frequency || '',
+        ].filter(Boolean).join(' | '),
+        entry: {
+          id: createEntryId(),
+          drug: String(item.drug || '').trim(),
+          dose: String(item.dose || '').replace(String(item.unit || ''), '').trim(),
+          unit: String(item.unit || '').trim(),
+          route: String(item.route || '').trim(),
+          frequency: String(item.frequency || '').trim(),
+          form: String(item.form || '').trim(),
+          status: String(item.status || '').trim().toLowerCase() === 'stopped' ? 'Stopped' : 'Current',
+          notes: item.whenRequired ? 'Added from inpatient PRN prescription.' : 'Added from inpatient prescription.',
+        },
+      })),
+    [prescriptions]
+  );
 
-  const persistMedicationHistory = async (nextHistory) => {
+  const persistMedicationHistory = useCallback(async (nextHistory) => {
     if (!onSaveMedicationHistory) {
       return;
     }
     await onSaveMedicationHistory(normalizeMedicationHistory(nextHistory));
-  };
+  }, [onSaveMedicationHistory]);
+
+  useEffect(() => {
+    if (disabled || !onSaveMedicationHistory || areAutosaveMetadataFieldsEqual(metadataDraft, normalizedHistory)) {
+      return undefined;
+    }
+
+    if (autosaveTimerRef.current) {
+      clearTimeout(autosaveTimerRef.current);
+    }
+
+    autosaveTimerRef.current = setTimeout(async () => {
+      const latestMetadataDraft = metadataDraftRef.current;
+      setSavingMetadata(true);
+      try {
+        await persistMedicationHistory({
+          ...normalizedHistory,
+          ...latestMetadataDraft,
+          ...getAutosaveMetadataFields(latestMetadataDraft),
+          completedAt: new Date().toISOString(),
+        });
+      } finally {
+        setSavingMetadata(false);
+      }
+    }, AUTOSAVE_DELAY_MS);
+
+    return () => {
+      if (autosaveTimerRef.current) {
+        clearTimeout(autosaveTimerRef.current);
+      }
+    };
+  }, [
+    disabled,
+    metadataDraft,
+    normalizedHistory,
+    onSaveMedicationHistory,
+    persistMedicationHistory,
+  ]);
 
   const handleSaveMetadata = async () => {
     setSavingMetadata(true);
     try {
       await persistMedicationHistory({
         ...metadataDraft,
-        sourcesUsed: metadataDraft.sourcesUsed
-          .map((item) => String(item || '').trim())
-          .filter(Boolean)
-          .slice(0, 1),
+        ...getAutosaveMetadataFields(metadataDraft),
         completedAt: new Date().toISOString(),
       });
     } finally {
@@ -221,6 +297,7 @@ const MedicationHistory = ({
     setDrugSearch('');
     setEntryError('');
     setShowSuggestions(false);
+    setSelectedPrescriptionIndex('');
     setShowEntryModal(true);
   };
 
@@ -229,19 +306,18 @@ const MedicationHistory = ({
     setEntryDraft({
       id: entry.id,
       drug: entry.drug,
-      strength: entry.strength,
       dose: entry.dose,
       unit: entry.unit,
       route: entry.route,
       frequency: entry.frequency,
       form: entry.form,
       status: entry.status,
-      lastTaken: entry.lastTaken,
       notes: entry.notes,
     });
-    setDrugSearch([entry.drug, entry.strength, entry.form].filter(Boolean).join(' '));
+    setDrugSearch([entry.drug, entry.form].filter(Boolean).join(' '));
     setEntryError('');
     setShowSuggestions(false);
+    setSelectedPrescriptionIndex('');
     setShowEntryModal(true);
   };
 
@@ -252,13 +328,13 @@ const MedicationHistory = ({
     setDrugSearch('');
     setEntryError('');
     setShowSuggestions(false);
+    setSelectedPrescriptionIndex('');
   };
 
   const selectDrug = (option) => {
     setEntryDraft((current) => ({
       ...current,
       drug: option.drug,
-      strength: current.strength || option.strength,
       unit: current.unit || option.unit,
       form: current.form || option.form,
       route: current.route || option.route,
@@ -279,14 +355,12 @@ const MedicationHistory = ({
         ...entryDraft,
         id: entryDraft.id || createEntryId(),
         drug: String(entryDraft.drug || '').trim(),
-        strength: String(entryDraft.strength || '').trim(),
         dose: String(entryDraft.dose || '').trim(),
         unit: String(entryDraft.unit || '').trim(),
         route: String(entryDraft.route || '').trim(),
         frequency: String(entryDraft.frequency || '').trim(),
         form: String(entryDraft.form || '').trim(),
         status: String(entryDraft.status || 'Current').trim() || 'Current',
-        lastTaken: String(entryDraft.lastTaken || '').trim(),
         notes: String(entryDraft.notes || '').trim(),
       };
 
@@ -298,6 +372,7 @@ const MedicationHistory = ({
         ...normalizedHistory,
         ...metadataDraft,
         entries: nextEntries,
+        reconciliationStatus: nextEntries.length ? 'In progress' : metadataDraft.reconciliationStatus,
         completedAt: new Date().toISOString(),
       });
       closeEntryModal();
@@ -337,14 +412,17 @@ const MedicationHistory = ({
       <div className="medication-history-panel">
         <div className="medication-history-panel__body">
           <div className="d-flex flex-wrap gap-3 align-items-center mb-3 mt-3">
-            <div className="small text-muted">Last updated: {formatDateTime(normalizedHistory.completedAt)}</div>
-            <div className="small text-muted">Updated by: {normalizedHistory.completedBy || 'Not recorded'}</div>
+            <div className="small text-muted"><strong>Last updated:</strong> {formatDateTime(normalizedHistory.completedAt)}</div>
+            <div className="small text-muted"><strong>Updated by:</strong> {normalizedHistory.completedBy || 'Not recorded'}</div>
             <Badge bg={formatStatusTone(normalizedHistory.reconciliationStatus)}>
               {normalizedHistory.reconciliationStatus}
             </Badge>
           </div>
 
-          <div className="medication-history-panel__section">
+          <div
+            ref={tutorialRefs.medRecDetails}
+            className={`medication-history-panel__section ${activeChartTutorialStepKey === 'med-rec-details' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}`}
+          >
             <div className="d-flex justify-content-between align-items-center gap-3 mb-3">
               <h6 className="medication-history-panel__section-title mb-0">History details</h6>
               {!hideInlineHistoryButton ? (
@@ -371,7 +449,7 @@ const MedicationHistory = ({
               </div>
               <div className="col-md-3">
                 <Form.Group controlId="medHistoryBlisterPack">
-                  <Form.Label>Blister pack / MDS</Form.Label>
+                  <Form.Label>Blister pack</Form.Label>
                   <div className="d-flex gap-3 mt-2">
                     <Form.Check
                       inline
@@ -422,24 +500,38 @@ const MedicationHistory = ({
                   </Form.Select>
                 </Form.Group>
               </div>
+              <div className="col-md-6">
+                <Form.Group controlId="medHistoryPatientOwnSupply">
+                  <Form.Label>Patients own supply</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={metadataDraft.patientOwnSupply}
+                    disabled={disabled}
+                    onChange={(event) => setMetadataDraft((current) => ({ ...current, patientOwnSupply: event.target.value }))}
+                    placeholder="Document whether the patient has their own medications"
+                  />
+                </Form.Group>
+              </div>
             </div>
 
            
           </div>
 
-          <div className="medication-history-panel__section mt-4">
+          <div
+            ref={tutorialRefs.medRecMedicines}
+            className={`medication-history-panel__section mt-4 ${activeChartTutorialStepKey === 'med-rec-medicines' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}`}
+          >
             <div className="d-flex justify-content-between align-items-center gap-3 mb-2">
               <h6 className="medication-history-panel__section-title mb-0">Medicines</h6>
               <div className="small text-muted">{normalizedHistory.entries.length} medicine{normalizedHistory.entries.length === 1 ? '' : 's'} recorded</div>
             </div>
 
-            <Table responsive hover size="sm" className="mb-0 medication-history-table">
+            <Table responsive size="sm" className="mb-0 medication-history-table">
               <thead>
                 <tr>
                   <th>Medicine</th>
                   <th>Directions</th>
                   <th>Status</th>
-                  <th>Last taken</th>
                   <th>Notes</th>
                   {!disabled ? <th className="text-end">Actions</th> : null}
                 </tr>
@@ -449,11 +541,10 @@ const MedicationHistory = ({
                   <tr key={entry.id}>
                     <td>
                       <div className="fw-semibold">{entry.drug}</div>
-                      <div className="small text-muted">{[entry.strength, entry.form].filter(Boolean).join(' | ') || 'Free-text medicine'}</div>
+                      <div className="small text-muted">{entry.form || 'Free-text medicine'}</div>
                     </td>
                     <td>{formatEntrySummary(entry)}</td>
                     <td>{entry.status || 'Current'}</td>
-                    <td>{formatDateTime(entry.lastTaken)}</td>
                     <td>{entry.notes || 'Not recorded'}</td>
                     {!disabled ? (
                       <td className="text-end">
@@ -462,7 +553,7 @@ const MedicationHistory = ({
                             Edit
                           </Button>
                           <Button type="button" size="sm" variant="outline-danger" onClick={() => handleDeleteEntry(entry.id)}>
-                            Delete
+                            <i className="bi bi-trash" aria-hidden="true" />
                           </Button>
                         </div>
                       </td>
@@ -470,7 +561,7 @@ const MedicationHistory = ({
                   </tr>
                 )) : (
                   <tr>
-                    <td colSpan={disabled ? 5 : 6} className="text-center text-muted">
+                    <td colSpan={disabled ? 4 : 5} className="text-center text-muted">
                       No medication history recorded yet.
                     </td>
                   </tr>
@@ -488,15 +579,21 @@ const MedicationHistory = ({
                       }
                     }}
                   >
-                    <td colSpan={6} className="text-center">
-                      Click to add a new medicine
+                    <td colSpan={5} className="text-center">
+                      <span className="text-success fw-semibold">
+                        <i className="bi bi-plus-circle me-2" aria-hidden="true" />
+                        Click to add a new medicine
+                      </span>
                     </td>
                   </tr>
                 ) : null}
               </tbody>
             </Table>
           </div>
-           <div className="mt-3 mb-3">
+          <div
+            ref={tutorialRefs.medRecNotes}
+            className={`medication-history-panel__section mt-4 ${activeChartTutorialStepKey === 'med-rec-notes' ? 'epma-tutorial-target epma-tutorial-target--active' : ''}`}
+          >
               <Form.Group controlId="medHistoryNotes">
                 <Form.Label>Med Rec Note</Form.Label>
                 <Form.Control
@@ -508,10 +605,13 @@ const MedicationHistory = ({
                   placeholder="Med Rec Notes"
                 />
               </Form.Group>
-            </div>
+          </div>
 
              {!disabled ? (
-              <div className="mt-3 mb-3 float-end">
+              <div className="mt-3 mb-3 d-flex justify-content-end gap-2">
+                <Button type="button" variant="outline-secondary" onClick={onClosePanel}>
+                  Close
+                </Button>
                 <Button type="button" onClick={handleSaveMetadata} disabled={savingMetadata}>
                   Save Med Rec
                 </Button>
@@ -526,6 +626,35 @@ const MedicationHistory = ({
         </Modal.Header>
         <Modal.Body>
           <div className="row g-3">
+            {inpatientPrescriptionOptions.length ? (
+              <div className="col-12">
+                <Form.Group controlId="medHistoryFromChart">
+                  <Form.Label>Add from inpatient chart</Form.Label>
+                  <Form.Select
+                    value={selectedPrescriptionIndex}
+                    onChange={(event) => {
+                      const nextValue = event.target.value;
+                      setSelectedPrescriptionIndex(nextValue);
+                      if (!nextValue) {
+                        return;
+                      }
+                      const selectedOption = inpatientPrescriptionOptions.find((item) => item.value === nextValue);
+                      if (!selectedOption) {
+                        return;
+                      }
+                      setEntryDraft(selectedOption.entry);
+                      setDrugSearch([selectedOption.entry.drug, selectedOption.entry.form].filter(Boolean).join(' '));
+                      setShowSuggestions(false);
+                    }}
+                  >
+                    <option value="">Select a prescribed inpatient medicine</option>
+                    {inpatientPrescriptionOptions.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </Form.Select>
+                </Form.Group>
+              </div>
+            ) : null}
             <div className="col-12">
               <Form.Group controlId="medHistoryDrug">
                 <Form.Label>Drug</Form.Label>
@@ -559,12 +688,6 @@ const MedicationHistory = ({
                     ))}
                   </ListGroup>
                 ) : null}
-              </Form.Group>
-            </div>
-            <div className="col-md-3">
-              <Form.Group controlId="medHistoryStrength">
-                <Form.Label>Strength</Form.Label>
-                <Form.Control type="text" value={entryDraft.strength} onChange={(event) => setEntryDraft((current) => ({ ...current, strength: event.target.value }))} />
               </Form.Group>
             </div>
             <div className="col-md-3">
@@ -615,12 +738,6 @@ const MedicationHistory = ({
                   <option value="Held">Held</option>
                   <option value="Stopped">Stopped</option>
                 </Form.Select>
-              </Form.Group>
-            </div>
-            <div className="col-md-6">
-              <Form.Group controlId="medHistoryLastTaken">
-                <Form.Label>Last taken / stopped</Form.Label>
-                <Form.Control type="datetime-local" value={toDateTimeLocalValue(entryDraft.lastTaken)} onChange={(event) => setEntryDraft((current) => ({ ...current, lastTaken: event.target.value }))} />
               </Form.Group>
             </div>
             <div className="col-12">

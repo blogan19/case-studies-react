@@ -33,7 +33,7 @@ const Imaging = (props) => {
        <Icon logo="bi bi-image" title_text="Imaging"/>
       </td>
 
-      <Offcanvas show={show} onHide={handleClose} style={{ width: '100%'}}>
+      <Offcanvas show={show} onHide={handleClose} style={{ width: '90%' }}>
         <Offcanvas.Header closeButton className="blue-back text-white">
           <Offcanvas.Title>Imaging</Offcanvas.Title>
         </Offcanvas.Header>

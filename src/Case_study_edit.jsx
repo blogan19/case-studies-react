@@ -238,12 +238,14 @@ const CaseStudyEdit = ({
                   <Alert variant="info">Students can join the live case with code {activeSessionCode}.</Alert>
                 ) : null}
 
-                <DrugLibraryManager
-                  items={drugLibrary?.items || []}
-                  metadata={drugLibrary?.metadata || {}}
-                  onImport={onImportDrugLibrary}
-                  importing={isSaving}
-                />
+                {onImportDrugLibrary ? (
+                  <DrugLibraryManager
+                    items={drugLibrary?.items || []}
+                    metadata={drugLibrary?.metadata || {}}
+                    onImport={onImportDrugLibrary}
+                    importing={isSaving}
+                  />
+                ) : null}
 
                 <ContentHeader title="Case Study Details" complete={completion.details ? 'true' : ''} />
                 <Form className="mt-3">

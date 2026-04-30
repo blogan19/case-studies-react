@@ -27,6 +27,25 @@ const AddImages = ({ closeModal, setImages, previousResult }) => {
     setRecordState((current) => (current.length === 1 ? [{ ...emptyRecord }] : current.filter((_item, recordIndex) => recordIndex !== index)));
   };
 
+  const uploadImage = (index, file) => {
+    if (!file) {
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = () => {
+      setRecordState((current) => current.map((record, recordIndex) => (
+        recordIndex === index
+          ? {
+              ...record,
+              image_url: String(reader.result || ''),
+              image_type: record.image_type || file.name.replace(/\.[^.]+$/, ''),
+            }
+          : record
+      )));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const saveRecords = () => {
     setImages(recordState.filter((record) => record.image_url || record.image_desc || record.image_type));
     closeModal();
@@ -48,8 +67,22 @@ const AddImages = ({ closeModal, setImages, previousResult }) => {
           </Row>
           <Row className="mb-3">
             <Form.Group as={Col} controlId={`imageUrl-${index}`}>
-              <Form.Label>Image URL</Form.Label>
+              <Form.Label>Image URL or uploaded image</Form.Label>
+              <Form.Control
+                type="file"
+                accept="image/*"
+                className="mb-2"
+                onChange={(event) => {
+                  uploadImage(index, event.target.files?.[0]);
+                  event.target.value = '';
+                }}
+              />
               <Form.Control type="text" value={record.image_url} onChange={(event) => updateRecord(index, 'image_url', event.target.value)} />
+              {record.image_url ? (
+                <div className="mt-2">
+                  <img src={record.image_url} alt={record.image_type || 'Uploaded preview'} className="img-fluid rounded border" style={{ maxHeight: '220px' }} />
+                </div>
+              ) : null}
             </Form.Group>
           </Row>
           <Row className="mb-3">

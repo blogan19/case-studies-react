@@ -3,8 +3,7 @@ import Table from 'react-bootstrap/Table';
 import Container from 'react-bootstrap/Container';
 
 const MicrobiologyTable = (props) => {
-    const results = props.results
-    console.log(props)
+    const results = props.results || [];
     return(
         <Container>
             <Table className='tbl-notes container-shadow text-break'>
@@ -13,9 +12,9 @@ const MicrobiologyTable = (props) => {
                         <th colSpan={2}>Microbiology</th>
                     </tr>
                 </thead>
-            {results.map( (result) =>(
-                
-                    <tbody>
+                <tbody>
+            {results.map((result, resultIndex) =>(
+                        <React.Fragment key={`result-${resultIndex}`}>
                         <tr>
                             <td>
                                <p><strong>Type:</strong>{result.sample_type}</p>
@@ -23,8 +22,8 @@ const MicrobiologyTable = (props) => {
                                <p><strong>Growth:</strong> {result.growth}</p>
                             </td>
                             <td>
-                                {result.sensitivities.map((sens) =>(
-                                    <p>{sens[0]}:  {sens[1]}</p>
+                                {(result.sensitivities || []).map((sens, sensIndex) =>(
+                                    <p key={`${resultIndex}-${sensIndex}`}>{sens[0]}:  {sens[1]}</p>
                                 ))
                                 }
                             </td>
@@ -32,10 +31,10 @@ const MicrobiologyTable = (props) => {
                         <tr>
                             <td colSpan={2}>{result.notes}</td>
                         </tr>
-                    </tbody>
-                
+                        </React.Fragment>
+            
             ))}
-                
+                </tbody>
             </Table>
         </Container>
     )

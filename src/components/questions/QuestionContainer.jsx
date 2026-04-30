@@ -6,7 +6,7 @@ import DrugChoice from './DrugChoice';
 import MultipleAnswer from './MultipleAnswer';
 import WorkthroughTask from './WorkthroughTask';
 
-const QuestionContainer = ({ questions = [], prescriptions = [] }) => {
+const QuestionContainer = ({ questions = [], drugLibrary }) => {
   return questions.map((question, index) => {
     switch (question.questionType) {
       case 'MultipleChoice':
@@ -20,7 +20,7 @@ const QuestionContainer = ({ questions = [], prescriptions = [] }) => {
           <DrugChoice
             key={question.questionNumber || index}
             question={question}
-            prescriptions={prescriptions}
+            drugLibrary={drugLibrary}
           />
         );
       case 'MultipleAnswer':
