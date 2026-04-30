@@ -1,71 +1,99 @@
 # AUXTECHNA Case Studies MVP
 
-A local-first MVP for the university teaching and prescribing platform. This repo is intended to be reviewed locally before deployment and shared with colleagues through GitHub.
+A local-first MVP for teaching case studies, staged learning scenarios, and EPMA-style prescribing simulation.
 
-## Current MVP scope
+This repository is intended for local review and colleague handover before any production deployment. It contains a React frontend, an Express/PostgreSQL API, database schema, seed data, and supporting documentation.
 
-This build now supports:
+## Current Scope
 
-- Educator and student accounts
-- Educator dashboard
-- Case builder and preview
-- Save draft / publish / clone / archive case studies
-- Published case library for students
-- Student self-paced case sessions
-- Save progress and submit for scoring
-- Submitted answer review with explanations where available
-- Basic lecturer analytics for a selected case
-- Live teaching sessions via join code and realtime case updates
-- Lecturer-controlled live progression and projector view
-- Live student answer submission with aggregate classroom response summaries
-- Simplified ePMA-style medication chart and patient case display
-- CSV-backed drug library import for prescribing
-- API smoke test script for quick environment validation
+This build supports:
 
-## Review documents
+- Student, facilitator, and facilitator-admin accounts
+- Case study authoring, preview/testing, draft save, publishing, cloning, archiving, and sharing
+- Self-paced student case studies with save-progress and submit flows
+- Staged case studies that can progress after question answers
+- Live classroom sessions with join codes and realtime response summaries
+- Facilitator live controls for stages, questions, answer reveals, and ending sessions
+- Facilitator analytics and individual attempt review/reset
+- EPMA-style patient record, allergy, medication history, VTE, task, and prescription chart workflows
+- Expanded seeded drug library for prescribing
+- Drug library/reference-data management
+- Local handover documentation for setup and architecture
 
-- Backlog: [docs/backlog/mvp-backlog.md](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/docs/backlog/mvp-backlog.md)
-- GitHub review checklist: [docs/backlog/github-review-checklist.md](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/docs/backlog/github-review-checklist.md)
-- AUXTECHNA integration roadmap: [docs/architecture/auxtechna-integration-roadmap.md](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/docs/architecture/auxtechna-integration-roadmap.md)
+## Technology Stack
 
-## Demo accounts
+- React 18 with Create React App
+- React Bootstrap, Bootstrap 5, Bootstrap Icons
+- Express 5 API
+- PostgreSQL via `pg`
+- JWT authentication with `jsonwebtoken`
+- Password hashing with `bcryptjs`
+- Server-sent events for live classroom updates
+- Plain SQL schema in `server/db/001_init.sql`
 
-When the API starts against an empty database it seeds:
+There is no ORM in this MVP. Case study and session state is stored heavily as JSONB snapshots.
 
-- Educator: `demo@casestudy.local` / `Demo123!`
+## Key Documentation
+
+- [Application structure and technology handover](docs/architecture/app-structure-and-tech-handover.md)
+- [Accessing the application after setup](docs/architecture/access-after-setup-summary.md)
+- [AUXTECHNA integration roadmap](docs/architecture/auxtechna-integration-roadmap.md)
+- [MVP backlog](docs/backlog/mvp-backlog.md)
+- [GitHub review checklist](docs/backlog/github-review-checklist.md)
+
+## Demo Accounts
+
+When the API starts against an empty database, it seeds:
+
+- Facilitator admin: `admin@casestudy.local` / `Admin123!`
+- Facilitator: `demo@casestudy.local` / `Demo123!`
 - Student: `student@casestudy.local` / `Student123!`
 
-The API also seeds one published case and prints a live session code in the terminal.
+The API also seeds one demo published case study and one active live classroom session. The live session code is printed in the API terminal.
 
-## Local setup
+These credentials are for local review only. Change or remove them before using the application on a shared server.
 
-### 1. Open the project
+## Seeded Data
+
+On first startup against an empty database, the API creates the schema and seeds:
+
+- Demo users listed above
+- One demo case study from `src/case_study.json`
+- One active live classroom session for the demo case
+- Drug library from `server/seed/drug-library.seed.csv`
+- Routes, frequencies, units, forms, indications, allergy reactions, common conditions, order sets, and EPMA reference data
+- Demo test patients for each user
+
+The expanded drug list is committed as `server/seed/drug-library.seed.csv`.
+
+## Local Setup
+
+### 1. Clone and open the project
 
 ```powershell
-cd "C:\Users\Ben\OneDrive\Documents\codex\case-studies-react"
+git clone https://github.com/blogan19/case-studies-react.git
+cd case-studies-react
 ```
 
-### 2. Database options
+### 2. Start PostgreSQL
 
-Option A: create the PostgreSQL database manually
-
-```powershell
-psql -U postgres -c "CREATE DATABASE case_studies_react;"
-```
-
-If your local PostgreSQL username is not `postgres`, replace it.
-
-Option B: run PostgreSQL with Docker
+Option A: use Docker:
 
 ```powershell
 docker compose up -d
 ```
 
-This starts a local Postgres instance with:
+This starts Postgres with:
 
 - database: `case_studies_react`
 - username: `postgres`
 - password: `postgres`
+
+Option B: create the database manually:
+
+```powershell
+psql -U postgres -c "CREATE DATABASE case_studies_react;"
+```
 
 ### 3. Create the environment file
 
@@ -73,9 +101,7 @@ This starts a local Postgres instance with:
 Copy-Item .env.example .env
 ```
 
-### 4. Check `.env`
-
-Default contents:
+Default `.env.example` contents:
 
 ```env
 PORT=4000
@@ -84,122 +110,153 @@ DATABASE_URL=postgresql://postgres:postgres@localhost:5432/case_studies_react
 JWT_SECRET=change-this-in-production
 ```
 
-Update `DATABASE_URL` if your local PostgreSQL password or username is different.
+Update `DATABASE_URL` if your PostgreSQL host, username, password, port, or database name differs. Change `JWT_SECRET` for anything beyond local testing.
 
-### 5. Install packages
+### 4. Install packages
 
 ```powershell
 npm install
 ```
 
-### 6. Start the API
+### 5. Start the API
 
 ```powershell
 npm run server
 ```
 
-### 7. Start the frontend in a second terminal
+The API runs on:
+
+```text
+http://localhost:4000
+```
+
+Health check:
+
+```text
+http://localhost:4000/api/health
+```
+
+Expected response:
+
+```json
+{ "ok": true }
+```
+
+### 6. Start the frontend
+
+In a second terminal:
 
 ```powershell
 npm start
 ```
 
-### 8. Run the smoke test (optional but recommended)
+Open:
 
-```powershell
-npm run smoke
+```text
+http://localhost:3000
 ```
 
-### 9. Open the app
+## Useful Commands
 
-[http://localhost:3000](http://localhost:3000)
+```powershell
+npm run build
+node --check server\index.js
+npm run smoke
+npm run test:frontend -- --runInBand
+```
 
-## Review flow
+`npm run build` currently passes, but Create React App may emit existing warnings about Browserslist/autoprefixer and an undeclared Babel plugin dependency.
 
-### Educator review
+## Review Flow
 
-1. Sign in as the educator demo user
-2. Open the educator dashboard
-3. Edit the seeded case or create a new draft
-4. Save the draft and confirm the success banner
-5. Publish the case
-6. Confirm the live code appears in the navbar
-7. Clone or archive a case from the dashboard
-8. Review the analytics block after student submissions
+### Facilitator/Admin
 
-### Student review
+1. Sign in as `admin@casestudy.local` / `Admin123!`.
+2. Open the facilitator areas.
+3. Create or edit a case study.
+4. Test the case study before publishing.
+5. Publish as a normal case study or start a live classroom.
+6. Share with students or copy the student link.
+7. Review attempts, scores, live responses, and access history.
 
-1. Sign in as the student demo user
-2. Open the student dashboard
-3. Start a case from the library
-4. Answer questions
-5. Save progress and confirm the success banner
-6. Submit the case
-7. Review score and answer explanations
-8. Return to dashboard and verify the session score/status
+### Student
 
-### Live teaching review
+1. Sign in as `student@casestudy.local` / `Student123!`.
+2. Open the student dashboard.
+3. Start a published case study.
+4. Answer and confirm questions.
+5. Save progress or submit the case.
+6. Reopen saved progress to continue unfinished questions.
 
-1. Publish a case as the educator
-2. Copy the live session code
-3. Open a second browser or incognito window
-4. Join the live session with the code
-5. Use `Projector view` in the navbar to open the lecturer-facing teaching screen
-6. Move between questions with `Previous` and `Next`
-7. Submit an answer from the student live screen
-8. Confirm the lecturer sees live counts and distribution bars update
-9. Reveal the answer and confirm correct-answer highlighting appears
+### Live Classroom
 
-### Drug library review
+1. Start a live classroom as a facilitator.
+2. Copy the live session code.
+3. Join from a second browser/incognito window as a student.
+4. Submit answers from the student live view.
+5. Use facilitator controls to move questions/stages and reveal answers.
+6. End the live session from the live teaching view or the case library.
 
-1. Sign in as the educator demo user
-2. Open the educator dashboard
-3. In the `Drug Library` card, upload or paste CSV content with columns `drug_name,strength,unit,form,default_route`
-4. Import the CSV and confirm the library summary updates
-5. Open `Add prescription`
-6. Confirm the new drugs are available in the picker and the default route prefills where present
+### Staged Case Studies
 
-## MVP architecture in this repo
+Staged case studies can be used in two ways:
 
-### Frontend
+- Normal self-paced case study: later stages must be triggered by students answering configured questions.
+- Live classroom: stages can be triggered by question answers or manually advanced by the facilitator.
 
-- [src/App.jsx](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/src/App.jsx): app shell and role-based flows
-- [src/components/dashboard/LecturerDashboard.jsx](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/src/components/dashboard/LecturerDashboard.jsx): educator dashboard
-- [src/components/dashboard/StudentDashboard.jsx](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/src/components/dashboard/StudentDashboard.jsx): student dashboard
-- [src/components/player/CaseSessionPlayer.jsx](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/src/components/player/CaseSessionPlayer.jsx): self-paced player and feedback review
-- [src/Case_study_edit.jsx](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/src/Case_study_edit.jsx): builder workspace
+Manual stage progression is live-classroom only because a self-paced student has no facilitator control to move the stage forward.
 
-### Backend
+## Repository Structure
 
-- [server/index.js](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/server/index.js): auth, case, session, live, analytics API
-- [server/db/001_init.sql](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/server/db/001_init.sql): local MVP schema
-- [docker-compose.yml](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/docker-compose.yml): optional local Postgres setup
-- [scripts/smoke-test.js](/C:/Users/Ben/OneDrive/Documents/codex/case-studies-react/scripts/smoke-test.js): API smoke test
+```text
+src/
+  App.jsx
+  Case_study_display.jsx
+  components/
+  lib/
+server/
+  index.js
+  auth.js
+  db.js
+  config.js
+  db/001_init.sql
+  seed/drug-library.seed.csv
+scripts/
+docs/
+```
 
-## Verified locally
+Important files:
 
-- `npm run build` passes
-- `node --check server/index.js` passes
+- [src/App.jsx](src/App.jsx): main frontend app shell and role-based view switching
+- [src/lib/caseStudy.js](src/lib/caseStudy.js): case normalisation, staging, validation, and grading helpers
+- [src/lib/api.js](src/lib/api.js): frontend API client
+- [src/Case_study_display.jsx](src/Case_study_display.jsx): patient/case display surface
+- [src/components/player/CaseSessionPlayer.jsx](src/components/player/CaseSessionPlayer.jsx): self-paced and facilitator-preview case player
+- [src/components/player/LiveSessionView.jsx](src/components/player/LiveSessionView.jsx): student live-session view
+- [src/components/dashboard/FacilitatorCaseAuthoringWorkspace.jsx](src/components/dashboard/FacilitatorCaseAuthoringWorkspace.jsx): case builder workspace
+- [src/components/dashboard/FacilitatorCaseLibrary.jsx](src/components/dashboard/FacilitatorCaseLibrary.jsx): view/share/publish case library
+- [server/index.js](server/index.js): main API server, routes, seeding, and live session events
+- [server/db/001_init.sql](server/db/001_init.sql): schema setup
+- [server/seed/drug-library.seed.csv](server/seed/drug-library.seed.csv): seeded drug library
 
-## Known limitations
+## Security Notes Before Shared Deployment
 
-- Multi-tenancy is not implemented yet in this repo
-- Platform integration with the main AUXTECHNA architecture is still a later step
+This MVP is suitable for local review, but before running it on a real shared server:
+
+- Change `JWT_SECRET`
+- Replace or remove seeded demo credentials
+- Do not keep `Admin123!`, `Demo123!`, or `Student123!` as active credentials
+- Consider replacing hardcoded first-admin seeding with environment-driven setup
+- Review whether real patient data is permitted; the app is designed for simulated/educational data
+- Configure HTTPS, secure hosting, backups, and proper database access controls
+
+## Known Limitations
+
+- Multi-tenancy is not implemented yet
+- `server/index.js` is large and should eventually be split into route/service modules
+- Case data relies heavily on JSONB snapshots, so changes need careful normalisation
 - Rules engine is still minimal
-- Pharmacist verification and infusion simulation are not yet included in this MVP
-- Payment/freemium features are not yet implemented
+- Pharmacist verification and infusion simulation are not fully implemented
+- Payment/freemium features are not implemented
+- This remains an MVP and should be reviewed before production use
 
-## Suggested GitHub workflow
-
-1. Create a new private GitHub repo
-2. Push this code to the repo
-3. Add your colleague as a collaborator
-4. Ask them to review:
-   - UX flow
-   - data model direction
-   - case authoring workflow
-   - student session flow
-   - live teaching usefulness
-5. Decide after review whether to:
-   - keep as a separate service, or
-   - fold into the main platform as a Case Studies module
